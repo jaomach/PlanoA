@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="/static/style/host.css">
     <h1>{{ room_id }}</h1>
     <span id="timer"></span>
-    <div class="inside">
+    <div class="inside" id="inside">
         <div id="playerList"></div>
         <div class="menu-inicial">
             <button class="no-style-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
@@ -105,10 +105,16 @@ function fetchPlayers() {
         if (data.remaining_time === 0 && round1 === true) {
             round1 = false;
             timeLeft = 0;
+            document.getElementById('inside').classList.add('ofuscado')
+            document.getElementById('playerList').classList.add('ofuscado')
+            document.getElementById('rounds').classList.add('aparecendo')
             socket.emit('message', { message: 'Round 1 finished', room_id: roomId });
         }
         if (data.current_round === 2 && round2 === false) {
             round2 = true;
+            document.getElementById('inside').classList.remove('ofuscado')
+            document.getElementById('playerList').classList.remove('ofuscado')
+            document.getElementById('rounds').classList.remove('aparecendo')
             startCountdown(120);
             socket.emit('message', { message: 'Round 2 started', room_id: roomId });
         }
@@ -125,6 +131,10 @@ function fetchPlayers() {
         if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === false) {
             handleRound3 = true;
             timeLeft = 0;
+            document.getElementById('inside').classList.add('ofuscado')
+            document.getElementById('playerList').classList.add('ofuscado')
+            document.getElementById('rounds').classList.add('aparecendo')
+            console.log('sou gostoso')
             socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
         }
         if (data.current_round === 4 && round4 === false) {
@@ -132,6 +142,9 @@ function fetchPlayers() {
             startCountdown(30);
             startTournament(roomId);
             fetchMatchups();
+            document.getElementById('inside').classList.remove('ofuscado')
+            document.getElementById('playerList').classList.remove('ofuscado')
+            document.getElementById('rounds').classList.remove('aparecendo')
             document.getElementById('papaleguas').classList.add('appear')
             setTimeout(function() {
                 document.getElementById('papaleguas').classList.add('appear')
@@ -251,12 +264,26 @@ function fetchPlayers() {
             document.getElementById('startButton').disabled = true;
             document.getElementById('timer').style.display = 'block'
             document.getElementById('startButton').classList.add('translate')
-            startCountdown(10); // Inicia o contador de tempo (30 segundos) ao iniciar o jogo
+            const body = document.body
+            const round1 = document.createElement('img')
+            round1.src = '/static/images/Round1.png'
+            round1.id = 'rounds'
+            body.appendChild(round1)
+
             socket.emit('message', { message: 'Game started', room_id: roomId });
             setTimeout(function() {
                 document.getElementById('startButton').classList.add('desappear')
                 document.getElementById('timer').classList.add('appear')
+                document.getElementById('inside').classList.add('ofuscado')
+                document.getElementById('playerList').classList.add('ofuscado')
+                document.getElementById('rounds').classList.add('aparecendo')
             }, 500);
+            setTimeout(function() {
+                document.getElementById('inside').classList.remove('ofuscado')
+                document.getElementById('playerList').classList.remove('ofuscado')
+                document.getElementById('rounds').classList.remove('aparecendo')
+                startCountdown(240); // Inicia o contador de tempo (30 segundos) ao iniciar o jogo
+            }, 10000);
         }
     })
     .catch(error => {

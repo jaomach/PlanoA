@@ -29,7 +29,7 @@ rooms = {
         'started': False,
         'start_time': time.time(),
         'duration': 240,
-        'current_round': 3,
+        'current_round': 1,
         'last_activity': time.time(),
         'votes': {},
         'player1': [os.path.join(UPLOAD_FOLDER, 'TEST_player1_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player1_2.png')],
@@ -164,7 +164,7 @@ def room_status(room_id):
 @app.route('/start_round/<room_id>', methods=['POST'])
 def start_round(room_id):
     if room_id in rooms:
-        rooms[room_id]['duration'] = 30
+        rooms[room_id]['duration'] = 120
         rooms[room_id]['current_round'] += 1
         rooms[room_id]['start_time'] = time.time()
         rooms[room_id]['last_activity'] = time.time()

@@ -189,6 +189,22 @@ h1 {
    flex-direction: column;
 }
 
+#inside {
+   transition: all 700ms;
+}
+
+#inside.ofuscado {
+   backdrop-filter: blur(10px);
+}
+
+   #playerList {
+      transition: all 700ms;
+   }
+
+#playerList.ofuscado {
+   filter: blur(10px);
+}
+
 @keyframes caindo {
    0% {
       transform: rotateZ(0deg);
@@ -203,4 +219,17 @@ h1 {
    100% {
       transform: translateY(100vw) rotateZ(20deg);
    }
+}
+
+#rounds {
+   position: absolute;
+   width: 30%;
+   align-self: center;
+   transition: all 600ms ease-in;
+   transform: translateY(-20vh);
+}
+
+#rounds.aparecendo {
+   transition: all 600ms ease-out;
+   transform: translateY(40vh);
 }
