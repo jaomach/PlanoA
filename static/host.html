@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Host da Sala</title>
+</head>
+<body>
+    <link rel="stylesheet" href="/static/style/host.css">
+    <h1>{{ room_id }}</h1>
+    <span id="timer"></span>
+    <div class="inside">
+        <div id="playerList"></div>
+        <div class="menu-inicial">
+            <button class="no-style-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
+        </div>
+        <div id="matchups">
+            <div class="matchup" id="papaleguas"></div>
+        </div>
+    </div>
+    <button id="advanceButton" style="display:none;">Advance to Next Round</button>
+    <button id="nextMatchupButton" style="display:none;">Next Matchup</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const roomId = "{{ room_id }}";
+        let countdown;
+        let timeLeft;
+        let round1 = true;
+        let round2 = false;
+        let handleRound2 = false;
+        let round3 = false;
+        let handleRound3 = false;
+        let handleRound4 = false;
+        let handleRound5 = false;
+        let round4 = false;
+        let round5 = false;
+        let currentMatchupIndex = 0;
+        let matchups = [];
+        let winners = [];
+        let roundsHandled = {};
+        let currentRound = 6;
+
+        console.log('Connecting to server with roomId:', roomId);
+        var socket = io({ query: { roomId: roomId } });
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+        });
+
+        let previousImageSrc = {};
+
+        let previousPlayers = {};
+
+function fetchPlayers() {
+    fetch(`/room_status/${roomId}`)
+    .then(response => response.json())
+    .then(data => {
+        const playerList = document.getElementById('playerList');
+
+        for (const [playerId, playerData] of Object.entries(data.players)) {
+            let playerContainer = document.getElementById(`container-${playerId}`);
+            let playerImage, playerItem;
+
+            if (!playerContainer) {
+                // Criação do contêiner do jogador
+                playerContainer = document.createElement('div');
+                playerContainer.classList.add('player-container');
+                playerContainer.id = `container-${playerId}`;
+
+                // Criação da imagem do jogador
+                playerImage = document.createElement('img');
+                playerImage.classList.add('character-image');
+                playerImage.id = `image-${playerId}`;
+                playerContainer.appendChild(playerImage);
+
+                // Criação do item de texto do jogador
+                playerItem = document.createElement('div');
+                playerItem.classList.add('fodao');
+                playerItem.id = playerId;
+                playerContainer.appendChild(playerItem);
+
+                playerList.appendChild(playerContainer);
+            } else {
+                playerImage = document.getElementById(`image-${playerId}`);
+                playerItem = document.getElementById(playerId);
+            }
+
+            // Verificação e atualização da imagem
+            const newImageSrc = `/static/images/${playerData.character}.png`;
+            if (!previousPlayers[playerId] || previousPlayers[playerId].character !== playerData.character) {
+                playerImage.src = newImageSrc;
+            }
+
+            // Atualiza o texto do jogador
+            if (!previousPlayers[playerId] || previousPlayers[playerId].username !== playerData.username) {
+                playerItem.textContent = `${playerData.username}`;
+            }
+        }
+
+        // Atualiza o estado anterior dos jogadores
+        previousPlayers = { ...data.players };
+
+        // Existing round handling logic
+        if (data.remaining_time === 0 && round1 === true) {
+            round1 = false;
+            timeLeft = 0;
+            socket.emit('message', { message: 'Round 1 finished', room_id: roomId });
+        }
+        if (data.current_round === 2 && round2 === false) {
+            round2 = true;
+            startCountdown(120);
+            socket.emit('message', { message: 'Round 2 started', room_id: roomId });
+        }
+        if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === false) {
+            handleRound2 = true;
+            timeLeft = 0;
+            socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
+        }
+        if (data.current_round === 3 && round3 === false) {
+            round3 = true;
+            startCountdown(60);
+            socket.emit('message', { message: 'Round 3 started', room_id: roomId });
+        }
+        if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === false) {
+            handleRound3 = true;
+            timeLeft = 0;
+            socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
+        }
+        if (data.current_round === 4 && round4 === false) {
+            round4 = true;
+            startCountdown(30);
+            startTournament(roomId);
+            fetchMatchups();
+            document.getElementById('papaleguas').classList.add('appear')
+            setTimeout(function() {
+                document.getElementById('papaleguas').classList.add('appear')
+            }, 1500);
+            socket.emit('message', { message: 'Round 4 started', room_id: roomId });
+        }
+        if (data.remaining_time === 0 && data.current_round === 4 && handleRound4 === false) {
+            handleRound4 = true;
+            timeLeft = 0;
+            processVotes(data);
+            socket.emit('message', { message: 'Round 4 finished', room_id: roomId });
+            setTimeout(function() {
+                document.getElementById('papaleguas').classList.remove('appear')
+            }, 1500);
+        }
+        if (data.current_round === 5 && round5 === false) {
+            startCountdown(30);
+            document.getElementById('papaleguas').classList.add('appear')
+            round5 = true;
+            socket.emit('message', { message: 'Round 5 started', room_id: roomId });
+        }
+        if (data.remaining_time === 0 && data.current_round === 5 && handleRound5 === false) {
+            handleRound5 = true;
+            timeLeft = 0;
+            processVotes(data);
+            setTimeout(function() {
+                document.getElementById('papaleguas').classList.remove('appear')
+            }, 1500);
+            socket.emit('message', { message: 'Round 5 finished', room_id: roomId });
+        }
+
+        // Dynamic handling for rounds after round 5
+        if (data.current_round >= 6) {
+            if (data.remaining_time === 0 && roundsHandled[data.current_round] === false) {
+                processVotes(data);
+                setTimeout(function() {
+                    document.getElementById('papaleguas').classList.remove('appear')
+                }, 1500);
+                roundsHandled[data.current_round] = true;
+                timeLeft = 0;
+                socket.emit('message', { message: `Last round finished`, room_id: roomId });
+            }
+            if (data.current_round === currentRound && !(currentRound in roundsHandled)) {
+                roundsHandled[currentRound] = false;
+                startCountdown(30); // Adjust the countdown time as needed
+                document.getElementById('papaleguas').classList.add('appear')
+                socket.emit('message', { message: `Next round started`, room_id: roomId });
+                currentRound++;
+            }
+        }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+        }
+
+        function processVotes(data) {
+            console.log('Room Status:', data);
+
+            // Mostrar quem votou em quem
+            for (const [user, vote] of Object.entries(data.votes)) {
+                console.log(`${user} votou em ${vote}`);
+            }
+
+            // Calculate the most voted option
+            const voteCounts = {};
+            for (let vote of Object.values(data.votes)) {
+                voteCounts[vote] = (voteCounts[vote] || 0) + 1;
+            }
+
+            let mostVoted = [];
+            let maxVotes = 0;
+            for (let [option, count] of Object.entries(voteCounts)) {
+                if (count > maxVotes) {
+                    maxVotes = count;
+                    mostVoted = [option];
+                } else if (count === maxVotes) {
+                    mostVoted.push(option);
+                }
+            }
+
+            // Handle tie by selecting a random option
+            if (mostVoted.length > 1) {
+                const randomIndex = Math.floor(Math.random() * mostVoted.length);
+                mostVoted = mostVoted[randomIndex];
+            } else {
+                mostVoted = mostVoted[0];
+            }
+
+            nextMatchup(mostVoted);
+            console.log(`Most Voted Option: ${mostVoted} (${maxVotes} votes)`);
+        }
+
+        function perderAnimation(winner) {
+            const drawingVencedor = document.getElementById(`${winner}Drawing`);
+            const phraseVencedor = document.getElementById(`${winner}Phrase`);
+            drawingVencedor.classList.add('hold');
+            phraseVencedor.classList.add('hold');
+            drawingVencedor.classList.remove('drawings');
+            phraseVencedor.classList.remove('phrases');
+            
+            const drawingPerdedor = document.getElementsByClassName('drawings');
+            const phrasePerdedor = document.getElementsByClassName('phrases');
+            for (let i = 0; i < drawingPerdedor.length; i++) {
+            drawingPerdedor[i].classList.add('perdedor');
+            phrasePerdedor[i].classList.add('perdedor');
+            }
+        }
+
+        function startGame() {
+    fetch(`/start_game/${roomId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Game started') {
+            document.getElementById('startButton').disabled = true;
+            document.getElementById('timer').style.display = 'block'
+            document.getElementById('startButton').classList.add('translate')
+            startCountdown(10); // Inicia o contador de tempo (30 segundos) ao iniciar o jogo
+            socket.emit('message', { message: 'Game started', room_id: roomId });
+            setTimeout(function() {
+                document.getElementById('startButton').classList.add('desappear')
+                document.getElementById('timer').classList.add('appear')
+            }, 500);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+        function startCountdown(duration) {
+            clearInterval(countdown); // Clear any existing interval to avoid multiple intervals running simultaneously
+            timeLeft = duration;
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+
+            countdown = setInterval(() => {
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timerElement.style.display = 'none'
+
+                    setTimeout(function() {
+                        startNextRound(duration);
+                    }, 10000);
+                }
+            }, 1000);
+        }
+
+        function modifyTimer(seconds) {
+            timeLeft += seconds;
+            const timerElement = document.getElementById('timer');
+            timerElement.textContent = timeLeft;
+        }
+
+        function startNextRound(duration) {
+            fetch(`/start_round/${roomId}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Round started') {
+                    document.getElementById('timer').style.display = 'block'
+                    startCountdown(duration)
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        window.onload = () => {
+            fetchPlayers(); // Atualiza a lista de jogadores ao carregar a página
+            setInterval(fetchPlayers, 3000); // Check every 3 seconds
+        };
+
+        function startTournament(roomId) {
+            fetch(`/start_tournament/${roomId}`, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Tournament started:', data.rounds);
+                    getCurrentMatchup(roomId);
+                });
+        }
+
+        // Function to fetch and display matchups
+        async function fetchMatchups() {
+            const response = await fetch(`/tournament/${roomId}/matchup`);
+            const data = await response.json();
+            if (data.matchups) {
+                matchups = data.matchups;
+                currentMatchupIndex = 0;
+                winners = [];
+                displayMatchup();
+            } else {
+            }
+        }
+
+        // Function to display a single matchup
+        function displayMatchup() {
+            const matchupsDiv = document.getElementById('matchups');
+            matchupsDiv.innerHTML = ''; // Clear previous matchups
+
+            if (currentMatchupIndex < matchups.length) {
+                const matchup = matchups[currentMatchupIndex];
+                const matchupDiv = document.createElement('div');
+                matchupDiv.classList.add('matchup');
+                matchupDiv.id = 'papaleguas';
+                const player1 = matchup.players[0];
+                const player2 = matchup.players[1];
+                const combinations = matchup.combinations;
+
+                const player1Comb = combinations[0][0];
+                const player1Div = document.createElement('div');
+                player1Div.classList.add('fodinha')
+                player1Div.innerHTML = `
+                    <img id="${player1}Drawing" class="drawings" src="${player1Comb.image_path}" alt="${player1}">
+                    <span id="${player1}Phrase" class="phrases">${player1Comb.phrase}</span>
+                `;
+                matchupDiv.appendChild(player1Div);
+
+                if (player2) {
+                    const player2Comb = combinations[1][0];
+                    const player2Div = document.createElement('div');
+                    player2Div.classList.add('fodinha')
+                    player2Div.id = player2
+                    player2Div.innerHTML = `
+                        <img id="${player2}Drawing" class="drawings" src="${player2Comb.image_path}" alt="${player2}">
+                        <span id="${player2}Phrase" class="phrases">${player2Comb.phrase}</span>
+                    `;
+                    matchupDiv.appendChild(player2Div);
+                } else {
+                    const byeDiv = document.createElement('div');
+                    byeDiv.innerHTML = `<p>Player: ${player1} gets a bye</p>`;
+                    matchupDiv.appendChild(byeDiv);
+                }
+
+                matchupsDiv.appendChild(matchupDiv);
+            }
+        }
+        // Function to advance to the next matchup
+        function nextMatchup(mostVoted) {
+            perderAnimation(mostVoted)
+            winners.push(mostVoted);
+            currentMatchupIndex++;
+            setTimeout(function() {
+                saveWinners()
+            }, 2000);
+        }
+
+        // Function to save the winner and advance the tournament round
+        async function saveWinners() {
+            try {
+                const response = await fetch(`/tournament/${roomId}/advance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ winners })
+                });
+
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        socket.emit('message', { message: `Tournament next`, room_id: roomId });
+                        displayMatchup();
+                    }
+                    throw new Error(`Failed to advance the tournament: ${response.statusText}`);
+                }
+
+                fetchMatchups();
+                socket.emit('message', { message: `Tournament advanced`, room_id: roomId });
+            } catch (error) {
+                // Opcional: você pode mover a chamada displayMatchup() para o bloco catch se desejar que ela sempre seja chamada em caso de erro.
+                // displayMatchup();
+            }
+        }
+
+        document.getElementById('nextMatchupButton').addEventListener('click', nextMatchup);
+        document.getElementById('advanceButton').addEventListener('click', saveWinners);
+
+    </script>
+</body>
+</html>

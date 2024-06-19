@@ -1,0 +1,206 @@
+body {
+   font-family: Arial, sans-serif;
+   margin: 0;
+   padding: 0;
+   display: flex;
+   overflow: hidden;
+   height: 100vh;
+   background-color: #f0f0f0;
+   flex-direction: column;
+   background-image: url('https://wallpapers.com/images/hd/museum-background-ar4wuzdgkobt7g65.jpg');
+   background-size: 100%;
+}
+.container {
+   width: 80%;
+   background-color: #fff;
+   padding: 20px;
+   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+   border-radius: 8px;
+}
+.player-combinations {
+   margin-bottom: 20px;
+}
+.player-combinations h2 {
+   margin-bottom: 10px;
+}
+.combination {
+   display: flex;
+   align-items: center;
+   margin-bottom: 10px;
+}
+.combination img {
+   max-width: 100px;
+   margin-right: 20px;
+}
+.combination p {
+   margin: 0;
+}
+#timer {
+   display: none;
+   margin: 2vw;
+   padding: 1vw;
+   font-size: 18pt;
+   font-weight: 600;
+   position: absolute;
+   background-color: #f0f0f0;
+   border-radius: 7%;
+   left: -100px;
+   transition: all 0.5s;
+}
+#playerList {
+   border-radius: 5px;
+   margin: 2%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   width: 100%;
+   gap: 2%;
+}
+.fodao {
+   padding: 2%;
+   background-color: #f0f0f0;
+   border-radius: 5px;
+}
+h1 {
+   color: #f0f0f0;
+   position: absolute;
+}
+.inside {
+   height: 100vh;
+   justify-content: center;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+}
+#timer.appear {
+   transition: all 0.5s;
+   left: 0;
+}
+.menu-inicial {
+   display: flex;
+   justify-content: center;
+   z-index: 1;
+   align-items: center;
+}
+
+.no-style-btn {
+   border-style: none;
+   font-size: 9.5pt;
+   border-color: none;
+   border-image: initial;
+   background-color: #00000000;
+   color: #fff;
+   padding: 0;
+   border-radius: 6px;
+   font-family: "Inter", sans-serif;
+   font-weight: 400;
+   width: 100%;
+}
+
+.menu-inicial button {
+   font-weight: 500;
+   font-size: 18pt;
+   padding: 2.5% 3.5%;
+   cursor: pointer;
+   text-wrap: nowrap;
+   align-items: center;
+   justify-content: center;
+   display: flex;
+   transition: all 0.2s;
+}
+
+.menu-inicial button:hover {
+   font-size: 18pt;
+   color: #fff;
+   background-color: #18252A;
+   padding: 2.5% 3.5%;
+   cursor: pointer;
+}
+
+.menu-inicial img {
+   height: 24px;
+   width: 50px;
+   padding-left: 3.5%;
+}
+#startButton.translate{
+   position: relative;
+   transition: all 0.5s;
+   padding: 0;
+   height: 0;
+   background-color: none;
+   transform: translateY(500px);
+}
+.matchup {
+   display: flex;
+   justify-content: center;
+   width: 100%;
+   transition: all 500ms;
+   gap: 150vw;
+}
+.matchup.appear{
+   gap: 18vw;
+   transition: all 500ms ease-in;
+}
+#matchups{
+   width: 100%;
+}
+.fodinha {
+   display: flex;
+   align-items: center;
+   flex-direction: column;
+}
+.fodinha img {
+   width: 400px;
+}
+.drawings.perdedor {
+   animation: caindo 900ms ease-in forwards;
+   z-index: 2;
+}
+.phrases.perdedor {
+   animation: caindo 900ms ease-in 500ms forwards;
+}
+.phrases {
+   margin-top: 3%;
+   padding: 3% 5%;
+   border-radius: 5px;
+   background-color: #f0f0f0;
+}
+.hold {
+   display: flex;
+   align-items: center;
+   flex-direction: column;
+   background-color: #f0f0f0;
+}
+.hold img {
+   width: 400px;
+}
+
+.character-image {
+   width: 80px;
+   padding-bottom: 5%;
+}
+
+.player-container {
+   background-color: #f0f0f0;
+   border-radius: 12px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   flex-direction: column;
+}
+
+@keyframes caindo {
+   0% {
+      transform: rotateZ(0deg);
+      transform-origin: top left;
+   }
+   15% {
+      transform: translateY(0) rotateZ(20deg);
+   }
+   30% {
+      transform: translateY(0) rotateZ(20deg);
+   }
+   100% {
+      transform: translateY(100vw) rotateZ(20deg);
+   }
+}
