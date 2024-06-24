@@ -14,22 +14,21 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-available_characters = ["Vanderlei", "Mage", "Rogue", "Healer", "Archer", "Paladin"]
+available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Archer", "Paladin"]
 
 rooms = {
     'TEST': {
         'players': {
             'player1': {'username': 'Alice', 'character': 'Vanderlei'},
             'player2': {'username': 'Bob', 'character': 'Merda'},
-            'player3': {'username': 'Charlie', 'character': 'Vanderlei'},
-            'player4': {'username': 'Charlie', 'character': 'Vanderlei'},
+            'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
+            'player4': {'username': 'Charlie', 'character': 'Maria'},
             'player5': {'username': 'Charlie', 'character': 'Vanderlei'},
-            'player6': {'username': 'Charlie', 'character': 'Vanderlei'},
         },
-        'started': False,
+        'started': True,
         'start_time': time.time(),
-        'duration': 240,
-        'current_round': 1,
+        'duration': 60,
+        'current_round': 3,
         'last_activity': time.time(),
         'votes': {},
         'player1': [os.path.join(UPLOAD_FOLDER, 'TEST_player1_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player1_2.png')],
@@ -85,8 +84,8 @@ def create_room():
         'players': {},
         'started': False,
         'start_time': None,
-        'duration': 240,  # 30 segundos de tempo
-        'current_round': 1,  # Começa com o round 1
+        'duration': 24000,  # 30 segundos de tempo
+        'current_round': 0,  # Começa com o round 1
         'last_activity': time.time(),
         'votes': {} 
     }
@@ -157,18 +156,26 @@ def room_status(room_id):
             'players': room['players'],
             'votes': room['votes'],
             'remaining_time': remaining_time,
-            'current_round': room['current_round']  # Adiciona o número do round à resposta
+            'current_round': room['current_round'],  # Adiciona o número do round à resposta
+            'started': room['started']
         })
     return jsonify({'message': 'Room not found'}), 404
 
 @app.route('/start_round/<room_id>', methods=['POST'])
 def start_round(room_id):
     if room_id in rooms:
-        rooms[room_id]['duration'] = 120
-        rooms[room_id]['current_round'] += 1
-        rooms[room_id]['start_time'] = time.time()
-        rooms[room_id]['last_activity'] = time.time()
-        return jsonify({'message': 'Round started'})
+        # Extraia a duração do corpo da solicitação
+        data = request.get_json()
+        duration = data.get('duration', 30)  # Use 30 como valor padrão se 'duration' não for fornecido
+
+        if isinstance(duration, int) and duration > 0:
+            rooms[room_id]['duration'] = duration
+            rooms[room_id]['current_round'] += 1
+            rooms[room_id]['start_time'] = time.time()
+            rooms[room_id]['last_activity'] = time.time()
+            return jsonify({'message': 'Round started', 'duration': duration})
+        else:
+            return jsonify({'message': 'Invalid duration'}), 400
     return jsonify({'message': 'Room not found'}), 404
 
 @app.route('/upload', methods=['POST'])
@@ -207,10 +214,6 @@ def upload():
         return jsonify({'message': 'Imagem salva com sucesso! Próximo round iniciado automaticamente.'})
 
     return jsonify({'message': 'Imagem salva com sucesso!'})
-
-@app.route('/start_round/<room_id>', methods=['POST'])
-def start_round_api(room_id):
-    return start_round(room_id)
 
 @app.route('/distribute_drawing/<room_id>', methods=['GET'])
 def distribute_drawing(room_id):

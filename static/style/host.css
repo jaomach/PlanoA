@@ -7,7 +7,7 @@ body {
    height: 100vh;
    background-color: #f0f0f0;
    flex-direction: column;
-   background-image: url('https://wallpapers.com/images/hd/museum-background-ar4wuzdgkobt7g65.jpg');
+   background-image: url('/static/images/background.png');
    background-size: 100%;
 }
 .container {
@@ -58,9 +58,25 @@ body {
 }
 .fodao {
    padding: 2%;
-   background-color: #f0f0f0;
    border-radius: 5px;
 }
+
+.sign {
+   width: 160px;
+   height: 70px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin-top: 2%;
+   color: #f0f0f0;
+   font-weight: 600;
+   font-size: 14pt;
+   background-size: 92%;
+   background-repeat: no-repeat;
+   background-position: center;
+   background-image: url('/static/images/plaquinha.png');
+}
+
 h1 {
    color: #f0f0f0;
    position: absolute;
@@ -95,6 +111,10 @@ h1 {
    font-family: "Inter", sans-serif;
    font-weight: 400;
    width: 100%;
+   text-wrap: nowrap;
+   text-overflow:ellipsis; 
+   white-space:nowrap; 
+   overflow:hidden;
 }
 
 .menu-inicial button {
@@ -176,12 +196,11 @@ h1 {
 }
 
 .character-image {
-   width: 80px;
+   width: 150px;
    padding-bottom: 5%;
 }
 
 .player-container {
-   background-color: #f0f0f0;
    border-radius: 12px;
    display: flex;
    align-items: center;
@@ -205,6 +224,10 @@ h1 {
    filter: blur(10px);
 }
 
+#rounds.aparecendo {
+   animation: wave 10s forwards;
+}
+
 @keyframes caindo {
    0% {
       transform: rotateZ(0deg);
@@ -219,6 +242,40 @@ h1 {
    100% {
       transform: translateY(100vw) rotateZ(20deg);
    }
+}
+
+@keyframes wave {
+   0%, 100% {
+       transform: translateY(-20vh) rotate(0deg);
+       filter: url(#wave);
+   }
+   10% {
+      transform: translateY(40vh) rotate(5deg);
+   }
+   25% {
+       transform: translateY(40vh) rotate(5deg);
+       filter: url(#wave);
+   }
+   50% {
+       transform: translateY(40vh) rotate(-5deg);
+       filter: url(#wave);
+   }
+   75% {
+       transform: translateY(40vh) rotate(5deg);
+       filter: url(#wave);
+   }
+   90% {
+      transform: translateY(40vh) rotate(5deg);
+   }
+}
+
+#fullscreen{
+   width: 2%;
+   padding: 1%;
+   position: absolute;
+   cursor: pointer;
+   z-index: 100;
+   top: 0;
 }
 
 #rounds {
