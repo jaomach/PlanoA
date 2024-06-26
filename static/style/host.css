@@ -272,6 +272,7 @@ h1 {
 #fullscreen{
    width: 2%;
    padding: 1%;
+   right: 0;
    position: absolute;
    cursor: pointer;
    z-index: 100;
@@ -289,4 +290,70 @@ h1 {
 #rounds.aparecendo {
    transition: all 600ms ease-out;
    transform: translateY(40vh);
+}
+
+#circle {
+   position: fixed;
+   top: 50%;
+   left: 50%;
+   width: 200vw;
+   height: 200vh;
+   background-color: rgba(0, 0, 0, 0);
+   border-radius: 50%;
+   border: solid 100vw black; /* Cria as bordas pretas ao redor do círculo transparente */
+   transform: translate(-50%, -50%);
+}
+
+#circle.open {
+   animation: openCircle 1.2s ease-in forwards;
+}
+
+#circle.close {
+   animation: closeCircle 1.2s ease-out forwards;
+}
+
+@keyframes closeCircle {
+   from {
+       width: 200vw;
+       height: 200vw;
+       border-width: 100vw; /* Borda inicial larga */
+   }
+   to {
+       width: 0;
+       height: 0;
+       border-width: 100vw; /* Borda final fechando o círculo */
+   }
+}
+
+@keyframes openCircle {
+   from {
+       width: 0;
+       height: 0;
+       border-width: 100vw; /* Borda final fechando o círculo */
+   }
+   to {
+      width: 200vw;
+      height: 200vw;
+      border-width: 100vw; /* Borda inicial larga */
+  }
+}
+
+#barreira {
+   position: absolute;
+   background-image: url(/static/images/barreira.png);
+   background-size: 100%;
+   background-repeat: repeat-x;
+   background-position: bottom;
+   filter: blur(2px);
+   opacity: 0.8;
+   height: 151px;
+   width: 100%;
+   bottom: 0;
+}
+
+.voters-container {
+   position: absolute;
+   height: 40px;
+   width: 350px;
+   background-color: aqua;
 }

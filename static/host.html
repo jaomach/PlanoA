@@ -10,6 +10,10 @@
     <!-- <h1>{{ room_id }}</h1>-->
     <span id="timer"></span>
     <img id="fullscreen" src="/static/images/fullscreen.svg" alt="">
+    
+    <div id="barreira"></div>
+    
+    <div id="circle"></div>
     <div class="inside" id="inside">
         <div id="playerList"></div>
         <div class="menu-inicial">
@@ -37,10 +41,13 @@
         let round4 = false;
         let round5 = false;
         let currentMatchupIndex = 0;
+        let gameStarted = false;
+        let auxGameStarted = false;
         let matchups = [];
         let winners = [];
         let roundsHandled = {};
         let currentRound = 6;
+        console.log(auxGameStarted)
         const fullscreenBtn = document.getElementById('fullscreen');
 
         fullscreenBtn.addEventListener('click', function() {
@@ -52,6 +59,13 @@
                 document.documentElement.webkitRequestFullscreen();
             } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
                 document.documentElement.msRequestFullscreen();
+            }
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !gameStarted) {
+                gameStarted = true;
+                startGame();
             }
         });
 
@@ -122,7 +136,8 @@ function fetchPlayers() {
         if (data.remaining_time === 0 && round1 === true) {
             round1 = false;
             timeLeft = 0;
-            startCountdown(120);
+            startCountdown(120, 10000);
+            document.getElementById('circle').classList.add('close')
             document.getElementById('inside').classList.add('ofuscado')
             document.getElementById('playerList').classList.add('ofuscado')
             document.getElementById('rounds').classList.add('aparecendo')
@@ -130,6 +145,8 @@ function fetchPlayers() {
         }
         if (data.current_round === 2 && round2 === false) {
             round2 = true;
+            document.getElementById('circle').classList.remove('close')
+            document.getElementById('circle').classList.add('open')
             document.getElementById('inside').classList.remove('ofuscado')
             document.getElementById('playerList').classList.remove('ofuscado')
             document.getElementById('rounds').classList.remove('aparecendo')
@@ -137,7 +154,7 @@ function fetchPlayers() {
         }
         if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === false) {
             timeLeft = 0;
-            startCountdown(60);
+            startCountdown(60, 10000);
             document.getElementById('inside').classList.add('ofuscado')
             document.getElementById('playerList').classList.add('ofuscado')
             document.getElementById('rounds').classList.add('aparecendo')
@@ -154,7 +171,7 @@ function fetchPlayers() {
         if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === false) {
             timeLeft = 0;
             handleRound3 = true;
-            startCountdown(30);
+            startCountdown(30, 10000);
             document.getElementById('inside').classList.add('ofuscado')
             document.getElementById('playerList').classList.add('ofuscado')
             document.getElementById('rounds').classList.add('aparecendo')
@@ -177,7 +194,7 @@ function fetchPlayers() {
         if (data.remaining_time === 0 && data.current_round === 4 && handleRound4 === false) {
             handleRound4 = true;
             timeLeft = 0;
-            startCountdown(30);
+            startCountdown(30, 5000);
             processVotes(data);
             socket.emit('message', { message: 'Round 4 finished', room_id: roomId });
             setTimeout(function() {
@@ -212,7 +229,7 @@ function fetchPlayers() {
             }
             if (data.current_round === currentRound && !(currentRound in roundsHandled)) {
                 roundsHandled[currentRound] = false;
-                startCountdown(30); // Adjust the countdown time as needed
+                startCountdown(30, 5000); // Adjust the countdown time as needed
                 document.getElementById('papaleguas').classList.add('appear')
                 socket.emit('message', { message: `Next round started`, room_id: roomId });
                 currentRound++;
@@ -293,11 +310,13 @@ function fetchPlayers() {
                 console.log('Response data:', data);
                 if (data.started === true) {
                     setTimeout(function() {
+                        auxGameStarted = false
+                        console.log(auxGameStarted)
                         const remainingTime = data.remaining_time
                         document.getElementById('timer').style.display = 'block'
                         document.getElementById('startButton').style.display = 'none'
                         document.getElementById('timer').classList.add('appear')
-                        startCountdown(remainingTime)
+                        startCountdown(remainingTime - 5, 0)
                     }, 5000)
                 }
             })
@@ -323,6 +342,7 @@ function fetchPlayers() {
             round1.src = '/static/images/Round1.png'
             round1.id = 'rounds'
             body.appendChild(round1)
+            auxGameStarted = true
 
             socket.emit('message', { message: 'Game started', room_id: roomId });
             setTimeout(function() {
@@ -330,14 +350,18 @@ function fetchPlayers() {
                 document.getElementById('timer').classList.add('appear')
                 document.getElementById('inside').classList.add('ofuscado')
                 document.getElementById('playerList').classList.add('ofuscado')
-                startCountdown(240);
+                document.getElementById('circle').classList.add('close')
+                startCountdown(240, 10000);
                 document.getElementById('rounds').classList.add('aparecendo')
             }, 500);
             setTimeout(function() {
                 document.getElementById('inside').classList.remove('ofuscado')
                 document.getElementById('playerList').classList.remove('ofuscado')
+                document.getElementById('circle').classList.remove('close')
+                document.getElementById('circle').classList.add('open')
                 document.getElementById('rounds').classList.remove('aparecendo')
             }, 10000);
+            console.log(auxGameStarted)
         }
     })
     .catch(error => {
@@ -345,23 +369,33 @@ function fetchPlayers() {
     });
 }
 
-        function startCountdown(duration) {
+        function startCountdown(duration, intervalo) {
             clearInterval(countdown); // Clear any existing interval to avoid multiple intervals running simultaneously
-            timeLeft = duration;
             const timerElement = document.getElementById('timer');
-            timerElement.textContent = timeLeft;
+            timeLeft = duration
+            if (auxGameStarted === true) {
+                setTimeout(function() {
+                    console.log(auxGameStarted)
+                    startNextRound(duration);
+                    timeLeft = duration;
+                    timerElement.textContent = timeLeft
+                }, intervalo)
+            } else {
+                timeLeft=duration
+                auxGameStarted = true
+                timerElement.textContent = timeLeft
+            }
 
             setTimeout(function() {
-                startNextRound(duration);
                 countdown = setInterval(() => {
-                timeLeft--;
-                timerElement.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerElement.style.display = 'none'
-                }
-            }, 1000);
-            }, 10000);
+                    timeLeft--;
+                    timerElement.textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        timerElement.style.display = 'none'
+                    }
+                }, 1000);
+            }, intervalo);
         }
 
         function modifyTimer(seconds) {
@@ -436,7 +470,7 @@ function fetchPlayers() {
                 player1Div.classList.add('fodinha')
                 player1Div.id = player1
                 player1Div.innerHTML = `
-                    <div id="${player1}Voters"></div>
+                    <div id="${player1}Voters" class="voters-container"></div>
                     <img id="${player1}Drawing" class="drawings" src="${player1Comb.image_path}" alt="${player1}">
                     <span id="${player1}Phrase" class="phrases">${player1Comb.phrase}</span>
                 `;
@@ -448,7 +482,7 @@ function fetchPlayers() {
                     player2Div.classList.add('fodinha')
                     player2Div.id = player2
                     player2Div.innerHTML = `
-                        <div id="${player2}Voters"></div>
+                        <div id="${player2}Voters" class="voters-container"></div>
                         <img id="${player2}Drawing" class="drawings" src="${player2Comb.image_path}" alt="${player2}">
                         <span id="${player2}Phrase" class="phrases">${player2Comb.phrase}</span>
                     `;

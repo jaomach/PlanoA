@@ -14,7 +14,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Archer", "Paladin"]
+available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinciado", "Berro"]
 
 rooms = {
     'TEST': {
@@ -23,9 +23,9 @@ rooms = {
             'player2': {'username': 'Bob', 'character': 'Merda'},
             'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
             'player4': {'username': 'Charlie', 'character': 'Maria'},
-            'player5': {'username': 'Charlie', 'character': 'Vanderlei'},
+            'player5': {'username': 'Charlie', 'character': 'Berro'},
         },
-        'started': True,
+        'started': False,
         'start_time': time.time(),
         'duration': 60,
         'current_round': 3,
@@ -84,7 +84,7 @@ def create_room():
         'players': {},
         'started': False,
         'start_time': None,
-        'duration': 24000,  # 30 segundos de tempo
+        'duration': 10000,  # 30 segundos de tempo
         'current_round': 0,  # Começa com o round 1
         'last_activity': time.time(),
         'votes': {} 
