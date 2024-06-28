@@ -14,7 +14,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinciado", "Berro"]
+available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
     'TEST': {
@@ -24,11 +24,12 @@ rooms = {
             'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
             'player4': {'username': 'Charlie', 'character': 'Maria'},
             'player5': {'username': 'Charlie', 'character': 'Berro'},
+            'playerControl': {'username': 'Player', 'character': 'Davinte'},
         },
         'started': False,
         'start_time': time.time(),
-        'duration': 60,
-        'current_round': 3,
+        'duration': 10000,
+        'current_round': 0,
         'last_activity': time.time(),
         'votes': {},
         'player1': [os.path.join(UPLOAD_FOLDER, 'TEST_player1_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player1_2.png')],
@@ -40,8 +41,7 @@ rooms = {
             'player3': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
             'player4': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
             'player5': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
-            'player6': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
-            'QnkDWaBxP54K': [{'image_path': '/uploads/cu.png', 'phrase': 'More funny captions'}]
+            'playerControl': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
         },
         'phrases': [
             {'player_id': 'player1', 'phrase': 'Phrase 1 from player 1', 'timestamp': time.time()},

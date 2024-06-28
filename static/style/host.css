@@ -70,6 +70,7 @@ body {
    margin-top: 2%;
    color: #f0f0f0;
    font-weight: 600;
+   filter: drop-shadow(0px 4px 2px #00000030);
    font-size: 14pt;
    background-size: 92%;
    background-repeat: no-repeat;
@@ -95,7 +96,7 @@ h1 {
 .menu-inicial {
    display: flex;
    justify-content: center;
-   z-index: 1;
+   z-index: 200;
    align-items: center;
 }
 
@@ -169,8 +170,10 @@ h1 {
    align-items: center;
    flex-direction: column;
 }
-.fodinha img {
-   width: 400px;
+.drawings {
+   width: 446px;
+   background-repeat: no-repeat;
+   background-position: center;
 }
 .drawings.perdedor {
    animation: caindo 900ms ease-in forwards;
@@ -191,12 +194,10 @@ h1 {
    flex-direction: column;
    background-color: #f0f0f0;
 }
-.hold img {
-   width: 400px;
-}
 
 .character-image {
    width: 150px;
+   filter: drop-shadow(0px 4px 2px #00000030);
    padding-bottom: 5%;
 }
 
@@ -275,7 +276,7 @@ h1 {
    right: 0;
    position: absolute;
    cursor: pointer;
-   z-index: 100;
+   z-index: 105;
    top: 0;
 }
 
@@ -283,6 +284,7 @@ h1 {
    position: absolute;
    width: 30%;
    align-self: center;
+   z-index: 101;
    transition: all 600ms ease-in;
    transform: translateY(-20vh);
 }
@@ -299,6 +301,7 @@ h1 {
    width: 200vw;
    height: 200vh;
    background-color: rgba(0, 0, 0, 0);
+   z-index: 100;
    border-radius: 50%;
    border: solid 100vw black; /* Cria as bordas pretas ao redor do círculo transparente */
    transform: translate(-50%, -50%);
@@ -345,15 +348,27 @@ h1 {
    background-repeat: repeat-x;
    background-position: bottom;
    filter: blur(2px);
-   opacity: 0.8;
+   opacity: 0.92;
    height: 151px;
    width: 100%;
    bottom: 0;
+}
+
+.voter-image {
+   animation: bounceVote 500ms ease-in-out;
+   width: 50px;
+}
+
+@keyframes bounceVote {
+   0% {transform: translateY(0px);}
+   50% {transform: translateY(-10px);}
 }
 
 .voters-container {
    position: absolute;
    height: 40px;
    width: 350px;
-   background-color: aqua;
+   display: flex;
+   justify-content: center;
+   flex-direction: row;
 }
