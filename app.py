@@ -172,6 +172,7 @@ def start_round(room_id):
             rooms[room_id]['duration'] = duration
             rooms[room_id]['current_round'] += 1
             rooms[room_id]['start_time'] = time.time()
+            rooms[room_id]['votes'] = {}
             rooms[room_id]['last_activity'] = time.time()
             return jsonify({'message': 'Round started', 'duration': duration})
         else:

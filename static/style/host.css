@@ -57,8 +57,17 @@ body {
    gap: 2%;
 }
 .fodao {
-   padding: 2%;
+   padding: 1% 5%;
    border-radius: 5px;
+   box-shadow: inset 0px 0px 10px 0px #3c1a06;
+   opacity: 1;
+}
+
+.iluminacao {
+   position: absolute;
+   transform: scale(1.8);
+   mix-blend-mode: soft-light;
+   z-index: -123;
 }
 
 .sign {
@@ -155,7 +164,7 @@ h1 {
    display: flex;
    justify-content: center;
    width: 100%;
-   transition: all 500ms;
+   transition: all 500ms ease-in;
    gap: 150vw;
 }
 .matchup.appear{
@@ -166,6 +175,7 @@ h1 {
    width: 100%;
 }
 .fodinha {
+   filter: brightness(1);
    display: flex;
    align-items: center;
    flex-direction: column;
@@ -174,6 +184,7 @@ h1 {
    width: 446px;
    background-repeat: no-repeat;
    background-position: center;
+   filter: brightness(1);
 }
 .drawings.perdedor {
    animation: caindo 900ms ease-in forwards;
@@ -187,12 +198,21 @@ h1 {
    padding: 3% 5%;
    border-radius: 5px;
    background-color: #f0f0f0;
+   filter: brightness(1);
 }
-.hold {
-   display: flex;
-   align-items: center;
-   flex-direction: column;
+.drawing-hold {
+   width: 446px;
+   background-repeat: no-repeat;
+   background-position: center;
+   filter: brightness(1);
+}
+
+.phrases-hold {
+   margin-top: 3%;
+   padding: 3% 5%;
+   border-radius: 5px;
    background-color: #f0f0f0;
+   filter: brightness(1);
 }
 
 .character-image {
@@ -362,6 +382,13 @@ h1 {
 @keyframes bounceVote {
    0% {transform: translateY(0px);}
    50% {transform: translateY(-10px);}
+}
+body {
+   backdrop-filter: brightness(1);
+}
+
+body.desligado {
+   backdrop-filter: brightness(0.6);
 }
 
 .voters-container {
