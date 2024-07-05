@@ -25,6 +25,9 @@
         </div>
     </div>
 
+    <audio id="myAudio" src="/static/images/narrador ae.mp3" type="audio/mpeg"></audio>
+    <div id="subtitles"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         const roomId = "{{ room_id }}";
@@ -81,10 +84,10 @@
 
         let previousPlayers = {};
 
-function fetchPlayers() {
-    fetch(`/room_status/${roomId}`)
-    .then(response => response.json())
-    .then(data => {
+        function fetchPlayers() {
+        fetch(`/room_status/${roomId}`)
+        .then(response => response.json())
+        .then(data => {
         const playerList = document.getElementById('playerList');
 
         for (const [playerId, playerData] of Object.entries(data.players)) {
@@ -359,6 +362,7 @@ function fetchPlayers() {
                     document.getElementById('startButton').disabled = true;
                     document.getElementById('timer').style.display = 'block'
                     document.getElementById('startButton').classList.add('translate')
+                    var audio = document.getElementById("myAudio");
                     const body = document.body
                     const round1 = document.createElement('img')
                     round1.src = '/static/images/Round1.png'
@@ -366,19 +370,42 @@ function fetchPlayers() {
                     body.appendChild(round1)
                     auxGameStarted = true
 
+                    
+                    var subtitleDiv = document.getElementById("subtitles");
+                    var subtitles = [];
+
+                    fetch('/static/legenda.json')
+                        .then(response => response.json())
+                        .then(data => {
+                        subtitles = data;
+                        });
+
+                    audio.ontimeupdate = function() {
+                        var currentTime = audio.currentTime;
+                        var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+                        if (subtitle) {
+                        subtitleDiv.innerHTML = subtitle.text;
+                        } else {
+                        subtitleDiv.innerHTML = '';
+                        }
+                    };
+
                     socket.emit('message', { message: 'Game started', room_id: roomId });
                     setTimeout(function() {
                         document.getElementById('startButton').classList.add('desappear')
                         document.getElementById('timer').classList.add('appear')
                         document.getElementById('circle').classList.add('close')
-                        startCountdown(10, 10000);
-                        document.getElementById('rounds').classList.add('aparecendo')
+                        audio.play();
+                        startCountdown(10, 13000);
                     }, 500);
+                    setTimeout(function() {
+                        document.getElementById('rounds').classList.add('aparecendo')
+                    }, 9210);
                     setTimeout(function() {
                         document.getElementById('circle').classList.remove('close')
                         document.getElementById('circle').classList.add('open')
                         document.getElementById('rounds').classList.remove('aparecendo')
-                    }, 10000);
+                    }, 13000);
                     console.log(auxGameStarted)
                 }
             })

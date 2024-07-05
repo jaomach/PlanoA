@@ -399,3 +399,15 @@ body.desligado {
    justify-content: center;
    flex-direction: row;
 }
+
+#subtitles {
+   z-index: 100000;
+   position: absolute;
+   color: #fff;
+   text-shadow: 0 3px black;
+   bottom: 0;
+   font-size: 14pt;
+   text-align: center;
+   padding-bottom: 1.7%;
+   width: 100%;
+}
