@@ -1,1 +1,2 @@
-exec gunicorn -w 1 app:app --bind 0.0.0.0:$PORT
+#!/bin/bash
+exec gunicorn -k gevent -w 1 app:app --bind 0.0.0.0:$PORT
