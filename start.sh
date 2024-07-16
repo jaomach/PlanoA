@@ -1,2 +1,4 @@
 #!/bin/bash
-exec gunicorn -k gevent -w 1 app:app --bind 0.0.0.0:$PORT
+export FLASK_APP=app.py
+export FLASK_ENV=production
+flask run --host=0.0.0.0 --port=10000

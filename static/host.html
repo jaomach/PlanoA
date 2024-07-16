@@ -6,6 +6,9 @@
     <title>Host da Sala</title>
 </head>
 <body id="body">
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
     <link rel="stylesheet" href="/static/style/host.css">
     <!-- <h1>{{ room_id }}</h1>-->
     <span id="timer"></span>
@@ -25,7 +28,11 @@
         </div>
     </div>
 
-    <audio id="myAudio" src="/static/images/narrador ae.mp3" type="audio/mpeg"></audio>
+
+    <audio id="audioRodada1" src="/static/images/narradorR1.mp3" type="audio/mpeg"></audio>
+    <audio id="whistleUp" src="/static/images/WhistleUp.mp3" type="audio/mpeg"></audio>
+    <audio id="soundTrackR1" src="/static/images/soundTrackR1.mp3" type="audio/mpeg"></audio>
+    <audio id="whistleDown" src="/static/images/WhistleDown.mp3" type="audio/mpeg"></audio>
     <div id="subtitles"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
@@ -362,7 +369,10 @@
                     document.getElementById('startButton').disabled = true;
                     document.getElementById('timer').style.display = 'block'
                     document.getElementById('startButton').classList.add('translate')
-                    var audio = document.getElementById("myAudio");
+                    var whistleDown = document.getElementById("whistleDown");
+                    var whistleUp = document.getElementById("whistleUp");
+                    var soundTrackR1 = document.getElementById("soundTrackR1");
+                    var audioRodada1 = document.getElementById("audioRodada1");
                     const body = document.body
                     const round1 = document.createElement('img')
                     round1.src = '/static/images/Round1.png'
@@ -380,8 +390,8 @@
                         subtitles = data;
                         });
 
-                    audio.ontimeupdate = function() {
-                        var currentTime = audio.currentTime;
+                    audioRodada1.ontimeupdate = function() {
+                        var currentTime = audioRodada1.currentTime;
                         var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
                         if (subtitle) {
                         subtitleDiv.innerHTML = subtitle.text;
@@ -394,18 +404,31 @@
                     setTimeout(function() {
                         document.getElementById('startButton').classList.add('desappear')
                         document.getElementById('timer').classList.add('appear')
+                        document.getElementById('iluminacao').classList.add('aparecendo')
+                        document.getElementById('logo').classList.add('aparecendo')
+                        document.getElementById('show').classList.add('aparecendo')
                         document.getElementById('circle').classList.add('close')
-                        audio.play();
-                        startCountdown(10, 13000);
+                        whistleDown.play();
+                        setTimeout(function() {
+                            startCountdown(10, 16000);
+                            soundTrackR1.play();
+                            audioRodada1.play();
+                        }, 1000);
                     }, 500);
                     setTimeout(function() {
-                        document.getElementById('rounds').classList.add('aparecendo')
+                        document.getElementById('show').classList.remove('aparecendo')
+                        document.getElementById('logo').classList.remove('aparecendo')
                     }, 9210);
+                    setTimeout(function() {
+                        document.getElementById('rounds').classList.add('aparecendo')
+                    }, 12210);
                     setTimeout(function() {
                         document.getElementById('circle').classList.remove('close')
                         document.getElementById('circle').classList.add('open')
+                        whistleUp.play()
+                        document.getElementById('iluminacao').classList.remove('aparecendo')
                         document.getElementById('rounds').classList.remove('aparecendo')
-                    }, 13000);
+                    }, 16000);
                     console.log(auxGameStarted)
                 }
             })
@@ -519,7 +542,7 @@
                     <div id="${player1}Voters" class="voters-container"></div>
                     <img id="${player1}Drawing" class="drawings" style="background-image: url(${player1Comb.image_path})" src="/static/images/cu.png" alt="${player1}">
                     <span id="${player1}Phrase" class="phrases">${player1Comb.phrase}</span>
-                    <img class="iluminacao" src="/static/images/iluminacao.png"></img>
+                    <img id="iluminacao" class="matchup" src="/static/images/iluminacao.png"></img>
                 `;
                 matchupDiv.appendChild(player1Div);
 
@@ -533,7 +556,7 @@
                         <div id="${player2}Voters" class="voters-container"></div>
                         <img id="${player2}Drawing" class="drawings" style="background-image: url(${player2Comb.image_path})" src="/static/images/cu.png" alt="${player2}">
                         <span id="${player2}Phrase" class="phrases">${player2Comb.phrase}</span>
-                        <img class="iluminacao" src="/static/images/iluminacao.png"></img>
+                        <img id="iluminacao" class="matchup" src="/static/images/iluminacao.png"></img>
                     `;
                     matchupDiv.appendChild(player2Div);
                 } else {
