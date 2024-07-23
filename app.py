@@ -55,7 +55,7 @@ rooms = {
     }
 }
 clients = []
-ROOM_TIMEOUT = 60  # 1 minuto de tempo limite
+ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 
 def cleanup_inactive_rooms():
     while True:
@@ -72,7 +72,7 @@ def cleanup_inactive_rooms():
                             os.remove(image_path)
                         except FileNotFoundError:
                             pass
-        time.sleep(10)  # Verifica a cada 10 segundos
+        time.sleep(10)  # verifica a cada 10 segundos
 
 cleanup_thread = threading.Thread(target=cleanup_inactive_rooms, daemon=True)
 cleanup_thread.start()
@@ -84,8 +84,8 @@ def create_room():
         'players': {},
         'started': False,
         'start_time': None,
-        'duration': 10000,  # 30 segundos de tempo
-        'current_round': 0,  # Começa com o round 1
+        'duration': 10000,  # ajustar tenmpo
+        'current_round': 0,
         'last_activity': time.time(),
         'votes': {} 
     }
@@ -108,18 +108,15 @@ def join_room_character():
     if room_id in rooms:
         room = rooms[room_id]
 
-        # Check if player is already in the room
         if player_id in room['players']:
-            room['players'][player_id]['username'] = username  # Update the username
+            room['players'][player_id]['username'] = username  
             room['last_activity'] = time.time()
             return jsonify({'message': 'Rejoining...', 'token': player_id})
 
-        # Check if room is full
         if len(room['players']) < 8:
             if room['started']:
                 return jsonify({'message': 'Cannot join room, game already started'}), 400
 
-            # Check if character is already taken
             if any(player.get('character') == character for player in room['players'].values()):
                 return jsonify({'message': 'Character already taken'}), 400
 
@@ -156,7 +153,7 @@ def room_status(room_id):
             'players': room['players'],
             'votes': room['votes'],
             'remaining_time': remaining_time,
-            'current_round': room['current_round'],  # Adiciona o número do round à resposta
+            'current_round': room['current_round'],  # manda o número do round aleluia
             'started': room['started']
         })
     return jsonify({'message': 'Room not found'}), 404
@@ -164,9 +161,8 @@ def room_status(room_id):
 @app.route('/start_round/<room_id>', methods=['POST'])
 def start_round(room_id):
     if room_id in rooms:
-        # Extraia a duração do corpo da solicitação
         data = request.get_json()
-        duration = data.get('duration', 30)  # Use 30 como valor padrão se 'duration' não for fornecido
+        duration = data.get('duration', 30)  # se não tiver duração na resposta, manda 30sec
 
         if isinstance(duration, int) and duration > 0:
             rooms[room_id]['duration'] = duration
@@ -290,7 +286,7 @@ def combine(room_id):
 
 @app.route('/combine/<room_id>/combinations', methods=['GET'])
 def get_combinations(room_id):
-    player_id = request.args.get('player_id')  # Obtém o player_id da query string
+    player_id = request.args.get('player_id') 
 
     if room_id not in rooms:
         return jsonify({'message': 'Invalid room'}), 400
@@ -347,7 +343,6 @@ def distribute_phrases(room_id):
     players = list(rooms[room_id]['players'].keys())
     phrases = rooms[room_id]['phrases']
     
-    # Shuffle players and phrases to ensure randomness
     random.shuffle(players)
     random.shuffle(phrases)
     
@@ -362,7 +357,6 @@ def distribute_phrases(room_id):
                 assignments[player_id].append(phrase['phrase'])
                 assigned_count += 1
             phrase_index += 1
-        # If all phrases have been assigned, reset index and shuffle again
         if phrase_index >= len(phrases):
             phrase_index = 0
             random.shuffle(phrases)
@@ -431,7 +425,7 @@ def start_tournament(room_id):
         player2 = players.pop()
         rounds.append((player1, player2))
     
-    if players:  # Handle odd number of players
+    if players:  # pra players impares, talvez preciso revisar
         rounds.append((players[0], None))
     
     room['tournament'] = {
@@ -484,7 +478,7 @@ def advance_tournament_round(room_id):
         player2 = next_round_players.pop()
         next_round.append((player1, player2))
     
-    if next_round_players:  # Handle odd number of players
+    if next_round_players:  # número impar denovo odeio isso
         next_round.append((next_round_players[0], None))
     
     tournament['current_round'] += 1
@@ -510,7 +504,6 @@ def get_tournament_matchup(room_id):
     if not matchups:
         return jsonify({'message': 'No matchups available'}), 404
     
-    # Prepare matchups with combinations
     combinations = room.get('combinations', {})
     matchups_with_combinations = []
     for player1, player2 in matchups:
@@ -531,10 +524,8 @@ def vote():
     vote = data['vote']
     
     if room_id in rooms and player_id in rooms[room_id]['players']:
-        # Armazene o voto do jogador
         rooms[room_id]['votes'][player_id] = vote
         
-        # Verifique se todos os jogadores votaram
         if all(vote is not None for vote in rooms[room_id]['votes'].values()):
             emit('message', {'message': 'All players have voted'}, room=room_id, namespace='/')
         

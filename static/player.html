@@ -347,7 +347,7 @@
 
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath(); // Reiniciar o caminho para que as novas linhas não se conectem às antigas
+            ctx.beginPath(); // reiniciar o caminho para que as novas linhas não se conectem às antigas
         }
 
         function resetTimer() {
@@ -382,7 +382,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.message === 'Phrase submitted') {
-                        document.getElementById('phrase').value = ''; // Limpa o campo de entrada após o envio
+                        document.getElementById('phrase').value = ''; // limpar o campo de entrada após o envio
                     }
                 })
                 .catch(error => {
@@ -442,7 +442,7 @@
 
                             const option = document.createElement('option');
                             option.value = url;
-                            option.textContent = url.substring(url.lastIndexOf('/') + 1); // Use the filename as the display text
+                            option.textContent = url.substring(url.lastIndexOf('/') + 1);
                             imageSelect.appendChild(option);
                             round3.appendChild(drawingList)
                         });
@@ -495,10 +495,9 @@
             }
         }
 
-        // Function to display a single matchup
         function displayMatchup() {
             const matchupsDiv = document.getElementById('matchups');
-            matchupsDiv.innerHTML = ''; // Clear previous matchups
+            matchupsDiv.innerHTML = '';
 
             if (currentMatchupIndex < matchups.length) {
                 const matchup = matchups[currentMatchupIndex];
@@ -549,7 +548,7 @@
                 vote: vote
             };
             
-            // Envie os dados para o servidor usando fetch
+            // enviar os dados para o servidor usando fetch
             fetch('/vote', {
                 method: 'POST',
                 body: JSON.stringify(data),
