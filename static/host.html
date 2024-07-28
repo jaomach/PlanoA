@@ -188,6 +188,7 @@
             startCountdown(30, 12000);
             document.getElementById('circle').classList.add('close')
             document.getElementById('rounds').classList.add('aparecendo')
+            document.getElementById('barreira').classList.add('animada')
             socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
             setTimeout(function() {
                 startTournament(roomId);
@@ -426,6 +427,7 @@
         function displayMatchup() {
             const matchupsDiv = document.getElementById('matchups');
             matchupsDiv.innerHTML = ''; 
+
             if (currentMatchupIndex < matchups.length) {
                 const matchup = matchups[currentMatchupIndex];
                 const matchupDiv = document.createElement('div');
@@ -444,9 +446,13 @@
                     <div id="${player1}Voters" class="voters-container"></div>
                     <img id="${player1}Drawing" class="drawings" style="background-image: url(${player1Comb.image_path})" src="/static/images/cu.png" alt="${player1}">
                     <span id="${player1}Phrase" class="phrases">${player1Comb.phrase}</span>
-                    <img id="iluminacao" class="matchup" src="/static/images/iluminacao.png"></img>
+                    <img id="${player1}Iluminacao" class="iluminacao-matchup" src="/static/images/iluminacao.png"></img>
                 `;
                 matchupDiv.appendChild(player1Div);
+                setTimeout( function() {
+                    const iluminacaoMatchupP1 = document.getElementById(`${player1}Iluminacao`)
+                    iluminacaoMatchupP1.classList.add('aceso')
+                }, 6000);
 
                 if (player2) {
                     const player2Comb = combinations[1][0];
@@ -458,15 +464,20 @@
                         <div id="${player2}Voters" class="voters-container"></div>
                         <img id="${player2}Drawing" class="drawings" style="background-image: url(${player2Comb.image_path})" src="/static/images/cu.png" alt="${player2}">
                         <span id="${player2}Phrase" class="phrases">${player2Comb.phrase}</span>
-                        <img id="iluminacao" class="matchup" src="/static/images/iluminacao.png"></img>
+                        <img id="${player2}Iluminacao" class="iluminacao-matchup" src="/static/images/iluminacao.png"></img>
                     `;
                     matchupDiv.appendChild(player2Div);
+
+                    setTimeout( function() {
+                    const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
+                    iluminacaoMatchupP2.classList.add('aceso')
+                    }, 6000);
                 } else {
                     actualPlayer2 = `${player1}`
                     console.log('numero impar')
                     setTimeout(function() {
                         timeLeft = 10
-                    }, 5000);
+                    }, 2000);
                 }
 
                 matchupsDiv.appendChild(matchupDiv);
@@ -538,6 +549,7 @@
         function processVotes(data) {
             console.log('Room Status:', data);
 
+            // Mostrar quem votou em quem
             for (const [user, vote] of Object.entries(data.votes)) {
                 const characterName = data.players[user].character;
                 console.log(`${user} votou em ${vote}`);
@@ -559,22 +571,13 @@
             }
 
             let mostVoted = [];
-            let leastVoted = [];
             let maxVotes = 0;
-            let minVotes = Infinity;
             for (let [option, count] of Object.entries(voteCounts)) {
                 if (count > maxVotes) {
                     maxVotes = count;
                     mostVoted = [option];
                 } else if (count === maxVotes) {
                     mostVoted.push(option);
-                }
-
-                if (count < minVotes) {
-                    minVotes = count;
-                    leastVoted = [option];
-                } else if (count === minVotes) {
-                    leastVoted.push(option);
                 }
             }
 
@@ -585,22 +588,33 @@
                 mostVoted = mostVoted[0];
             }
 
-            if (leastVoted.length > 1 || leastVoted.length === 0) {
-                const randomIndex = Math.floor(Math.random() * 2);
-                leastVoted = randomIndex === 0 ? actualPlayer1 : actualPlayer2;
-            } else {
-                leastVoted = leastVoted[0];
-            }
+            const leastVoted = mostVoted === actualPlayer1 ? actualPlayer2 : actualPlayer1;
 
             console.log('actual player 1:', actualPlayer1);
             console.log('actual player 2:', actualPlayer2);
             console.log('most voted:', mostVoted);
             console.log('least voted:', leastVoted);
 
+            if (leastVoted) {
+                const perdedorContainer = document.getElementById(`${leastVoted}Container`)
+                const perdedorAuxContainer = document.createElement('div')
+                const perdedorSign = document.createElement('img')
+                const perdedorImg = document.createElement('img')
+                perdedorSign.src = '/static/images/plaquinha.png'
+                perdedorImg.src = `/static/images/perdedor/${data.players[leastVoted].character}.png`
+                perdedorImg.classList.add('perdedor-image')
+                perdedorAuxContainer.classList.add('perdedor-container')
+                perdedorSign.classList.add('perdedor-sign')
+                perdedorContainer.appendChild(perdedorAuxContainer)
+                perdedorAuxContainer.appendChild(perdedorImg)
+                perdedorAuxContainer.appendChild(perdedorSign)
+            }
+
             nextMatchup(mostVoted);
             console.log(`Most Voted Option: ${mostVoted} (${maxVotes} votes)`);
-            console.log(`Least Voted Option: ${leastVoted} (${minVotes} votes)`);
+            console.log(`Least Voted Option: ${leastVoted}`);
         }
+
 
 
         function perderAnimation(winner) {
@@ -617,6 +631,7 @@
             drawingPerdedor[i].classList.add('perdedor');
             phrasePerdedor[i].classList.add('perdedor');
             }
+
         }
         
         function verifyRoom() {

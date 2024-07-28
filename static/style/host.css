@@ -357,15 +357,24 @@ h1 {
    display: block;
 }
 
-#iluminacao.matchup {
+.iluminacao-matchup {
+   position: absolute;
    z-index: 102;
-   opacity: 1;
+   opacity: 0.9;
    height: 70vh;
    width: 70vh;
    display: block;
    transform: translateY(0);
    filter: blur(70px);
    mix-blend-mode: screen;
+   height: 80vh;
+   display: none;
+   align-self: center;
+}
+
+.iluminacao-matchup.aceso {
+   opacity: 0.9;
+   display: block;
 }
 
 #circle {
@@ -426,6 +435,11 @@ h1 {
    height: 151px;
    width: 100%;
    bottom: 0;
+
+}
+
+#barreira.animada{
+   animation: bounceBarreira 700ms ease-in-out infinite;
 }
 
 .voter-image {
@@ -441,6 +455,11 @@ h1 {
 @keyframes aparecerIluminacao {
    from {transform: translateY(-70vh);}
    to {transform: translateY(10vh);}
+}
+
+@keyframes bounceBarreira {
+   0% {transform: translateY(0px);}
+   50% {transform: translateY(10px);}
 }
 
 body {
@@ -470,4 +489,25 @@ body.desligado {
    text-align: center;
    padding-bottom: 1.7%;
    width: 100%;
+}
+
+.perdedor-container {
+   z-index: -1;
+   position: absolute;
+   display: flex;
+   align-self: center;
+   align-items: center;
+   justify-content: center;
+   justify-self: center;
+   flex-direction: column;
+   top: 25%;
+}
+
+.perdedor-image {
+   display: flex;
+}
+
+.perdedor-sign {
+   display: flex;
+   padding-top: 6%;
 }
