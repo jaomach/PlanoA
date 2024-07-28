@@ -33,17 +33,19 @@
                     <button onclick="setColor('yellow')">Amarelo</button>
                     <button onclick="setColor('purple')">Roxo</button>
                 </div>
-                <button onclick="setEraser()">Borracha</button>
-                <select id="brushSize" onchange="setBrushSize(this.value)">
-                    <option value="5">2px</option>
-                    <option value="10">5px</option>
-                    <option value="15">10px</option>
-                    <option value="20">20px</option>
-                </select>
+                <div class="tool-other">
+                    <button onclick="setEraser()">Borracha</button>
+                    <select id="brushSize" onchange="setBrushSize(this.value)">
+                        <option value="5">2px</option>
+                        <option value="10">5px</option>
+                        <option value="15">10px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </div>
             </div>
             <div class="drawing-section">
                 <canvas id="canvas" width="400" height="500"></canvas>
-                <button onclick="exportDrawing()">Exportar Desenho</button> 
+                <button class="no-style-btn" id="exportDrawingBtn" onclick="exportDrawing()">Pronto</button> 
             </div>
         </div>
     </div>
@@ -96,7 +98,7 @@
 
         socket.on('message', function(data) {
             if (data.msg === 'Game started') {
-                document.getElementById('drawingArea').style.display = 'block';
+                document.getElementById('drawingArea').style.display = 'flex';
                 document.getElementById('waitingMessage').style.display = 'none';
                 document.getElementById('round1').style.display = 'block';
                 document.getElementById('userSelect').style.display = 'none'
@@ -178,17 +180,20 @@
             const savedPlayerId = localStorage.getItem('playerId');
             const savedUsername = localStorage.getItem('username');
             const savedCharacter = localStorage.getItem('character');
+            const savedRoom = localStorage.getItem('room');
             let character = savedCharacter;
             let playerId = savedPlayerId;
             let username = savedUsername;
 
             checkGameStatus();
 
-            if (playerId && username) {
+            if (savedRoom === roomId) {
+                if (playerId && username) {
                 joinRoom(playerId, username, character)
             } else {
                 if (!playerId) {
                 }
+            }
             }
         };
 
@@ -199,6 +204,7 @@
 
             localStorage.setItem('username', username);
             localStorage.setItem('character', character);
+            localStorage.setItem('room', roomId);
             joinRoom(playerId, username, character);
         }
 
@@ -219,6 +225,7 @@
 
                     localStorage.setItem('playerId', data.token);
                     localStorage.setItem('username', username);
+                    document.getElementById('userSelect').style.display = 'none'
                 } else {
                     window.location.href = 'https://youtube.com';
                 }
@@ -238,6 +245,13 @@
             canvas.addEventListener('touchmove', draw);
             canvas.addEventListener('touchend', stopDrawing);
             canvas.addEventListener('touchcancel', stopDrawing);
+
+            fillCanvasWithWhite();
+        }
+
+        function fillCanvasWithWhite() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function setColor(color) {
@@ -321,6 +335,7 @@
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath(); // reiniciar o caminho para que as novas linhas não se conectem às antigas
+            fillCanvasWithWhite()
         }
 
         function submitPhrase() {
