@@ -3,43 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style/player.css">
     <title>Canvas Desenhável - Round {{ round_number }}</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #canvas {
-            border: 1px solid black;
-            touch-action: none;
-        }
-        .toolbar {
-            margin: 10px;
-        }
-        .toolbar button, .toolbar select {
-            margin-right: 5px;
-        }
-        .selection-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .selection-container select, .selection-container button {
-            margin: 5px;
-        }
-        #round3 {
-            display: none;
-        }
-    </style>
 </head>
 <body>
     <div id="waitingMessage">Esperando o host iniciar a partida...</div>
     <div id="userSelect">
         <label for="username">Nome de Usuário:</label>
         <input type="text" id="username" name="username">
-        <button onclick="saveUsername()">Salvar Nome</button>
+        <button onclick="saveUsername()">Entrar</button>
     </div>
     <div id="messages"></div>
     <div id="round1">
@@ -51,25 +23,30 @@
             <option value="Archer">Archer</option>
             <option value="Paladin">Paladin</option>
         </select>
-        <div id="drawingArea" style="display: none;">
+        <div id="drawingArea" style="display: flex;">
             <div class="toolbar">
-                <button onclick="setColor('black')">Preto</button>
-                <button onclick="setColor('red')">Vermelho</button>
-                <button onclick="setColor('green')">Verde</button>
-                <button onclick="setColor('blue')">Azul</button>
-                <button onclick="setColor('yellow')">Amarelo</button>
-                <button onclick="setColor('purple')">Roxo</button>
-                <button onclick="setEraser()">Borracha</button>
-                <select id="brushSize" onchange="setBrushSize(this.value)">
-                    <option value="5">2px</option>
-                    <option value="10">5px</option>
-                    <option value="15">10px</option>
-                    <option value="20">20px</option>
-                </select>
-                <button onclick="exportDrawing()">Exportar Desenho</button>
+                <div class="tool-colors">
+                    <button onclick="setColor('black')">Preto</button>
+                    <button onclick="setColor('red')">Vermelho</button>
+                    <button onclick="setColor('green')">Verde</button>
+                    <button onclick="setColor('blue')">Azul</button>
+                    <button onclick="setColor('yellow')">Amarelo</button>
+                    <button onclick="setColor('purple')">Roxo</button>
+                </div>
+                <div class="tool-other">
+                    <button onclick="setEraser()">Borracha</button>
+                    <select id="brushSize" onchange="setBrushSize(this.value)">
+                        <option value="5">2px</option>
+                        <option value="10">5px</option>
+                        <option value="15">10px</option>
+                        <option value="20">20px</option>
+                    </select>
+                </div>
             </div>
-            <canvas id="canvas" width="500" height="500"></canvas>
-            <div id="timer">Tempo restante: <span id="timeLeft">30</span> segundos</div>
+            <div class="drawing-section">
+                <canvas id="canvas" width="400" height="500"></canvas>
+                <button class="no-style-btn" id="exportDrawingBtn" onclick="exportDrawing()">Pronto</button> 
+            </div>
         </div>
     </div>
 
@@ -94,9 +71,10 @@
         </div>
     </div>
 
-
-    <div id="matchups"></div>
-    <button id="sendVote" onclick="sendVote()">Enviar Voto</button>
+    <div id="round4">
+        <div id="matchups"></div>
+        <button id="sendVote" onclick="sendVote()">Enviar Voto</button>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
@@ -105,7 +83,6 @@
         let drawing = false;
         let currentColor = 'black';
         let currentSize = 2;
-        let timer;
         let countdown;
         let gameStarted = false;
         let phrasesFetched = false;
@@ -121,18 +98,18 @@
 
         socket.on('message', function(data) {
             if (data.msg === 'Game started') {
-                document.getElementById('drawingArea').style.display = 'block';
+                document.getElementById('drawingArea').style.display = 'flex';
                 document.getElementById('waitingMessage').style.display = 'none';
                 document.getElementById('round1').style.display = 'block';
                 document.getElementById('userSelect').style.display = 'none'
                 localStorage.setItem('drawings', 0)
                 gameStarted = true;
-                startTimer(30);
                 initializeCanvas()
             }
             if (data.msg === 'Round 1 finished') {
                 document.getElementById('drawingArea').style.display = 'none';
                 document.getElementById('round1').style.display = 'none';
+                exportDrawing();
             }
             if (data.msg === 'Round 2 started') {
                 document.getElementById('phraseInput').style.display = 'block';
@@ -154,6 +131,7 @@
                 document.getElementById('round3').style.display = 'none'
             }
             if (data.msg === 'Round 4 started') {
+                document.getElementById('round4').style.display = 'block'
                 fetchMatchups()
             }
             if (data.msg === 'Round 5 started') {
@@ -178,7 +156,6 @@
                         gameStarted = true;
                         document.getElementById('waitingMessage').style.display = 'none';
                         document.getElementById('drawingArea').style.display = 'block';
-                        startTimer(data.remaining_time);
                         localStorage.setItem('drawings', 0)
                         initializeCanvas();
                     }
@@ -203,17 +180,20 @@
             const savedPlayerId = localStorage.getItem('playerId');
             const savedUsername = localStorage.getItem('username');
             const savedCharacter = localStorage.getItem('character');
+            const savedRoom = localStorage.getItem('room');
             let character = savedCharacter;
             let playerId = savedPlayerId;
             let username = savedUsername;
 
             checkGameStatus();
 
-            if (playerId && username) {
+            if (savedRoom === roomId) {
+                if (playerId && username) {
                 joinRoom(playerId, username, character)
             } else {
                 if (!playerId) {
                 }
+            }
             }
         };
 
@@ -224,6 +204,7 @@
 
             localStorage.setItem('username', username);
             localStorage.setItem('character', character);
+            localStorage.setItem('room', roomId);
             joinRoom(playerId, username, character);
         }
 
@@ -244,6 +225,7 @@
 
                     localStorage.setItem('playerId', data.token);
                     localStorage.setItem('username', username);
+                    document.getElementById('userSelect').style.display = 'none'
                 } else {
                     window.location.href = 'https://youtube.com';
                 }
@@ -263,6 +245,13 @@
             canvas.addEventListener('touchmove', draw);
             canvas.addEventListener('touchend', stopDrawing);
             canvas.addEventListener('touchcancel', stopDrawing);
+
+            fillCanvasWithWhite();
+        }
+
+        function fillCanvasWithWhite() {
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
         }
 
         function setColor(color) {
@@ -280,7 +269,6 @@
         function startDrawing(event) {
             drawing = true;
             draw(event);
-            resetTimer();
         }
 
         function draw(event) {
@@ -304,7 +292,6 @@
         function stopDrawing() {
             drawing = false;
             ctx.beginPath();
-            resetTimer();
         }
 
         function exportDrawing() {
@@ -348,24 +335,7 @@
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.beginPath(); // reiniciar o caminho para que as novas linhas não se conectem às antigas
-        }
-
-        function resetTimer() {
-            clearTimeout(timer);
-            timer = setTimeout(exportDrawing, 30000);
-        }
-
-        function startTimer(duration) {
-            let timeLeft = duration;
-            document.getElementById('timeLeft').textContent = timeLeft;
-            countdown = setInterval(() => {
-                timeLeft--;
-                document.getElementById('timeLeft').textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    exportDrawing();
-                }
-            }, 1000);
+            fillCanvasWithWhite()
         }
 
         function submitPhrase() {

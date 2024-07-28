@@ -1,0 +1,87 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    overflow: hidden;
+    height: 100vh;
+    background-color: #f0f0f0;
+    flex-direction: column;
+    background-image: url('/static/images/background.png');
+    background-size: cover;
+ }
+ .no-style-btn {
+   border-style: none;
+   font-size: 9.5pt;
+   border-color: none;
+   border-image: initial;
+   background-color: #00000000;
+   color: #fff;
+   padding: 0;
+   border-radius: 6px;
+   font-family: "Inter", sans-serif;
+   font-weight: 400;
+   width: 100%;
+   text-wrap: nowrap;
+   text-overflow:ellipsis; 
+   white-space:nowrap; 
+   overflow:hidden;
+}
+#canvas {
+    border: 1px solid black;
+    touch-action: none;
+}
+#exportDrawingBtn {
+    padding: 3%;
+    width: 25%;
+    cursor: pointer;
+    background-color: red;
+    border-radius: 0 0 6px 6px;
+}
+#drawingArea {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.toolbar {
+    margin-right: 40px;
+    width: 5%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.tool-colors {
+    display: flex;
+    flex-direction: column;
+}
+.tool-colors button {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    margin: 5% 0;
+}
+.tool-other {
+    display: flex;
+}
+.drawing-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.selection-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+}
+.selection-container select, .selection-container button {
+    margin: 5px;
+}
+#round3 {
+    display: none;
+}
+#round4 {
+    display: none;
+}
