@@ -45,7 +45,7 @@ body {
 }
 .toolbar {
     margin-right: 40px;
-    width: 5%;
+    margin-left: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;

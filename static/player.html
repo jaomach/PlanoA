@@ -47,6 +47,9 @@
                 <canvas id="canvas" width="400" height="500"></canvas>
                 <button class="no-style-btn" id="exportDrawingBtn" onclick="exportDrawing()">Pronto</button> 
             </div>
+            <div class="toolbar">
+                <div id="drawingCounter">0/4</div>
+            </div>
         </div>
     </div>
 
@@ -322,9 +325,10 @@
                 if (drawings < 3) {
                     drawings += 1;
                     localStorage.setItem('drawings', drawings);
+                    document.getElementById('drawingCounter').innerHTML = `${drawings}/4`
                     clearCanvas();
                 } else {
-                    canvas.style.display = 'none';
+                    document.getElementById('drawingArea').style.display = 'none'
                 }
             })
             .catch((error) => {
