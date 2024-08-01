@@ -36,7 +36,7 @@ rooms = {
         'player2': [os.path.join(UPLOAD_FOLDER, 'TEST_player2_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player2_2.png')],
         'player3': [os.path.join(UPLOAD_FOLDER, 'TEST_player3_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player3_2.png')],
         'combinations': {
-            'player1': [{'image_path': '/uploads/cu.png', 'phrase': 'A funny caption'}],
+            'player1': [{'image_path': '/uploads/JSRH_playerControl_1722470632.png', 'phrase': 'A funny caption'}],
             'player2': [{'image_path': '/uploads/cu.png', 'phrase': 'Another funny caption'}],
             'player3': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],
             'player4': [{'image_path': '/uploads/cu.png', 'phrase': 'Yet another funny caption'}],

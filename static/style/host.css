@@ -63,6 +63,36 @@ body {
    opacity: 1;
 }
 
+.primary-btn {
+   font-family: 'inter', sans-serif;
+   font-weight: 800;
+   font-size: 12pt;
+   margin-top: 8%;
+   padding: 4% 52%;
+   border-radius: 5px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   background-color: #1e1e1e;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+   width: 100%;
+}
+
+.primary-btn.desappear {
+   display: none;
+}
+
+.primary-btn img {
+   margin-left: 0.5vw;
+}
+
+.primary-btn:hover {
+   background-color: #252525;
+   transition: all 500ms;
+}
+
 .iluminacao {
    position: absolute;
    transform: scale(1.8);
@@ -130,20 +160,15 @@ h1 {
 .menu-inicial button {
    font-weight: 500;
    font-size: 18pt;
-   padding: 2.5% 3.5%;
    cursor: pointer;
    text-wrap: nowrap;
    align-items: center;
    justify-content: center;
    display: flex;
-   transition: all 0.2s;
 }
 
 .menu-inicial button:hover {
-   font-size: 18pt;
    color: #fff;
-   background-color: #18252A;
-   padding: 2.5% 3.5%;
    cursor: pointer;
 }
 

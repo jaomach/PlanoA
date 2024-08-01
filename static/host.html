@@ -17,11 +17,10 @@
     <div id="barreira"></div>
     
     <div id="circle"></div>
-    <img class="voter-image" src="/static/images/MonalisaVote.png" alt="">
     <div class="inside" id="inside">
         <div id="playerList"></div>
         <div class="menu-inicial">
-            <button class="no-style-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
+            <button class="primary-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
         </div>
         <div id="matchups">
             <div class="matchup" id="papaleguas"></div>
@@ -143,7 +142,7 @@
         if (data.remaining_time === 0 && round1 === true) {
             round1 = false;
             timeLeft = 0;
-            startCountdown(10, 10000);
+            startCountdown(240, 10000);
             document.getElementById('circle').classList.add('close')
             document.getElementById('rounds').classList.add('aparecendo')
             whistleDown.play();
@@ -167,7 +166,7 @@
         }
         if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === false) {
             timeLeft = 0;
-            startCountdown(10, 10000);
+            startCountdown(100, 10000);
             document.getElementById('circle').classList.add('close')
             document.getElementById('rounds').classList.add('aparecendo')
             handleRound2 = true;
@@ -304,14 +303,13 @@
                     };
 
                     //jogo inicia a principio
-                    socket.emit('message', { message: 'Game started', room_id: roomId });
                     setTimeout(function() {
                         document.getElementById('startButton').classList.add('desappear')
                         document.getElementById('timer').classList.add('appear')
                         document.getElementById('circle').classList.add('close')
                         whistleDown.play();
                         setTimeout(function() {
-                            startCountdown(10, 16000);
+                            startCountdown(240, 16000);
                             soundTrackR1.play();
                             audioRodada1.play();
                             document.getElementById('iluminacao').classList.add('aceso')
@@ -334,6 +332,7 @@
                         document.getElementById('circle').classList.add('open')
                         whistleUp.play()
                         document.getElementById('rounds').classList.remove('aparecendo')
+                        socket.emit('message', { message: 'Game started', room_id: roomId });
                     }, 16000);
                     console.log(auxGameStarted)
                 }

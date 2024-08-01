@@ -1,13 +1,20 @@
+:root {
+    --primary-color: #1e1e1e;
+    --secondary-color: #3f3f3f;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    width: 100vw;
     height: 100vh;
-    background-color: #f0f0f0;
+    background-color: var(--primary-color);
     flex-direction: column;
-    background-image: url('/static/images/background.png');
     background-size: cover;
  }
  .no-style-btn {
@@ -27,16 +34,48 @@ body {
    white-space:nowrap; 
    overflow:hidden;
 }
+.sign {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2%;
+    height: 50px;
+    width: 200px;
+    color: #f0f0f0;
+    font-weight: 600;
+    filter: drop-shadow(0px 4px 2px #00000030);
+    font-size: 14pt;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url('/static/images/plaquinha.png');
+}
+
+#userSelect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.fodao {
+    width: 70%;
+    font-size: large;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: inset 0px 0px 10px 0px #3c1a06;
+    opacity: 1;
+    background-color: #00000000;
+    color: white;
+    border-color: #00000000;
+}
+ 
 #canvas {
-    border: 1px solid black;
+    border: 1px solid var(--secondary-color);
+    border-radius: 6px;
     touch-action: none;
 }
 #exportDrawingBtn {
-    padding: 3%;
-    width: 25%;
-    cursor: pointer;
-    background-color: red;
-    border-radius: 0 0 6px 6px;
+    padding: 2.5% 7%;
 }
 #drawingArea {
     display: flex;
@@ -50,19 +89,38 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-bottom: 13%;
 }
 .tool-colors {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-self: center;
+    justify-content: center;
+    padding: 4%;
+    border-radius: 6px;
+    width: 120px;
+    flex: 1 0 21%; /* explanation below */
+    gap: 4%;
+    background-color: var(--primary-color);
+    border-style: solid;
+    border-color: var(--secondary-color);
+    border-width: 1px;
 }
 .tool-colors button {
-    width: 60px;
-    height: 60px;
+    width: 28%;
+    height: 33.59px;
+    border-radius: 100%;
     display: flex;
-    margin: 5% 0;
+    margin: 3% 0;
+    cursor: pointer;
+    border-style: solid;
+    border-color: var(--secondary-color);
+    border-width: 1px;
+    transition: all 500ms;
 }
 .tool-other {
     display: flex;
+    flex-direction: column;
 }
 .drawing-section {
     display: flex;
@@ -84,4 +142,144 @@ body {
 }
 #round4 {
     display: none;
+}
+.colors {
+}
+
+.colors:nth-child(1) {
+    background-color: black;
+}
+
+.colors:nth-child(2) {
+    background-color: red;
+}
+
+.colors:nth-child(3) {
+    background-color: green;
+}
+
+.colors:nth-child(4) {
+    background-color: blue;
+}
+
+.colors:nth-child(5) {
+    background-color: yellow;
+}
+
+.colors:nth-child(6) {
+    background-color: purple;
+}
+
+#character {
+    display: none;
+}
+
+.swiper-container {
+    width: 300px;
+}
+
+swiper-slide {
+    display: flex;
+    justify-content: center;
+}
+
+swiper-slide img {
+    filter: drop-shadow(0px 4px 2px #00000030);
+}
+
+.primary-btn {
+    font-family: 'inter', sans-serif;
+    font-weight: 800;
+    font-size: 12pt;
+    margin-top: 8%;
+    padding: 2.5% 18%;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #3f3f3f;
+    background-color: #1e1e1e;
+    color: #fff;
+    border-width: 1.8px;
+    cursor: pointer;
+    transition: all 500ms;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.primary-btn:hover {
+    background-color: #252525;
+    transition: all 500ms;
+}
+
+.primary-btn img {
+    width: 24px;
+}
+
+#eraserBtn {
+    padding: 12%;
+    margin-bottom: 10%;
+}
+
+#drawingCounter {
+    padding: 17%;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16pt;
+    margin-bottom: 50%;
+    border-style: solid;
+    border-radius: 4px;
+    border-color: var(--secondary-color);
+    border-width: 1px;
+}
+
+.brush-btn {
+    padding: 10%;
+    width: 50px;
+    height: 50px;
+}
+
+.brush-btn:nth-child(2) img {
+    width: 10px;
+}
+
+.brush-btn:nth-child(3) img {
+    width: 15px;
+}
+
+.brush-btn:nth-child(4) img {
+    width: 20px;
+}
+
+.option-brush {
+    background-image: url('/static/images/player/bSize.png');
+}
+
+#phraseInput {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#phraseInput button {
+    margin-top: 6%;
+    padding: 3% 7%;
+}
+
+#phraseInput span {
+    color: white;
+    font-size: 18pt;
+}
+
+#swiperCombine {
+    width: 550px;
+}
+
+#phrase {
+    margin-top: 8%;
+    cursor: text;
+    padding: 3%;
+    width: 300px;
+    font-weight: 400;
+    background-color: #252525;
+    font-size: 9pt;
 }
