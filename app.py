@@ -6,9 +6,11 @@ import random
 import threading
 import json
 from flask_socketio import SocketIO, emit, join_room
+from flask_cors import CORS
 import secrets
 
 app = Flask(__name__, static_folder='static')
+CORS(app)
 socketio = SocketIO(app)
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
