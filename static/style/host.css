@@ -200,7 +200,7 @@ h1 {
    width: 100%;
 }
 .fodinha {
-   filter: brightness(1);
+   filter: drop-shadow(0 0 30px #000000b1);
    display: flex;
    align-items: center;
    flex-direction: column;
@@ -470,6 +470,7 @@ h1 {
 .voter-image {
    animation: bounceVote 500ms ease-in-out;
    width: 50px;
+   filter: drop-shadow(0 4px 9px #000000b1);
 }
 
 @keyframes bounceVote {
@@ -502,6 +503,8 @@ body.desligado {
    display: flex;
    justify-content: center;
    flex-direction: row;
+   filter: brightness(0.8);
+   z-index: 2;
 }
 
 #subtitles {
@@ -535,4 +538,20 @@ body.desligado {
 .perdedor-sign {
    display: flex;
    padding-top: 6%;
+}
+
+#playerListR2 {
+   display: flex;
+   position: absolute;
+   z-index: 101;
+   top: 50%;
+   left: 50%;
+   filter: brightness(0.7);
+
+   transform: translate(-50%, -280%);
+   transition: all 700ms;
+}
+
+#playerListR2.appear {
+   transform: translate(-50%, -50%);
 }

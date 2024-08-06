@@ -47,7 +47,7 @@
             <button class="primary-btn" onclick="saveUsername()">Entrar</button> 
         </div>
     <div id="messages"></div>
-    <div id="round1"">
+    <div id="round1">
         <div id="drawingArea" style="display: none;">
             <div class="toolbar">
                 <div class="tool-colors">
@@ -65,7 +65,7 @@
                     <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
                     <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
                     <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
+                    <div id="actualColor" class="actual-color"></div>
                 </div>
             </div>
             <div class="drawing-section">
@@ -80,6 +80,8 @@
                     <button class="primary-btn brush-btn" onclick="setBrushSize(10)"><img src="/static/images/player/bSize.png" alt=""></button>
                     <button class="primary-btn brush-btn" onclick="setBrushSize(20)"><img src="/static/images/player/bSize.png" alt=""></button>
                     <button class="primary-btn brush-btn" onclick="setBrushSize(30)"><img src="/static/images/player/bSize.png" alt=""></button>
+                    <button class="primary-btn" onclick="undo()"><img src="/static/images/undo.svg" alt=""></button>
+                    <button class="primary-btn" onclick="redo()"><img style="transform: scale(-1,1)" src="/static/images/undo.svg" alt=""></button>
                 </div>
             </div>
         </div>
@@ -87,20 +89,19 @@
 
     <div id="round2">
         <div id="phraseInput" style="display: none;">
-            <span for="phrase">Escreva uma frase!</span>
+            <span>Escreva uma frase!</span>
             <input placeholder="Escreva sua frase aqui" type="text" class="primary-btn" id="phrase" name="phrase">
             <button class="primary-btn" onclick="submitPhrase()">Enviar Frase</button>
         </div>
     </div>
 
     <div id="round3" style="display: none;">
-        <ul id="phraseList"></ul>
         <div id="drawingList"></div>
         <div class="selection-container" id="combinationArea" style="display: flex;">
-            <h3>Combine um Desenho com uma Frase</h3>
+            <span class="primary-title">Combine um título com uma pintura:</span>
             <swiper-container id="swiperCombine" class="swiper-container" navigation="true">
                 <swiper-slide>
-                    <img src="/uploads/JSRH_playerControl_1722470633.png" alt="">
+                    <img src="/uploads/KCTB_534EZe8YXMKM_1722528836.png" alt="">
                     <span id="character">Berro</span>
                 </swiper-slide>
                 <swiper-slide>
@@ -108,496 +109,22 @@
                     <span id="character">Berro</span>
                 </swiper-slide>
             </swiper-container>
-            <label for="imageSelect">Selecione um Desenho:</label>
-            <select id="imageSelect"></select>
-            <label for="phraseSelect">Selecione uma Frase:</label>
-            <select id="phraseSelect"></select>
-            <button onclick="combineSelection()">Combinar</button>
+            <select class="primary-select" id="phraseSelect">
+                <option value=""></option>
+            </select>
+            <button class="primary-btn" onclick="combineSelection()">Combinar</button>
         </div>
     </div>
 
     <div id="round4">
         <div id="matchups"></div>
-        <button id="sendVote" onclick="sendVote()">Enviar Voto</button>
+        <button class="primary-btn" id="sendVote" onclick="sendVote()">Enviar Voto</button>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        let drawing = false;
-        let currentColor = 'black';
-        let currentSize = 2;
-        let countdown;
-        let gameStarted = false;
-        let phrasesFetched = false;
-        let lastColor;
-
         const roomId = "{{ room_id }}";
-        console.log('Connecting to server with roomId:', roomId);
-        var socket = io.connect('https://' + document.domain + ':' + location.port);
-
-        socket.on('connect', function() {
-            console.log('Connected to server');
-            socket.emit('join', { room_id: roomId });
-        });
-
-        socket.on('message', function(data) {
-            if (data.msg === 'Game started') {
-                document.getElementById('drawingArea').style.display = 'flex';
-                document.getElementById('waitingMessage').style.display = 'none';
-                document.getElementById('round1').style.display = 'block';
-                document.getElementById('userSelect').style.display = 'none'
-                localStorage.setItem('drawings', 0)
-                gameStarted = true;
-                initializeCanvas()
-            }
-            if (data.msg === 'Round 1 finished') {
-                document.getElementById('drawingArea').style.display = 'none';
-                document.getElementById('round1').style.display = 'none';
-                exportDrawing();
-            }
-            if (data.msg === 'Round 2 started') {
-                document.getElementById('phraseInput').style.display = 'block';
-                document.getElementById('round2').style.display = 'block';
-            }
-            if (data.msg === 'Round 2 finished') {
-                document.getElementById('phraseInput').style.display = 'none';
-                document.getElementById('round2').style.display = 'none';
-            }
-            if (data.msg === 'Round 3 started') {
-                phrasesFetched = true
-                fetchDistributedPhrases()
-                fetchDistributedDrawings()
-                document.getElementById('combinationArea').style.display = 'block';
-                document.getElementById('round3').style.display = 'block'
-            }
-            if (data.msg === 'Round 3 finished') {
-                document.getElementById('combinationArea').style.display = 'none';
-                document.getElementById('round3').style.display = 'none'
-            }
-            if (data.msg === 'Round 4 started') {
-                document.getElementById('round4').style.display = 'block'
-                fetchMatchups()
-            }
-            if (data.msg === 'Round 5 started') {
-                displayMatchup()
-            }
-            if (data.msg === 'Round 5 finished') {
-            }
-            if (data.msg === 'Tournament advanced') {
-                fetchMatchups()
-            }
-            if (data.msg === 'Tournament next') {
-                displayMatchup()
-            }
-            console.log('Mensagem recebida:', data.msg);
-        });
-
-        function checkGameStatus() {
-            fetch(`/room_status/${roomId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.started && !gameStarted) {
-                        gameStarted = true;
-                        document.getElementById('waitingMessage').style.display = 'none';
-                        document.getElementById('drawingArea').style.display = 'block';
-                        localStorage.setItem('drawings', 0)
-                        initializeCanvas();
-                    }
-                    if (data.remaining_time === 0) {
-                        document.getElementById('drawingArea').style.display = 'none';
-                    }
-                    if (data.current_round === 2) {
-                        document.getElementById('phraseInput').style.display = 'flex';
-                    }
-                    if (data.current_round === 3 && !phrasesFetched) {
-                        phrasesFetched = true
-                        fetchDistributedPhrases()
-                        fetchDistributedDrawings()
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-
-        window.onload = () => {
-            const savedPlayerId = localStorage.getItem('playerId');
-            const savedUsername = localStorage.getItem('username');
-            const savedCharacter = localStorage.getItem('character');
-            const savedRoom = localStorage.getItem('room');
-            let character = savedCharacter;
-            let playerId = savedPlayerId;
-            let username = savedUsername;
-
-            checkGameStatus();
-
-            if (savedRoom === roomId) {
-                if (playerId && username) {
-                joinRoom(playerId, username, character)
-            } else {
-                if (!playerId) {
-                }
-            }
-            }
-        };
-
-        function saveUsername(){
-            const username = document.getElementById('username').value;
-            const playerId = localStorage.getItem('playerId');
-            let characterNew
-            const character = document.querySelector('.swiper-slide-active').querySelectorAll('span').forEach(element => {
-                console.log(element.innerHTML)
-                characterNew = element.innerHTML
-            });
-
-
-            localStorage.setItem('username', username);
-            localStorage.setItem('character', characterNew);
-            localStorage.setItem('room', roomId);
-            joinRoom(playerId, username, characterNew);
-        }
-
-        function joinRoom(playerId, username, character) {
-            fetch('/api/join_room', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ room_id: roomId, player_id: playerId, username: username, character: character })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Response data:', data);
-                if (data.message === 'Player added' || data.message === 'Rejoining...') {
-                    console.log('Token:', data.token); // O token é o próprio playerId
-                    console.log(data.message);
-
-                    localStorage.setItem('playerId', data.token);
-                    localStorage.setItem('username', username);
-                    document.getElementById('userSelect').innerHTML = ''
-                } else {
-                    window.location.href = 'https://youtube.com';
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        function initializeCanvas() {
-            canvas.addEventListener('mousedown', startDrawing);
-            canvas.addEventListener('mousemove', draw);
-            canvas.addEventListener('mouseup', stopDrawing);
-            canvas.addEventListener('mouseout', stopDrawing);
-
-            canvas.addEventListener('touchstart', startDrawing);
-            canvas.addEventListener('touchmove', draw);
-            canvas.addEventListener('touchend', stopDrawing);
-            canvas.addEventListener('touchcancel', stopDrawing);
-
-            fillCanvasWithWhite();
-        }
-
-        function fillCanvasWithWhite() {
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-        }
-
-        function setColor(color) {
-            currentColor = color;            
-            if (lastColor === undefined) {
-                document.getElementById(color).style.borderColor = 'white'
-            } else if (lastColor != color) {
-                document.getElementById(lastColor).style.borderColor = 'black'
-                document.getElementById(color).style.borderColor = 'white'
-            }
-            lastColor = color;
-        }
-
-        function setBrushSize(size) {
-            currentSize = size;
-        }
-
-        function setEraser() {
-            currentColor = 'white';
-        }
-
-        function startDrawing(event) {
-            drawing = true;
-            draw(event);
-        }
-
-        function draw(event) {
-            if (!drawing) return;
-
-            event.preventDefault();
-            const rect = canvas.getBoundingClientRect();
-            const x = (event.clientX || event.touches[0].clientX) - rect.left;
-            const y = (event.clientY || event.touches[0].clientY) - rect.top;
-
-            ctx.lineWidth = currentSize;
-            ctx.lineCap = 'round';
-            ctx.strokeStyle = currentColor;
-
-            ctx.lineTo(x, y);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-        }
-
-        function stopDrawing() {
-            drawing = false;
-            ctx.beginPath();
-        }
-
-        function exportDrawing() {
-            const dataURL = canvas.toDataURL('image/png');
-            const playerId = localStorage.getItem('playerId')
-            fetch('/upload', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ player_id: playerId, room_id: roomId, image: dataURL })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro na resposta do servidor');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Success:', data);
-                var drawings = localStorage.getItem('drawings');
-                if (drawings) {
-                    drawings = parseInt(drawings);
-                } else {
-                    drawings = 0;
-                }
-
-                if (drawings < 3) {
-                    drawings += 1;
-                    localStorage.setItem('drawings', drawings);
-                    document.getElementById('drawingCounter').innerHTML = `${drawings}/4`
-                    clearCanvas();
-                } else {
-                    document.getElementById('drawingArea').style.display = 'none'
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
-
-        function clearCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.beginPath(); // reiniciar o caminho para que as novas linhas não se conectem às antigas
-            fillCanvasWithWhite()
-        }
-
-        function submitPhrase() {
-            const phrase = document.getElementById('phrase').value;
-            const playerId = localStorage.getItem('playerId')
-            if (phrase) {
-                fetch('/submit_phrase', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ room_id: roomId, player_id: playerId, phrase: phrase })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === 'Phrase submitted') {
-                        document.getElementById('phrase').value = ''; // limpar o campo de entrada após o envio
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert("Por favor, insira uma frase!");
-            }
-        }
-
-        function fetchDistributedPhrases() {
-            fetch(`/distribute_phrases/${roomId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const phraseList = document.getElementById('phraseList');
-                    const playerId = localStorage.getItem('playerId')
-                    const phraseSelect = document.getElementById('phraseSelect');
-                    const round3 = document.getElementById('round3')
-                    phraseList.innerHTML = '';
-                    phraseSelect.innerHTML = '';
-                    if (data[playerId] && data[playerId].length > 0) {
-                        data[playerId].forEach(phrase => {
-                            const li = document.createElement('li');
-                            li.textContent = phrase;
-                            phraseList.appendChild(li);
-
-                            const option = document.createElement('option');
-                            option.value = phrase;
-                            option.textContent = phrase;
-                            phraseSelect.appendChild(option);
-                            round3.appendChild(phraseList)
-                        });
-                    } else {
-                        phraseList.textContent = 'Nenhuma frase atribuída.';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-
-        function fetchDistributedDrawings() {
-            fetch(`/distribute_drawing/${roomId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const drawingList = document.getElementById('swiperCombine');
-                    const playerId = localStorage.getItem('playerId')
-                    const imageSelect = document.getElementById('imageSelect');
-                    const round3 = document.getElementById('round3')
-                    drawingList.innerHTML = '';
-                    imageSelect.innerHTML = '';
-                    if (data[playerId] && data[playerId].length > 0) {
-                        data[playerId].forEach(url => {
-                            const newSwiper = document.createElement('swiper-slide')
-                            const img = document.createElement('img');
-                            img.src = url;
-                            drawingList.appendChild(newSwiper);
-                            newSwiper.appendChild(img);
-
-                            const option = document.createElement('span');
-                            option.textContent = url;
-                            newSwiper.appendChild(option);
-                            round3.appendChild(drawingList)
-                        });
-                    } else {
-                        drawingList.textContent = 'Nenhum desenho atribuído.';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-            });
-        }
-
-        function combineSelection() {
-            const selectedPhrase = document.getElementById('phraseSelect').value;
-            let newSelectedImage
-            const selectedImage = document.querySelector('.swiper-slide-active').querySelectorAll('span').forEach(element => {
-                newSelectedImage = element.innerHTML
-            });
-            console.log(newSelectedImage)
-            const playerId = localStorage.getItem('playerId')
-
-            if (newSelectedImage && selectedPhrase) {
-                fetch(`/combine/${roomId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ player_id: playerId, image_path: newSelectedImage, phrase: selectedPhrase })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.message === 'Combination saved successfully') {
-                        alert('Combinação enviada com sucesso!');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                alert('Por favor, selecione um desenho e uma frase!');
-            }
-        }
-
-        async function fetchMatchups() {
-            const response = await fetch(`/tournament/${roomId}/matchup`);
-            const data = await response.json();
-            if (data.matchups) {
-                matchups = data.matchups;
-                currentMatchupIndex = 0;
-                winners = [];
-                displayMatchup();
-            } else {
-                document.getElementById('matchups').innerHTML = '<p>No matchups available</p>';
-            }
-        }
-
-        function displayMatchup() {
-            const matchupsDiv = document.getElementById('matchups');
-            matchupsDiv.innerHTML = '';
-
-            if (currentMatchupIndex < matchups.length) {
-                const matchup = matchups[currentMatchupIndex];
-                const matchupDiv = document.createElement('div');
-                matchupDiv.classList.add('matchup');
-                const player1 = matchup.players[0];
-                const player2 = matchup.players[1];
-
-                const player1Div = document.createElement('div');
-                player1Div.innerHTML = `
-                    <input type="radio" name="winner" value="${player1}"> Player: ${player1}<br>
-                    Combinations: ${JSON.stringify(matchup.combinations[0], null, 2)}
-                `;
-                matchupDiv.appendChild(player1Div);
-
-                if (player2) {
-                    const player2Div = document.createElement('div');
-                    player2Div.innerHTML = `
-                        <input type="radio" name="winner" value="${player2}"> Player: ${player2}<br>
-                        Combinations: ${JSON.stringify(matchup.combinations[1], null, 2)}
-                    `;
-                    matchupDiv.appendChild(player2Div);
-                } else {
-                    const byeDiv = document.createElement('div');
-                    byeDiv.innerHTML = `<p>Player: ${player1} gets a bye</p>`;
-                    matchupDiv.appendChild(byeDiv);
-                }
-
-                matchupsDiv.appendChild(matchupDiv);
-                document.getElementById('sendVote').style.display = 'block';
-            } else {
-                document.getElementById('sendVote').style.display = 'none';
-            }
-        }
-
-        function sendVote() {
-            const selectedWinner = document.querySelector('input[name="winner"]:checked');
-            if (selectedWinner) {
-                currentMatchupIndex++;
-            } else {
-                alert('Please select a winner before proceeding.');
-            }
-            const playerId = localStorage.getItem('playerId')
-            var vote = selectedWinner.value;
-            var data = {
-                room_id: roomId,
-                player_id: playerId,
-                vote: vote
-            };
-            
-            // enviar os dados para o servidor usando fetch
-            fetch('/vote', {
-                method: 'POST',
-                body: JSON.stringify(data),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log(data.message + vote)
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
     </script>
+    <script src="/static/scripts/player.js"></script>
 </body>
 </html>
