@@ -18,18 +18,62 @@ let roundsHandled = {};
 let currentRound = 6;
 let actualPlayer1 = ''
 let actualPlayer2 = ''
+let timeOuts = []
 console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
 fullscreenBtn.addEventListener('click', function() {
-    if (document.documentElement.requestFullscreen) {
-        document.documentElement.requestFullscreen();
-    } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-        document.documentElement.mozRequestFullScreen();
-    } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
-        document.documentElement.webkitRequestFullscreen();
-    } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
-        document.documentElement.msRequestFullscreen();
+    if (!document.fullscreenElement && fullscreenBtn.src.includes('fullscreen.svg')) {
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen();
+        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+            document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+            document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+            document.documentElement.msRequestFullscreen();
+        }
+        fullscreenBtn.src = '/static/images/collapse.svg';
+    } else if (document.fullscreenElement && fullscreenBtn.src.includes('collapse.svg')) {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) { // Firefox
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { // IE/Edge
+            document.msExitFullscreen();
+        }
+        fullscreenBtn.src = '/static/images/fullscreen.svg';
+    }
+});
+
+document.addEventListener('fullscreenchange', function() {
+    if (!document.fullscreenElement) {
+        fullscreenBtn.src = '/static/images/fullscreen.svg';
+    } else {
+        fullscreenBtn.src = '/static/images/collapse.svg';
+    }
+});
+
+const muteBtn = document.getElementById('volume');
+muteBtn.addEventListener('click', function() {
+    const audioElements = document.querySelectorAll('audio, video');
+
+    if (audioElements.length > 0) {
+        // Verifica se o primeiro elemento de áudio/vídeo está mutado
+        const isMuted = audioElements[0].muted;
+
+        // Alterna o estado de mutação de todos os elementos de áudio/vídeo
+        audioElements.forEach(function(element) {
+            element.muted = !isMuted;
+        });
+
+        if (isMuted) {
+            muteBtn.src = '/static/images/volume-up.svg';
+        } else {
+            muteBtn.src = '/static/images/volume-off.svg';
+        }
     }
 });
 
@@ -38,7 +82,28 @@ document.addEventListener('keydown', function(event) {
         gameStarted = true;
         startGame();
     }
+    if (event.key === 's') {
+        document.getElementById('skipRoundBtn').click()
+    }
 });
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === '1' && !gameStarted) {
+        round2Var1()
+    }
+});
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === '2' && !gameStarted) {
+        round2Var2()
+    }
+});
+document.addEventListener('keydown', function(event) {
+    if (event.key === '3' && !gameStarted) {
+        round2Var3()
+    }
+});
+
 
 console.log('Connecting to server with roomId:', roomId);
 var socket = io({ query: { roomId: roomId } });
@@ -103,7 +168,7 @@ previousPlayers = { ...data.players };
 if (data.remaining_time === 0 && round1 === true) {
     round1 = false;
     timeLeft = 0;
-    roundCallRandom(round2Var1, round2Var1, round2Var1)
+    roundCallRandom(round2Var1, round2Var2, round2Var3)
 }
 if (data.current_round === 2 && round2 === false) {
     round2 = true;
@@ -220,19 +285,19 @@ function startCountdown(duration, intervalo) {
     const timerElement = document.getElementById('timer');
     timeLeft = duration
     if (auxGameStarted === true) {
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             console.log(auxGameStarted)
             startNextRound(duration);
             timeLeft = duration;
             timerElement.textContent = timeLeft
-        }, intervalo)
+        }, intervalo))
     } else {
         timeLeft=duration
         auxGameStarted = true
         timerElement.textContent = timeLeft
     }
 
-    setTimeout(function() {
+    timeOuts.push(setTimeout(function() {
         countdown = setInterval(() => {
             timeLeft--;
             timerElement.textContent = timeLeft;
@@ -241,7 +306,7 @@ function startCountdown(duration, intervalo) {
                 timerElement.style.display = 'none'
             }
         }, 1000);
-    }, intervalo);
+    }, intervalo));
 }
 
 function modifyTimer(seconds) {
@@ -262,7 +327,6 @@ function startNextRound(duration) {
     .then(data => {
         if (data.message === 'Round started') {
             document.getElementById('timer').style.display = 'block'
-            console.log('começou sla porra')
         }
     })
     .catch(error => {
@@ -407,7 +471,6 @@ function showWinner(winner) {
 
     setTimeout(function() {
         var playerToRemove = actualPlayer1 === winner ? actualPlayer2 : actualPlayer1;
-        console.log(playerToRemove)
         
         if (document.getElementById(`${playerToRemove}Container`)) {
             document.getElementById(`${playerToRemove}Container`).remove();
@@ -546,6 +609,7 @@ function roundCallRandom(variavel1, variavel2, variavel3) {
 }
 
 function round1Var1() {
+    document.getElementById('skipRoundBtn').disabled = true;
     document.getElementById('startButton').disabled = true;
     document.getElementById('timer').style.display = 'block'
     document.getElementById('startButton').classList.add('translate')
@@ -557,9 +621,15 @@ function round1Var1() {
     const round1 = document.createElement('img')
     round1.src = '/static/images/Round1.png'
     round1.id = 'rounds'
-    body.appendChild(round1)
+    document.getElementById('roundContainer').appendChild(round1)
     auxGameStarted = true
 
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2.png" id="rounds">
+    `
     
     var subtitleDiv = document.getElementById("subtitles");
     var subtitles = [];
@@ -610,6 +680,7 @@ function round1Var1() {
         whistleUp.play()
         document.getElementById('rounds').classList.remove('aparecendo')
         socket.emit('message', { message: 'Game started', room_id: roomId });
+        document.getElementById('skipRoundBtn').classList.remove('aparecendo')
     }, 16000);
     console.log(auxGameStarted)
 }
@@ -617,11 +688,14 @@ function round1Var1() {
 function round2Var1() {
     socket.emit('message', { message: 'Round 1 finished', room_id: roomId });
 
+    document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(2)')
+    document.getElementById('skipRoundBtn').classList.add('aparecendo')
     document.getElementById('timer').style.display = 'block'
+    document.getElementById('skipRoundBtn').disabled = false;
     var soundTrackR1 = document.getElementById("soundTrackR1");
     var soundTrackR2 = document.getElementById("soundTrackR2");
     var audioR2Var1 = document.getElementById("audioR2");
-    soundTrackR2.src = '/static/audios/r1/soundTrackR1.mp3'
+    soundTrackR2.src = '/static/audios/r2/soundTrackR2.mp3'
     audioR2Var1.src = '/static/audios/r2/audioR2Var1.mp3'
 
     const playerList = document.getElementById('playerList');
@@ -630,7 +704,7 @@ function round2Var1() {
 
     var playerContainers = clonedPlayerList.querySelectorAll('.player-container');
 
-    setTimeout(function() {
+    timeOuts.push(setTimeout(function() {
         playerContainers.forEach(function(container) {
             var img = container.querySelector('img');
             
@@ -638,11 +712,17 @@ function round2Var1() {
                 img.src = img.src.replace('/static/images/', '/static/images/perdedor/');
             }
         });
-    }, 5500)
+    }, 5500))
 
     // Adiciona a div clonada ao DOM
     clonedPlayerList.id = 'playerListR2'
-    document.body.appendChild(clonedPlayerList);
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2.png" id="rounds">
+    `
+    document.getElementById('roundContainer').appendChild(clonedPlayerList);
     
     
     var subtitleDiv = document.getElementById("subtitles");
@@ -664,7 +744,7 @@ function round2Var1() {
         }
     };
 
-    setTimeout(function() {
+    timeOuts.push(setTimeout(function() {
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
@@ -672,7 +752,7 @@ function round2Var1() {
             clonedPlayerList.classList.add('appear')
         }, 1800)
         setTimeout(function() {
-            startCountdown(240, 16000);
+            startCountdown(240, 12000);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -681,22 +761,208 @@ function round2Var1() {
                 document.getElementById('iluminacao').classList.add('aceso')
             }, 1670)
         }, 1000);
-    }, 500);
-    setTimeout(function() {
+    }, 500));
+    timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
         clonedPlayerList.classList.remove('appear')
-    }, 9210);
-    setTimeout(function() {
+    }, 6600));
+    timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.add('aceso')
         document.getElementById('rounds').classList.add('aparecendo')
-    }, 12210);
-    setTimeout(function() {
+    }, 9300));
+    timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
         document.getElementById('circle').classList.remove('close')
         document.getElementById('circle').classList.add('open')
         whistleUp.play()
         document.getElementById('rounds').classList.remove('aparecendo')
-    }, 16000);
+        document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+}, 11970));
+}
+
+function round2Var2() {
+    socket.emit('message', { message: 'Round 1 finished', room_id: roomId });
+
+    document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(2)')
+    document.getElementById('skipRoundBtn').classList.add('aparecendo')
+    document.getElementById('timer').style.display = 'block'
+    document.getElementById('skipRoundBtn').disabled = false;
+    var soundTrackR1 = document.getElementById("soundTrackR1");
+    var soundTrackR2 = document.getElementById("soundTrackR2");
+    var audioR2Var1 = document.getElementById("audioR2");
+    soundTrackR2.src = '/static/audios/r2/soundTrackR2.mp3'
+    audioR2Var1.src = '/static/audios/r2/audioR2Var2.mp3'
+
+    const playerList = document.getElementById('playerList');
+            
+    const clonedPlayerList = playerList.cloneNode(true);
+
+    // Adiciona a div clonada ao DOM
+    clonedPlayerList.id = 'playerListR2'
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2.png" id="rounds">
+    `
+    document.getElementById('roundContainer').appendChild(clonedPlayerList);
+    
+    
+    var subtitleDiv = document.getElementById("subtitles");
+    var subtitles = [];
+
+    fetch('/static/captionR2Var2.json')
+        .then(response => response.json())
+        .then(data => {
+        subtitles = data;
+    });
+
+    audioR2Var1.ontimeupdate = function() {
+        var currentTime = audioR2Var1.currentTime;
+        var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+        if (subtitle) {
+        subtitleDiv.innerHTML = subtitle.text;
+        } else {
+        subtitleDiv.innerHTML = '';
+        }
+    };
+
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('timer').classList.add('appear')
+        document.getElementById('circle').classList.add('close')
+        whistleDown.play();
+        setTimeout(function() {
+            clonedPlayerList.classList.add('appear')
+        }, 1700)
+        setTimeout(function() {
+            startCountdown(240, 12800);
+            soundTrackR1.pause();
+            soundTrackR2.play();
+            audioR2Var1.play();
+
+            setTimeout(function() {
+                document.getElementById('iluminacao').classList.add('aceso')
+            }, 1670)
+        }, 1000);
+    }, 500));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.remove('aceso')
+        clonedPlayerList.classList.remove('appear')
+    }, 6600));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.add('aceso')
+        document.getElementById('rounds').classList.add('aparecendo')
+    }, 9300));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.remove('aceso')
+        document.getElementById('circle').classList.remove('close')
+        document.getElementById('circle').classList.add('open')
+        whistleUp.play()
+        document.getElementById('rounds').classList.remove('aparecendo')
+        document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+}, 12600));
+}
+
+function round2Var3() {
+    socket.emit('message', { message: 'Round 1 finished', room_id: roomId });
+
+    document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(2)')
+    document.getElementById('skipRoundBtn').classList.add('aparecendo')
+    document.getElementById('timer').style.display = 'block'
+    document.getElementById('skipRoundBtn').disabled = false;
+    var soundTrackR1 = document.getElementById("soundTrackR1");
+    var soundTrackR2 = document.getElementById("soundTrackR2");
+    var audioR2Var1 = document.getElementById("audioR2");
+    soundTrackR2.src = '/static/audios/r2/soundTrackR2.mp3'
+    audioR2Var1.src = '/static/audios/r2/audioR2Var3.mp3'
+
+    const playerList = document.getElementById('playerList');
+            
+    const clonedPlayerList = playerList.cloneNode(true);
+
+    clonedPlayerList.id = 'playerListR2'
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2Vote.png" id="rounds">
+    `
+    document.getElementById('roundContainer').appendChild(clonedPlayerList);
+
+    var playerContainers = clonedPlayerList.querySelectorAll('.player-container');
+
+    playerContainers.forEach(function(container) {
+        var img = container.querySelector('img');
+        
+        if (img.src.includes('/static/images/')) {
+            img.src = img.src.replace('/static/images/', '/static/images/perdedor/');
+        }
+    });
+
+    var subtitleDiv = document.getElementById("subtitles");
+    var subtitles = [];
+
+    fetch('/static/captionR2Var3.json')
+        .then(response => response.json())
+        .then(data => {
+        subtitles = data;
+    });
+
+    audioR2Var1.ontimeupdate = function() {
+        var currentTime = audioR2Var1.currentTime;
+        var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+        if (subtitle) {
+        subtitleDiv.innerHTML = subtitle.text;
+        } else {
+        subtitleDiv.innerHTML = '';
+        }
+    };
+
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('timer').classList.add('appear')
+        document.getElementById('circle').classList.add('close')
+        whistleDown.play();
+        setTimeout(function() {
+            startCountdown(240, 18800);
+            soundTrackR1.pause();
+            soundTrackR2.play();
+            audioR2Var1.play();
+
+            setTimeout(function() {
+                document.getElementById('iluminacao').classList.add('aceso')
+                clonedPlayerList.classList.add('appear')
+            }, 800)
+        }, 1000);
+    }, 500));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.remove('aceso')
+        clonedPlayerList.classList.remove('appear')
+    }, 6729));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('rounds').classList.add('aparecendo')
+        setTimeout(function() {
+            document.getElementById('iluminacao').classList.add('aceso')
+        }, 1021)
+    }, 10169));
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('rounds').classList.remove('aparecendo')
+        document.getElementById('iluminacao').classList.remove('aceso')
+    }, 12732))
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.add('aceso')
+        setTimeout(function() {
+            document.getElementById('rounds').src = '/static/images/Round2.png'
+            document.getElementById('rounds').classList.add('aparecendo')
+        }, 500)
+    }, 15400))
+    timeOuts.push(setTimeout(function() {
+        document.getElementById('iluminacao').classList.remove('aceso')
+        document.getElementById('circle').classList.remove('close')
+        document.getElementById('circle').classList.add('open')
+        whistleUp.play()
+        document.getElementById('rounds').classList.remove('aparecendo')
+        document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+}, 18500));
 }
 
 function round3Var1() {
@@ -737,3 +1003,74 @@ function round3Var3() {
         whistleUp.play();
     }, 10000);
 }
+
+function skipRound(round) {
+    document.getElementById('skipRoundBtn').disabled = true;
+    document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+    timeOuts.forEach(function(timeoutID) {
+        clearTimeout(timeoutID);
+    });
+    if (round === 1) {
+        const audioR1Var1 = document.getElementById("audioR1");
+        audioR1Var1.pause();
+        audioR1Var1.currentTime = 0;
+        startCountdown(240, 500)
+    } 
+    if (round === 2) {
+        const audioR2Var1 = document.getElementById("audioR2");
+        audioR2Var1.pause();
+        audioR2Var1.currentTime = 0;
+        startCountdown(240, 500)
+    }
+    if (round === 3) {
+        const audioR3Var1 = document.getElementById("audioR3");
+        audioR3Var1.pause();
+        audioR3Var1.currentTime = 0;
+        startCountdown(120, 500)
+    }
+    if (round === 4) {
+        const audioR3Var1 = document.getElementById("audioR3");
+        audioR3Var1.pause();
+        audioR3Var1.currentTime = 0;
+        startCountdown(40, 500)
+    }
+    document.getElementById('circle').classList.remove('close')
+    document.getElementById('circle').classList.add('open')
+    document.getElementById('roundContainer').innerHTML = ''
+    document.getElementById('roundContainer').innerHTML = `
+        <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+        <img id="logo" src="/static/images/LOGO.png" alt="">
+        <img id="show" src="/static/images/OSHOW.png" alt="">
+    `
+}
+
+
+
+
+
+
+
+let lastTime = performance.now();
+let frame = 0;
+let fps = 0;
+
+function calculateFPS() {
+    const now = performance.now();
+    const delta = (now - lastTime) / 1000; // Tempo em segundos
+    lastTime = now;
+    fps = 1 / delta; // FPS
+
+    document.getElementById('fps').textContent = `FPS: ${fps.toFixed(2)}`;
+
+    requestAnimationFrame(calculateFPS);
+}
+
+calculateFPS();
+
+const observer = new PerformanceObserver((list) => {
+    list.getEntries().forEach((entry) => {
+        console.log(`${entry.entryType} [${entry.name}]: ${entry.duration}ms`);
+    });
+});
+
+observer.observe({ entryTypes: ['longtask'] }); // Observe "long tasks" que podem indicar uso intenso de CPU

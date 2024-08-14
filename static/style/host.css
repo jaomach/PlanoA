@@ -1,3 +1,8 @@
+:root {
+   --primary-color: #1e1e1e;
+   --secondary-color: #3f3f3f;
+}
+
 body {
    font-family: Arial, sans-serif;
    margin: 0;
@@ -37,15 +42,11 @@ body {
 }
 #timer {
    display: none;
-   margin: 2vw;
-   padding: 1vw;
-   font-size: 18pt;
+   font-size: 20pt;
    font-weight: 600;
-   position: absolute;
-   background-color: #f0f0f0;
    border-radius: 7%;
-   left: -100px;
    transition: all 0.5s;
+   z-index: 1;
 }
 #playerList {
    border-radius: 5px;
@@ -262,16 +263,12 @@ h1 {
    backdrop-filter: blur(10px);
 }
 
-   #playerList {
-      transition: all 700ms;
-   }
+#playerList {
+   transition: all 700ms;
+}
 
 #playerList.ofuscado {
    filter: blur(10px);
-}
-
-#rounds.aparecendo {
-   animation: wave 4s forwards;
 }
 
 @keyframes caindo {
@@ -292,25 +289,57 @@ h1 {
 
 @keyframes wave {
    0%, 100% {
-       transform: translateY(-20vh) rotate(0deg);
+       transform: translateY(-80vh) rotate(0deg);
        filter: url(#wave);
    }
    20% {
-      transform: translateY(40vh) rotate(0deg);
+      transform: translateY(0vh) rotate(0deg);
    }
    80% {
-      transform: translateY(40vh) rotate(0deg);
+      transform: translateY(0vh) rotate(0deg);
    }
 }
 
-#fullscreen{
-   width: 2%;
-   padding: 1%;
+
+#interfaceContainer{
+   width: 100%;
    right: 0;
    position: absolute;
+   display: flex;
+   justify-content: end;
+   z-index: 105;
+   top: 0;
+   height: 100vh;
+}
+
+.btn-interface {
+   height: 25px;
+   padding: 1% 1% 1% 0%;
+   right: 0;
    cursor: pointer;
    z-index: 105;
    top: 0;
+}
+
+.timer-container {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+
+   position: absolute;
+   left: 0;
+
+   width: 100px;
+   height: 110px;
+}
+
+.timer-container img {
+   width: 100%;
+   position: absolute;
+}
+
+.btn-interface:nth-child(2) {
+   padding: 1%;
 }
 
 #rounds {
@@ -319,12 +348,15 @@ h1 {
    align-self: center;
    z-index: 101;
    transition: all 600ms ease-in;
-   transform: translateY(-20vh);
+   filter: brightness(0.2);
+   transform: translateY(-80vh);
 }
 
 #rounds.aparecendo {
    transition: all 600ms ease-out;
-   transform: translateY(40vh);
+   transition: filter 1000ms ease-out, all 600ms ease-out;
+   filter: brightness(0.8);
+   transform: translateY(0vh);
 }
 
 #logo {
@@ -343,7 +375,7 @@ h1 {
    align-self: center;
    transition: all 600ms ease-out;
    filter: brightness(0.6);
-   transform: translateY(10vh);
+   transform: translateY(0vh);
 }
 
 #show {
@@ -362,7 +394,7 @@ h1 {
    align-self: center;
    transition: all 700ms ease-out;
    filter: brightness(0.6);
-   transform: translateY(10vh);
+   transform: translateY(0vh);
 }
 
 #iluminacao {
@@ -373,7 +405,6 @@ h1 {
    z-index: 102;
    opacity: 0.9;
    filter: blur(5px);
-   transform: translateY(10vh);
    mix-blend-mode: screen;
 }
 
@@ -554,4 +585,46 @@ body.desligado {
 
 #playerListR2.appear {
    transform: translate(-50%, -50%);
+}
+
+#skipRoundBtn {
+   position: absolute;
+   bottom: -20vh;
+   transition: all 500ms;
+
+   width: fit-content;
+   height: fit-content;
+
+   padding: 0.7% 1%;
+   margin: 0% 0% 2% 0%;
+   align-items: center;
+   display: flex;
+   cursor: pointer;
+}
+
+#skipRoundBtn.aparecendo {
+   bottom: 0;
+}
+
+#skipRoundBtn img {
+   height: 18px;
+}
+
+#roundContainer {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   
+   position: absolute;
+   width: 100vw;
+   height: 100vh;
+}
+
+#version {
+   color: white;
+   position: absolute;
+   bottom: 0;
+   left: 0;
+   padding: 0.2%;
+   font-size: 8pt;
 }

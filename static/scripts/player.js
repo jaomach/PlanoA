@@ -58,13 +58,24 @@ socket.on('message', function(data) {
         document.getElementById('round4').style.display = 'flex'
         fetchMatchups()
     }
+    if (data.msg === 'Round 4 finished') {
+        document.getElementById('round4').style.display = 'none'
+    }
     if (data.msg === 'Round 5 started') {
+        document.getElementById('round4').style.display = 'flex'
         displayMatchup()
     }
     if (data.msg === 'Round 5 finished') {
+        document.getElementById('round4').style.display = 'none'
     }
     if (data.msg === 'Tournament advanced') {
         fetchMatchups()
+    }
+    if (data.msg === 'Last round finished') {
+        document.getElementById('round4').style.display = 'none'
+    }
+    if (data.msg === 'Next round started') {
+        document.getElementById('round4').style.display = 'flex'
     }
     if (data.msg === 'Tournament next') {
         displayMatchup()
@@ -317,11 +328,13 @@ function clearCanvas() {
     fillCanvasWithWhite()
 }
 
-var phraseCounter = 0
+let phraseCounter = 0
 function submitPhrase() {
     const phrase = document.getElementById('phrase').value;
     const playerId = localStorage.getItem('playerId')
+    const submitPhraseBtn = document.getElementById('submitPhraseBtn')
     if (phrase) {
+        submitPhraseBtn.disabled = true
         fetch('/submit_phrase', {
             method: 'POST',
             headers: {
@@ -332,11 +345,13 @@ function submitPhrase() {
         .then(response => response.json())
         .then(data => {
             if (data.message === 'Phrase submitted') {
+                submitPhraseBtn.disabled = false
+
                 if (phraseCounter < 3) {
                     phraseCounter += 1
                     console.log(phraseCounter)
-    } else {document.getElementById('round2').style.display = 'none';}
-                document.getElementById('phrase').value = ''; // limpar o campo de entrada após o envio
+                } else {document.getElementById('round2').style.display = 'none';}
+                document.getElementById('phrase').value = '';
             }
         })
         .catch(error => {
@@ -496,12 +511,21 @@ function displayMatchup() {
 
 function selectedVote() {
    const selectedWinner = document.querySelectorAll('.player-vote');
+    const sendVoteBtn = document.getElementById('sendVote')
+    let previousWinnerSelected = null
 
    selectedWinner.forEach(winner => {
-      winner.addEventListener('click', function () {
-         winner.classList.add('selected')
-         selectedWinnerId = winner.id;
-      });
+        winner.addEventListener('click', function () {
+            if (sendVoteBtn.innerText === 'Enviar Voto') {
+
+              if (previousWinnerSelected) {
+                  document.getElementById(previousWinnerSelected).classList.remove('selected');
+              }
+              winner.classList.add('selected')
+              selectedWinnerId = winner.id;
+              previousWinnerSelected = winner.id
+            }
+        });
    });
 }
 
@@ -509,6 +533,13 @@ function sendVote() {
    if (selectedWinnerId) {
        currentMatchupIndex++;
        const playerId = localStorage.getItem('playerId');
+       const sendVoteBtn = document.getElementById('sendVote')
+        sendVoteBtn.innerText = 'Cancelar'
+        document.getElementById('matchups').classList.add('inactive')
+
+        if (sendVoteBtn.innerText = 'Cancelar') {
+            sendVoteBtn.onclick = cancelVote
+        }
        var vote = selectedWinnerId;
        var data = {
            room_id: roomId,
@@ -535,4 +566,11 @@ function sendVote() {
        alert('Please select a winner before proceeding.');
        return; // Adicione um retorno aqui para evitar continuar a função sem um vencedor selecionado.
    }
+}
+
+function cancelVote() {
+    document.getElementById('matchups').classList.remove('inactive')
+    const sendVoteBtn = document.getElementById('sendVote')
+    sendVoteBtn.innerText = 'Enviar Voto'
+    sendVoteBtn.onclick = sendVote
 }

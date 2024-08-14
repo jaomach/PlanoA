@@ -370,7 +370,9 @@ def index():
 
 @app.route('/drawing/<room_id>')
 def drawing(room_id):
-    return render_template_string(open('static/player.html').read(), room_id=room_id)
+    with open('static/player.html', encoding='utf-8') as f:
+        html_content = f.read()
+    return render_template_string(html_content, room_id=room_id)
 
 @socketio.on('connect')
 def handle_connect():
@@ -398,7 +400,10 @@ def on_join(data):
 
 @app.route('/receptor/<room_id>')
 def receptor(room_id):
-    return render_template_string(open('static/host.html').read(), room_id=room_id)
+    with open('static/host.html', encoding='utf-8') as f:
+        html_content = f.read()
+    return render_template_string(html_content, room_id=room_id)
+
 
 def generate_room_id():
     import random

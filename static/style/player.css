@@ -379,3 +379,7 @@ swiper-slide img {
     flex-direction: column;
     width: 100%;
 }
+
+#matchups.inactive {
+    opacity: 0.5;
+}

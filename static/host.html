@@ -6,17 +6,26 @@
     <title>Host da Sala</title>
 </head>
 <body id="body">
-    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
-    <img id="logo" src="/static/images/LOGO.png" alt="">
-    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <div id="circle"></div>
+    <div id="roundContainer">
+    </div>
     <link rel="stylesheet" href="/static/style/host.css">
     <!-- <h1>{{ room_id }}</h1>-->
-    <span id="timer"></span>
-    <img id="fullscreen" src="/static/images/fullscreen.svg" alt="">
+    <div id="interfaceContainer">
+        <div class="timer-container">
+            <span id="timer"></span>
+            <img src="/static/images/counter.png" alt="">
+        </div>
+        <img class="btn-interface" id="volume" src="/static/images/volume-up.svg" alt="">
+        <img class="btn-interface" id="fullscreen" src="/static/images/fullscreen.svg" alt="">
+        <button class="primary-btn" id="skipRoundBtn" onclick="skipRound()">Pular<img src="/static/skip.png" alt=""></button>
+        <span id="version">Versão Beta</span>
+    </div>
+    <div id="fps" style="position: fixed; top: 10px; left: 10px; color: white; z-index: 1000000000000000000000;"></div>
+
+
     
     <div id="barreira"></div>
-    
-    <div id="circle"></div>
     <div class="inside" id="inside">
         <div id="playerList"></div>
         <div class="menu-inicial">
