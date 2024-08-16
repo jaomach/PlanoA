@@ -87,10 +87,15 @@ cleanup_thread.start()
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
     data = request.json
-    image_path = data['image_path']  # This should be the path sent from the frontend
-    base64_image = encode_image(image_path)
+    image_path = data['image_path']  # Este é o caminho enviado pelo frontend
 
-    # Configuring the request to OpenAI API
+    # Corrigir o caminho para ser um caminho de arquivo local
+    local_image_path = os.path.join(os.getcwd(), image_path.replace("https://awdawd-y1xl.onrender.com/", ""))
+
+    # Certifique-se de que o caminho agora aponta para o arquivo correto no sistema
+    base64_image = encode_image(local_image_path)
+
+    # Configurando a requisição para a API da OpenAI
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -110,10 +115,10 @@ def call_ai():
         "max_tokens": 300
     }
 
-    # Sending the request to the API
+    # Enviando a requisição para a API
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     
-    # Extracting the content from the response
+    # Extraindo o conteúdo da resposta
     ai_response = response.json()['choices'][0]['message']['content']
 
     return jsonify({"response": ai_response})

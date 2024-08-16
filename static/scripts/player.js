@@ -13,7 +13,7 @@ let historyStep = -1;
 let selectedWinnerId = null;
 
 console.log('Connecting to server with roomId:', roomId);
-var socket = io.connect('https://' + document.domain + ':' + location.port);
+var socket = io.connect('http://' + document.domain + ':' + location.port);
 
 socket.on('connect', function() {
     console.log('Connected to server');
