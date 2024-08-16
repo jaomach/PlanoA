@@ -87,12 +87,15 @@ cleanup_thread.start()
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
     data = request.json
-    image_path = data['image_path']  # Este é o caminho enviado pelo frontend
+    image_url = data['image_path']  # Este é o URL enviado pelo frontend
 
-    # Corrigir o caminho para ser um caminho de arquivo local
-    local_image_path = os.path.join(os.getcwd(), image_path.replace("http://127.0.0.1:5000", ""))
+    # Extraia o caminho relativo do URL
+    relative_path = image_url.replace("http://awdawd-y1xl.onrender.com", "")  # Ajuste para o domínio correto
 
-    # Certifique-se de que o caminho agora aponta para o arquivo correto no sistema
+    # Combine com o caminho base no servidor
+    local_image_path = os.path.join(os.getcwd(), relative_path.lstrip('/'))
+
+    # Agora, encode a imagem para base64
     base64_image = encode_image(local_image_path)
 
     # Configurando a requisição para a API da OpenAI
