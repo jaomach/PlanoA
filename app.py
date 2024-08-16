@@ -90,7 +90,7 @@ def call_ai():
     image_path = data['image_path']  # Este é o caminho enviado pelo frontend
 
     # Corrigir o caminho para ser um caminho de arquivo local
-    local_image_path = os.path.join(os.getcwd(), image_path.replace("https://awdawd-y1xl.onrender.com/", ""))
+    local_image_path = os.path.join(os.getcwd(), image_path.replace("http://127.0.0.1:5000", ""))
 
     # Certifique-se de que o caminho agora aponta para o arquivo correto no sistema
     base64_image = encode_image(local_image_path)
