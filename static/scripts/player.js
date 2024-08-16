@@ -13,7 +13,7 @@ let historyStep = -1;
 let selectedWinnerId = null;
 
 console.log('Connecting to server with roomId:', roomId);
-var socket = io.connect('http://' + document.domain + ':' + location.port);
+var socket = io.connect('https://' + document.domain + ':' + location.port);
 
 socket.on('connect', function() {
     console.log('Connected to server');
@@ -33,15 +33,18 @@ socket.on('message', function(data) {
     if (data.msg === 'Round 1 finished') {
         document.getElementById('drawingArea').style.display = 'none';
         document.getElementById('round1').style.display = 'none';
+        document.getElementById('waitingMessage').style.display = 'block';
         exportDrawing();
     }
     if (data.msg === 'Round 2 started') {
         document.getElementById('phraseInput').style.display = 'flex';
         document.getElementById('round2').style.display = 'block';
+        document.getElementById('waitingMessage').style.display = 'none';
     }
     if (data.msg === 'Round 2 finished') {
         document.getElementById('phraseInput').style.display = 'none';
         document.getElementById('round2').style.display = 'none';
+        document.getElementById('waitingMessage').style.display = 'block';
     }
     if (data.msg === 'Round 3 started') {
         phrasesFetched = true
@@ -49,6 +52,7 @@ socket.on('message', function(data) {
         fetchDistributedDrawings()
         document.getElementById('combinationArea').style.display = 'flex';
         document.getElementById('round3').style.display = 'block'
+        document.getElementById('waitingMessage').style.display = 'none';
     }
     if (data.msg === 'Round 3 finished') {
         document.getElementById('combinationArea').style.display = 'none';
@@ -315,6 +319,7 @@ function exportDrawing() {
             clearCanvas();
         } else {
             document.getElementById('drawingArea').style.display = 'none'
+            document.getElementById('waitingMessage').style.display = 'block';
         }
     })
     .catch((error) => {
@@ -350,7 +355,10 @@ function submitPhrase() {
                 if (phraseCounter < 3) {
                     phraseCounter += 1
                     console.log(phraseCounter)
-                } else {document.getElementById('round2').style.display = 'none';}
+                } else {
+                    document.getElementById('round2').style.display = 'none';
+                    document.getElementById('waitingMessage').style.display = 'block';
+                }
                 document.getElementById('phrase').value = '';
             }
         })

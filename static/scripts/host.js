@@ -403,11 +403,16 @@ function displayMatchup() {
                 <img id="${player2}Iluminacao" class="iluminacao-matchup" src="/static/images/iluminacao.png"></img>
             `;
             matchupDiv.appendChild(player2Div);
+            
+            players = [player1Comb.image_path, player2Comb.image_path]
+            const choosedPlayer = players[Math.floor(Math.random() * players.length)];
+            sendToAI(choosedPlayer)
 
-            setTimeout( function() {
+            setTimeout(function() {
             const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
             iluminacaoMatchupP2.classList.add('aceso')
             }, 6000);
+            
         } else {
             actualPlayer2 = `${player1}`
             console.log('numero impar')
@@ -415,7 +420,6 @@ function displayMatchup() {
                 timeLeft = 10
             }, 2000);
         }
-
         matchupsDiv.appendChild(matchupDiv);
     }
 }
@@ -538,6 +542,7 @@ function processVotes(data) {
         perdedorSign.src = '/static/images/plaquinha.png'
         perdedorImg.src = `/static/images/perdedor/${data.players[leastVoted].character}.png`
         perdedorImg.classList.add('perdedor-image')
+        perdedorImg.id = 'perdedorImg'
         perdedorAuxContainer.classList.add('perdedor-container')
         perdedorSign.classList.add('perdedor-sign')
         perdedorContainer.appendChild(perdedorAuxContainer)
@@ -652,7 +657,7 @@ function round1Var1() {
 
     setTimeout(function() {
         document.getElementById('startButton').classList.add('desappear')
-        document.getElementById('timer').classList.add('appear')
+        document.getElementById('timerContainer').classList.remove('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
@@ -681,6 +686,7 @@ function round1Var1() {
         document.getElementById('rounds').classList.remove('aparecendo')
         socket.emit('message', { message: 'Game started', room_id: roomId });
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+        document.getElementById('timerContainer').classList.add('appear')
     }, 16000);
     console.log(auxGameStarted)
 }
@@ -745,6 +751,7 @@ function round2Var1() {
     };
 
     timeOuts.push(setTimeout(function() {
+        document.getElementById('timerContainer').classList.remove('appear')
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
@@ -777,7 +784,8 @@ function round2Var1() {
         whistleUp.play()
         document.getElementById('rounds').classList.remove('aparecendo')
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
-}, 11970));
+        document.getElementById('timerContainer').classList.add('appear')
+    }, 11970));
 }
 
 function round2Var2() {
@@ -828,6 +836,7 @@ function round2Var2() {
     };
 
     timeOuts.push(setTimeout(function() {
+        document.getElementById('timerContainer').classList.remove('appear')
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
@@ -858,6 +867,7 @@ function round2Var2() {
         document.getElementById('circle').classList.remove('close')
         document.getElementById('circle').classList.add('open')
         whistleUp.play()
+        document.getElementById('timerContainer').classList.add('appear')
         document.getElementById('rounds').classList.remove('aparecendo')
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
 }, 12600));
@@ -868,6 +878,7 @@ function round2Var3() {
 
     document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(2)')
     document.getElementById('skipRoundBtn').classList.add('aparecendo')
+    document.getElementById('timerContainer').classList.remove('appear')
     document.getElementById('timer').style.display = 'block'
     document.getElementById('skipRoundBtn').disabled = false;
     var soundTrackR1 = document.getElementById("soundTrackR1");
@@ -962,7 +973,8 @@ function round2Var3() {
         whistleUp.play()
         document.getElementById('rounds').classList.remove('aparecendo')
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
-}, 18500));
+        document.getElementById('timerContainer').classList.add('appear')
+    }, 18500));
 }
 
 function round3Var1() {
@@ -1043,9 +1055,22 @@ function skipRound(round) {
         <img id="show" src="/static/images/OSHOW.png" alt="">
     `
 }
+function sendToAI(image_path) {
+    const imagePath = image_path;
 
-
-
+    fetch('/call_ai', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image_path: imagePath })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('responseMessage').innerText = data.response;
+    })
+    .catch(error => console.error('Error:', error));
+}
 
 
 

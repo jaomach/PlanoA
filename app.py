@@ -7,6 +7,8 @@ import threading
 import json
 from flask_socketio import SocketIO, emit, join_room
 import secrets
+import openai
+import requests
 
 app = Flask(__name__, static_folder='static')
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -14,6 +16,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+api_key = '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'
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
@@ -57,6 +60,10 @@ rooms = {
 clients = []
 ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 
+def encode_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode('utf-8')
+
 def cleanup_inactive_rooms():
     while True:
         current_time = time.time()
@@ -76,6 +83,40 @@ def cleanup_inactive_rooms():
 
 cleanup_thread = threading.Thread(target=cleanup_inactive_rooms, daemon=True)
 cleanup_thread.start()
+
+@app.route('/call_ai', methods=['POST'])
+def call_ai():
+    data = request.json
+    image_path = data['image_path']  # This should be the path sent from the frontend
+    base64_image = encode_image(image_path)
+
+    # Configuring the request to OpenAI API
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+
+    payload = {
+        "model": "gpt-4o-mini",
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "What’s in this image?"},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
+                ]
+            }
+        ],
+        "max_tokens": 300
+    }
+
+    # Sending the request to the API
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    
+    # Extracting the content from the response
+    ai_response = response.json()['choices'][0]['message']['content']
+
+    return jsonify({"response": ai_response})
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
@@ -537,8 +578,6 @@ def vote():
         return jsonify({'message': 'Vote received'})
     else:
         return jsonify({'message': 'Invalid room or player'}), 400
-
-
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)

@@ -383,3 +383,13 @@ swiper-slide img {
 #matchups.inactive {
     opacity: 0.5;
 }
+
+#waitingMessage img {
+    margin-bottom: 18%;
+}
+
+#waitingMessage span {
+    color: #3f3f3f;
+    font-weight: 600;
+    font-size: 16pt;
+}

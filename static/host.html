@@ -12,9 +12,10 @@
     <link rel="stylesheet" href="/static/style/host.css">
     <!-- <h1>{{ room_id }}</h1>-->
     <div id="interfaceContainer">
-        <div class="timer-container">
+        <div id="timerContainer" class="timer-container">
             <span id="timer"></span>
-            <img src="/static/images/counter.png" alt="">
+            <img class="timer-clock" src="/static/images/counter.png" alt="">
+            <img src="/static/images/counterLight.png" style="z-index: 2;" alt="">
         </div>
         <img class="btn-interface" id="volume" src="/static/images/volume-up.svg" alt="">
         <img class="btn-interface" id="fullscreen" src="/static/images/fullscreen.svg" alt="">
@@ -22,6 +23,16 @@
         <span id="version">Versão Beta</span>
     </div>
     <div id="fps" style="position: fixed; top: 10px; left: 10px; color: white; z-index: 1000000000000000000000;"></div>
+
+    <div id="messageContainer">
+        <div class="message-interface">
+            <img src="" alt="">
+            <div class="message-interface-texts">
+                <span id="usernameMessage"></span>
+                <span id="responseMessage"></span>
+            </div>
+        </div>
+    </div>
 
 
     

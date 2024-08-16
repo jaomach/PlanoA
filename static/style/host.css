@@ -47,6 +47,7 @@ body {
    border-radius: 7%;
    transition: all 0.5s;
    z-index: 1;
+   color: #683e00;
 }
 #playerList {
    border-radius: 5px;
@@ -333,9 +334,23 @@ h1 {
    height: 110px;
 }
 
+#timerContainer.appear {
+   transform: translateX(0);
+   transition: all 500ms ease-in-out;
+}
+
+#timerContainer {
+   transform: translateX(-500px);
+   transition: all 500ms ease-in-out;
+}
+
 .timer-container img {
    width: 100%;
    position: absolute;
+}
+
+.timer-clock {
+   filter: drop-shadow(0px 8px 5px #00000048);
 }
 
 .btn-interface:nth-child(2) {
@@ -344,7 +359,7 @@ h1 {
 
 #rounds {
    position: absolute;
-   width: 30%;
+   width: 40%;
    align-self: center;
    z-index: 101;
    transition: all 600ms ease-in;
@@ -404,7 +419,7 @@ h1 {
    align-self: center;
    z-index: 102;
    opacity: 0.9;
-   filter: blur(5px);
+   filter: blur(70px);
    mix-blend-mode: screen;
 }
 
