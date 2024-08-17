@@ -406,7 +406,7 @@ function displayMatchup() {
             
             players = [player1Comb.image_path, player2Comb.image_path]
             const choosedPlayer = players[Math.floor(Math.random() * players.length)];
-            document.getElementById.style.display = 'flex'
+            document.getElementById('messageContainer').style.display = 'flex'
             sendToAI(choosedPlayer)
 
             setTimeout(function() {
