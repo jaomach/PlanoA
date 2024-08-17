@@ -760,7 +760,7 @@ function round2Var1() {
             clonedPlayerList.classList.add('appear')
         }, 1800)
         setTimeout(function() {
-            startCountdown(240, 12000);
+            startCountdown(15, 12000);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -845,7 +845,7 @@ function round2Var2() {
             clonedPlayerList.classList.add('appear')
         }, 1700)
         setTimeout(function() {
-            startCountdown(240, 12800);
+            startCountdown(15, 12800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -935,7 +935,7 @@ function round2Var3() {
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
-            startCountdown(240, 18800);
+            startCountdown(15, 18800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -979,7 +979,7 @@ function round2Var3() {
 }
 
 function round3Var1() {
-    startCountdown(100, 10000);
+    startCountdown(20, 10000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();
@@ -992,7 +992,7 @@ function round3Var1() {
 }
 
 function round3Var2() {
-    startCountdown(100, 1000);
+    startCountdown(20, 1000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();
@@ -1005,7 +1005,7 @@ function round3Var2() {
 }
 
 function round3Var3() {
-    startCountdown(100, 10000);
+    startCountdown(20, 10000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();
@@ -1027,19 +1027,19 @@ function skipRound(round) {
         const audioR1Var1 = document.getElementById("audioR1");
         audioR1Var1.pause();
         audioR1Var1.currentTime = 0;
-        startCountdown(240, 500)
+        startCountdown(15, 500)
     } 
     if (round === 2) {
         const audioR2Var1 = document.getElementById("audioR2");
         audioR2Var1.pause();
         audioR2Var1.currentTime = 0;
-        startCountdown(240, 500)
+        startCountdown(15, 500)
     }
     if (round === 3) {
         const audioR3Var1 = document.getElementById("audioR3");
         audioR3Var1.pause();
         audioR3Var1.currentTime = 0;
-        startCountdown(120, 500)
+        startCountdown(15, 500)
     }
     if (round === 4) {
         const audioR3Var1 = document.getElementById("audioR3");
