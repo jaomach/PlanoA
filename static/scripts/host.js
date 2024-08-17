@@ -415,9 +415,9 @@ function displayMatchup() {
                 }
                 function gerarUsername() {
                     // Listas de nomes, comidas e números
-                    const nomes = ["Lucas", "Maria", "João", "Ana", "Carlos"];
-                    const comidas = ["Pizza", "Carne", "Sushi", "Pasta", "Salada"];
-                    const numeros = [12, 34, 56, 78, 90];
+                    const criterios1 = ["Pedro", "Goku", "Sasuke", "OcultDay", "PaulaNoku"];
+                    const criterios2 = ["SocaFofo", "FC", "OFC", "Implacavel", "Amostradinho", "Pensador"];
+                    const criterios3 = [12, 34, 56, 78, 90];
                 
                     // Função para escolher um elemento aleatório de uma lista
                     function escolherAleatorio(lista) {
@@ -425,17 +425,17 @@ function displayMatchup() {
                     }
                 
                     // Gerando as partes do username
-                    const nome = escolherAleatorio(nomes);
-                    const comida = escolherAleatorio(comidas);
-                    const numero = escolherAleatorio(numeros);
+                    const criterio1 = escolherAleatorio(criterios1);
+                    const criterio2 = escolherAleatorio(criterios2);
+                    const criterio3 = escolherAleatorio(criterios3);
                 
                     // Combinando as partes para formar o username
-                    const username = `${nome}${comida}${numero}`;
+                    const username = `${criterio1}${criterio2}${criterio3}`;
                     return username;
                 }
                 
                 const usernameAleatorio = gerarUsername();
-                document.getElementById('usernameMessage').innerText = usernameAleatorio
+                document.getElementById('usernameMessage').innerText = `@${usernameAleatorio}`
             }
 
             callRandomAI()
