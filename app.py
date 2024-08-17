@@ -110,7 +110,7 @@ def call_ai():
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "Dê uma pequena descrição engraçada sobre a imagem, brinque falando se ela está boa ou não!"},
+                    {"type": "text", "text": "Finja que você está no twitter e poste um tweet engraçado sobre a imagem, brinque falando se ela está boa ou não!"},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                 ]
             }
@@ -121,10 +121,22 @@ def call_ai():
     # Enviando a requisição para a API
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     
-    # Extraindo o conteúdo da resposta
-    ai_response = response.json()['choices'][0]['message']['content']
+    # Verificar o status da resposta
+    if response.status_code != 200:
+        return jsonify({"error": f"API request failed with status code {response.status_code} and response: {response.text}"}), response.status_code
 
-    return jsonify({"response": ai_response})
+    # Tente capturar e processar a resposta
+    try:
+        response_json = response.json()
+        if 'choices' in response_json and len(response_json['choices']) > 0:
+            ai_response = response_json['choices'][0]['message']['content']
+            return jsonify({"response": ai_response})
+        else:
+            # Resposta inesperada, sem a chave 'choices'
+            return jsonify({"error": f"Unexpected API response format: {response_json}"}), 500
+    except Exception as e:
+        # Erro ao processar a resposta
+        return jsonify({"error": f"Exception: {str(e)}, response: {response.text}"}), 500
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
