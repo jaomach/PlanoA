@@ -413,6 +413,29 @@ function displayMatchup() {
                     sendToAI(choosedPlayer);
                     document.getElementById('messageContainer').classList.add('aparecendo');
                 }
+                function gerarUsername() {
+                    // Listas de nomes, comidas e números
+                    const nomes = ["Lucas", "Maria", "João", "Ana", "Carlos"];
+                    const comidas = ["Pizza", "Carne", "Sushi", "Pasta", "Salada"];
+                    const numeros = [12, 34, 56, 78, 90];
+                
+                    // Função para escolher um elemento aleatório de uma lista
+                    function escolherAleatorio(lista) {
+                        return lista[Math.floor(Math.random() * lista.length)];
+                    }
+                
+                    // Gerando as partes do username
+                    const nome = escolherAleatorio(nomes);
+                    const comida = escolherAleatorio(comidas);
+                    const numero = escolherAleatorio(numeros);
+                
+                    // Combinando as partes para formar o username
+                    const username = `${nome}${comida}${numero}`;
+                    return username;
+                }
+                
+                const usernameAleatorio = gerarUsername();
+                document.getElementById('usernameMessage').innerText = usernameAleatorio
             }
 
             callRandomAI()
@@ -583,7 +606,6 @@ function perderAnimation(winner) {
     drawingPerdedor[i].classList.add('perdedor');
     phrasePerdedor[i].classList.add('perdedor');
     }
-
 }
 
 function verifyRoom() {

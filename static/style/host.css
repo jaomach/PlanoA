@@ -687,3 +687,7 @@ body.desligado {
    margin-bottom: 2%;
    font-size: 10pt;
 }
+
+#responseMessage {
+   opacity: 0.6;
+}
