@@ -16,7 +16,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-api_key = 'sk-HtFs_pNOrbnREJaetVsK_KW9DqXprFVaxAd_meVUMYT3BlbkFJwGvGsWvtVonJ6p9yx-mdLCyWys2nl1F303_tae7VkA'
+api_key = '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'
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
