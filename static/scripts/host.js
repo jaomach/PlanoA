@@ -404,11 +404,22 @@ function displayMatchup() {
             `;
             matchupDiv.appendChild(player2Div);
             
-            players = [player1Comb.image_path, player2Comb.image_path]
-            const choosedPlayer = players[Math.floor(Math.random() * players.length)];
-            document.getElementById('messageContainer').style.display = 'flex'
-            sendToAI(choosedPlayer)
+            function callRandomAI() {
+                players = [player1Comb.image_path, player2Comb.image_path];
+                const choosedPlayer = players[Math.floor(Math.random() * players.length)];
+            
+                // Gere um número aleatório e compare com 0.8
+                if (Math.random() <= 0.8) {
+                    sendToAI(choosedPlayer);
+                    document.getElementById('messageContainer').classList.add('aparecendo');
+                }
+            }
 
+            callRandomAI()
+
+            setTimeout(function() {
+                document.getElementById('messageContainer').classList.remove('aparecendo')
+            }, 25000)
             setTimeout(function() {
             const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
             iluminacaoMatchupP2.classList.add('aceso')
