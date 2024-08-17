@@ -110,7 +110,7 @@ def call_ai():
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": "What’s in this image?"},
+                    {"type": "text", "text": "Dê uma pequena descrição engraçada sobre a imagem, brinque falando se ela está boa ou não!"},
                     {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{base64_image}"}}
                 ]
             }
