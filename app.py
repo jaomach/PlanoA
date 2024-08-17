@@ -16,7 +16,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-api_key = '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'
+api_key = os.environ["GPT_KEY"]
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
