@@ -433,7 +433,7 @@ function displayMatchup() {
                 const choosedPlayer = players[Math.floor(Math.random() * players.length)];
             
                 // Gere um número aleatório e compare com 0.8
-                if (Math.random() <= 0.8) {
+                if (Math.random() <= 1) {
                     sendToAI(choosedPlayer);
                     setTimeout(function() {
                         document.getElementById('messageContainer').classList.add('aparecendo');
