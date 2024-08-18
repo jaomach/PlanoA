@@ -19,6 +19,8 @@ let currentRound = 6;
 let actualPlayer1 = ''
 let actualPlayer2 = ''
 let timeOuts = []
+let round2Time = 240
+let round3Time = 90
 console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
@@ -110,6 +112,16 @@ var socket = io({ query: { roomId: roomId } });
 
 socket.on('connect', function() {
     console.log('Connected to server');
+    socket.emit('join', { room_id: roomId });
+});
+
+
+socket.on('message', function(data) {
+    if (data.msg) {
+        document.getElementById('container-' + data.msg).classList.remove('in-game')
+    }
+
+    console.log('Mensagem recebida:', data.msg);
 });
 
 let previousImageSrc = {};
@@ -173,6 +185,9 @@ if (data.remaining_time === 0 && round1 === true) {
 if (data.current_round === 2 && round2 === false) {
     round2 = true;
     document.getElementById('rounds').classList.remove('aparecendo')
+    document.querySelectorAll('.player-container').forEach(function(element) {
+        element.classList.add('in-game');
+    });
     socket.emit('message', { message: 'Round 2 started', room_id: roomId });
 }
 if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === false) {
@@ -183,6 +198,9 @@ if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === fa
 if (data.current_round === 3 && round3 === false) {
     round3 = true;
     document.getElementById('rounds').classList.remove('aparecendo')
+    document.querySelectorAll('.player-container').forEach(function(element) {
+        element.classList.add('in-game');
+    });
     socket.emit('message', { message: 'Round 3 started', room_id: roomId });
 }
 if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === false) {
@@ -210,6 +228,9 @@ if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === fa
 if (data.current_round === 4 && round4 === false) {
     round4 = true;
     document.getElementById('rounds').classList.remove('aparecendo')
+    document.querySelectorAll('.player-container').forEach(function(element) {
+        element.classList.add('in-game');
+    });
     socket.emit('message', { message: 'Round 4 started', room_id: roomId });
 }
 if (data.remaining_time === 0 && data.current_round === 4 && handleRound4 === false) {
@@ -273,6 +294,9 @@ function startGame() {
     .then(data => {
         if (data.message === 'Game started') {
             roundCallRandom(round1Var1, round1Var1, round1Var1)
+            document.querySelectorAll('.player-container').forEach(function(element) {
+                element.classList.add('in-game');
+            });
         }
     })
     .catch(error => {
@@ -411,11 +435,13 @@ function displayMatchup() {
                 // Gere um número aleatório e compare com 0.8
                 if (Math.random() <= 0.8) {
                     sendToAI(choosedPlayer);
-                    document.getElementById('messageContainer').classList.add('aparecendo');
+                    setTimeout(function() {
+                        document.getElementById('messageContainer').classList.add('aparecendo');
+                    }, 2000)
                 }
                 function gerarUsername() {
                     // Listas de nomes, comidas e números
-                    const criterios1 = ["Pedro", "Goku", "Sasuke", "OcultDay", "PaulaNoku"];
+                    const criterios1 = ["Pedro", "Goku", "Sasuke", "OcultDay", "PaulaNoku", player1, player2];
                     const criterios2 = ["SocaFofo", "FC", "OFC", "Implacavel", "Amostradinho", "Pensador"];
                     const criterios3 = [12, 34, 56, 78, 90];
                 
@@ -695,7 +721,7 @@ function round1Var1() {
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
-            startCountdown(10, 16000);
+            startCountdown(240, 16000);
             soundTrackR1.play();
             audioRodada1.play();
             document.getElementById('iluminacao').classList.add('aceso')
@@ -793,7 +819,7 @@ function round2Var1() {
             clonedPlayerList.classList.add('appear')
         }, 1800)
         setTimeout(function() {
-            startCountdown(15, 12000);
+            startCountdown(round2Time, 12000);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -878,7 +904,7 @@ function round2Var2() {
             clonedPlayerList.classList.add('appear')
         }, 1700)
         setTimeout(function() {
-            startCountdown(15, 12800);
+            startCountdown(round2Time, 12800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -968,7 +994,7 @@ function round2Var3() {
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
-            startCountdown(15, 18800);
+            startCountdown(round2Time, 18800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
@@ -1012,7 +1038,7 @@ function round2Var3() {
 }
 
 function round3Var1() {
-    startCountdown(20, 10000);
+    startCountdown(round3Time, 10000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();
@@ -1025,7 +1051,7 @@ function round3Var1() {
 }
 
 function round3Var2() {
-    startCountdown(20, 1000);
+    startCountdown(round3Time, 1000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();
@@ -1038,7 +1064,7 @@ function round3Var2() {
 }
 
 function round3Var3() {
-    startCountdown(20, 10000);
+    startCountdown(round3Time, 10000);
     document.getElementById('circle').classList.add('close')
     document.getElementById('rounds').classList.add('aparecendo')
     whistleDown.play();

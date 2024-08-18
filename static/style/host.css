@@ -250,10 +250,15 @@ h1 {
 
 .player-container {
    border-radius: 12px;
+   transition: all 500ms;
    display: flex;
    align-items: center;
    justify-content: center;
    flex-direction: column;
+}
+
+.player-container.in-game {
+   opacity: 0.6;
 }
 
 #inside {
@@ -654,6 +659,7 @@ body.desligado {
    bottom: 0;
    opacity: 0;
    transition: all 500ms;
+   z-index: 100000000000000000000;
 }
 
 #messageContainer.appear {

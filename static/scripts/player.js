@@ -13,7 +13,7 @@ let historyStep = -1;
 let selectedWinnerId = null;
 
 console.log('Connecting to server with roomId:', roomId);
-var socket = io.connect('https://' + document.domain + ':' + location.port);
+var socket = io({ query: { roomId: roomId } });
 
 socket.on('connect', function() {
     console.log('Connected to server');
@@ -320,6 +320,7 @@ function exportDrawing() {
         } else {
             document.getElementById('drawingArea').style.display = 'none'
             document.getElementById('waitingMessage').style.display = 'block';
+            socket.emit('message', {message: playerId, room_id: roomId });
         }
     })
     .catch((error) => {
@@ -358,6 +359,7 @@ function submitPhrase() {
                 } else {
                     document.getElementById('round2').style.display = 'none';
                     document.getElementById('waitingMessage').style.display = 'block';
+                    socket.emit(playerId);
                 }
                 document.getElementById('phrase').value = '';
             }
@@ -503,15 +505,12 @@ function displayMatchup() {
             `;
             matchupDiv.appendChild(player2Div);
         } else {
-            const byeDiv = document.createElement('div');
-            byeDiv.innerHTML = `<p>Player: ${player1} gets a bye</p>`;
-            matchupDiv.appendChild(byeDiv);
+            document.getElementById('waitingMessage').style.display = 'flex'
         }
 
         matchupsDiv.appendChild(matchupDiv);
         document.getElementById('sendVote').style.display = 'flex';
         selectedVote();
-
     } else {
         document.getElementById('sendVote').style.display = 'none';
     }
