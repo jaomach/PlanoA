@@ -116,13 +116,13 @@ socket.on('connect', function() {
 });
 
 
-socket.on('message', function(data) {
-    if (data.msg) {
-        document.getElementById('container-' + data.msg).classList.remove('in-game')
-    }
+//socket.on('message', function(data) {
+//    if (data.msg) {
+//        document.getElementById('container-' + data.msg).classList.remove('in-game')
+//    }
 
-    console.log('Mensagem recebida:', data.msg);
-});
+//    console.log('Mensagem recebida:', data.msg);
+//});
 
 let previousImageSrc = {};
 
