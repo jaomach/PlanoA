@@ -19,8 +19,9 @@ let currentRound = 6;
 let actualPlayer1 = ''
 let actualPlayer2 = ''
 let timeOuts = []
-let round2Time = 240
-let round3Time = 90
+let round1Time = 10
+let round2Time = 10
+let round3Time = 10
 console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
@@ -434,7 +435,7 @@ function displayMatchup() {
                 const choosedPlayer = players[Math.floor(Math.random() * players.length)];
             
                 // Gere um número aleatório e compare com 0.8
-                if (Math.random() <= 1) {
+                if (Math.random() <= 0.8) {
                     sendToAI(choosedPlayer);
                     setTimeout(function() {
                         document.getElementById('messageContainer').classList.add('aparecendo');
@@ -722,7 +723,7 @@ function round1Var1() {
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
-            startCountdown(240, 16000);
+            startCountdown(round1Time, 16000);
             soundTrackR1.play();
             audioRodada1.play();
             document.getElementById('iluminacao').classList.add('aceso')
