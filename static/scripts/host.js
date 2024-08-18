@@ -115,14 +115,15 @@ socket.on('connect', function() {
     socket.emit('join', { room_id: roomId });
 });
 
-
-//socket.on('message', function(data) {
-//    if (data.msg) {
-//        document.getElementById('container-' + data.msg).classList.remove('in-game')
-//    }
-
-//    console.log('Mensagem recebida:', data.msg);
-//});
+if (gameStarted === true) {
+    socket.on('message', function(data) {
+        if (data.msg) {
+            document.getElementById('container-' + data.msg).classList.remove('in-game')
+        }
+    
+        console.log('Mensagem recebida:', data.msg);
+    });
+}
 
 let previousImageSrc = {};
 
