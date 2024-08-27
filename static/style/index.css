@@ -17,6 +17,24 @@ canvas { display: block; position: absolute; }
     padding: 1%;
 }
 
+#errorContainer {
+    width: 100%;
+    height: 20px;
+    background-color: darkred;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    opacity: 0;
+    top: 0;
+}
+#errorContainer.appear {
+    animation: errorAppear 2000ms ease-in-out forwards;
+}
+#errorMsg {
+    color: white;
+}
+
 .menu-inicial {
     display: flex;
     width: 100%;
@@ -363,6 +381,21 @@ canvas { display: block; position: absolute; }
         filter: drop-shadow(0 0px 0px #00000030);
     }
 }
+@keyframes errorAppear {
+    0% {
+        opacity: 0;
+    }
+    
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
 @keyframes hoverCardboard {
     0% {
         transform: rotate(0deg);
@@ -373,5 +406,4 @@ canvas { display: block; position: absolute; }
     75% {
         transform: rotate(-1deg);
     }
-
 }

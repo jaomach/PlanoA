@@ -58,6 +58,8 @@ rooms = {
     }
 }
 clients = []
+ip_cooldowns = {}
+COOLDOWN_PERIOD = 60
 ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 
 def encode_image(image_path):
@@ -140,16 +142,31 @@ def call_ai():
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
+    client_ip = request.remote_addr
+    current_time = time.time()
+    
+    # Verifica se o IP já fez uma requisição e se está no período de cooldown
+    if client_ip in ip_cooldowns:
+        last_request_time = ip_cooldowns[client_ip]
+        if current_time - last_request_time < COOLDOWN_PERIOD:
+            cooldown_remaining = COOLDOWN_PERIOD - (current_time - last_request_time)
+            return jsonify({'error': 'Cooldown ativo', 'cooldown_remaining': cooldown_remaining}), 429
+    
+    # Gera o ID da sala e armazena as informações
     room_id = generate_room_id()
     rooms[room_id] = {
         'players': {},
         'started': False,
         'start_time': None,
-        'duration': 10000,  # ajustar tenmpo
+        'duration': 10000,  # ajustar tempo
         'current_round': 0,
         'last_activity': time.time(),
         'votes': {} 
     }
+
+    # Atualiza o tempo da última requisição para o IP atual
+    ip_cooldowns[client_ip] = current_time
+    
     return jsonify({'room_id': room_id})
 
 def generate_token(length=12):

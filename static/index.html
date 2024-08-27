@@ -10,21 +10,6 @@
     <img id="logo" src="/static/images/index/planoA.png" alt="">
     <!--<h1>Criar Sala</h1>
     <button onclick="createRoom()">Criar Sala</button>-->
-    <div id="adPopup" class="popup">
-        <div class="popup-content">
-            <span id="closePopup" class="close">&times;</span>
-            <!-- Código de anúncio AdSense -->
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-                 data-ad-slot="XXXXXXXXXX"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
-    </div>
     <div id="gameMenu">
         <div class="menu-part1">
             <select name="" id="options">
@@ -69,6 +54,9 @@
             <button onclick="abrirCaixa()" class="primary-btn">Abrir Caixa<img src="/static/1204.png" alt=""></button>
         </div>
     </div>
+    <div id="errorContainer">
+        <span id="errorMsg"></span>
+    </div>
     <script>
         function createRoom() {
             fetch('/create_room', {
@@ -79,13 +67,32 @@
             })
             .then(response => response.json())
             .then(data => {
-                const roomId = data.room_id;
-                window.location.href = `/receptor/${roomId}`;
+                if (data.room_id === undefined) {
+                    const errorMsg = document.getElementById('errorMsg')
+                    const errorContainer = document.getElementById('errorContainer')
+                    if (data.cooldown_remaining !== undefined) {
+                        errorMsg.innerText = `Cooldown ativo. Tente novamente em ${Math.ceil(data.cooldown_remaining)} segundos.`
+                        errorContainer.classList.add('appear')
+                        setTimeout(function(){
+                        errorContainer.classList.remove('appear')
+                    }, 2000)
+                    } else {
+                        console.error('Erro: room_id retornou undefined');
+                    }
+                } else {
+                    const roomId = data.room_id;
+                    window.location.href = `/receptor/${roomId}`;
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
             });
         }
+
+        function showError() {
+
+        }
+
         const fullscreenBtn = document.getElementById('fullscreen');
 
         fullscreenBtn.addEventListener('click', function() {
@@ -173,7 +180,6 @@
             
             const offSetX = ((x - middleX)/middleX) * 45;
             const offSetY = ((y - middleY)/middleY) * 45;
-            console.log(offSetX,offSetY)
             
             // due to how rotation works
             // x rotates across it's y axis
