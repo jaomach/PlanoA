@@ -426,7 +426,9 @@ def distribute_phrases(room_id):
 
 @app.route('/')
 def index():
-    return render_template_string(open('static/index.html').read())
+    with open('static/index.html', encoding='utf-8') as f:
+        html_content = f.read()
+    return render_template_string(html_content)
 
 
 @app.route('/drawing/<room_id>')

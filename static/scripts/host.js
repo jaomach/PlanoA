@@ -114,17 +114,24 @@ var socket = io({ query: { roomId: roomId } });
 socket.on('connect', function() {
     console.log('Connected to server');
     socket.emit('join', { room_id: roomId });
+    setTimeout(function() {
+        socket.on('message', function(data) {
+            if (data.msg) {
+                document.getElementById('container-' + data.msg).classList.remove('in-game')
+            }
+        
+            console.log('Mensagem recebida:', data.msg);
+        });
+    }, 5000)
 });
 
-if (gameStarted === true) {
-    socket.on('message', function(data) {
-        if (data.msg) {
-            document.getElementById('container-' + data.msg).classList.remove('in-game')
-        }
-    
-        console.log('Mensagem recebida:', data.msg);
-    });
-}
+socket.on('message', function(data) {
+    if (data.msg) {
+        document.getElementById('container-' + data.msg).classList.remove('in-game')
+    }
+
+    console.log('Mensagem recebida:', data.msg);
+});
 
 let previousImageSrc = {};
 
@@ -817,19 +824,19 @@ function round2Var1() {
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             clonedPlayerList.classList.add('appear')
-        }, 1800)
-        setTimeout(function() {
+        }, 1800))
+        timeOuts.push(setTimeout(function() {
             startCountdown(round2Time, 12000);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
 
-            setTimeout(function() {
+            timeOuts.push(setTimeout(function() {
                 document.getElementById('iluminacao').classList.add('aceso')
-            }, 1670)
-        }, 1000);
+            }, 1670))
+        }, 1000));
     }, 500));
     timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
@@ -902,19 +909,19 @@ function round2Var2() {
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             clonedPlayerList.classList.add('appear')
-        }, 1700)
-        setTimeout(function() {
+        }, 1700))
+        timeOuts.push(setTimeout(function() {
             startCountdown(round2Time, 12800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
 
-            setTimeout(function() {
+            timeOuts.push(setTimeout(function() {
                 document.getElementById('iluminacao').classList.add('aceso')
-            }, 1670)
-        }, 1000);
+            }, 1670))
+        }, 1000));
     }, 500));
     timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
@@ -995,17 +1002,17 @@ function round2Var3() {
         document.getElementById('timer').classList.add('appear')
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             startCountdown(round2Time, 18800);
             soundTrackR1.pause();
             soundTrackR2.play();
             audioR2Var1.play();
 
-            setTimeout(function() {
+            timeOuts.push(setTimeout(function() {
                 document.getElementById('iluminacao').classList.add('aceso')
                 clonedPlayerList.classList.add('appear')
-            }, 800)
-        }, 1000);
+            }, 800))
+        }, 1000));
     }, 500));
     timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
@@ -1013,9 +1020,9 @@ function round2Var3() {
     }, 6729));
     timeOuts.push(setTimeout(function() {
         document.getElementById('rounds').classList.add('aparecendo')
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             document.getElementById('iluminacao').classList.add('aceso')
-        }, 1021)
+        }, 1021))
     }, 10169));
     timeOuts.push(setTimeout(function() {
         document.getElementById('rounds').classList.remove('aparecendo')
@@ -1023,10 +1030,10 @@ function round2Var3() {
     }, 12732))
     timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.add('aceso')
-        setTimeout(function() {
+        timeOuts.push(setTimeout(function() {
             document.getElementById('rounds').src = '/static/images/Round2.png'
             document.getElementById('rounds').classList.add('aparecendo')
-        }, 500)
+        }, 500))
     }, 15400))
     timeOuts.push(setTimeout(function() {
         document.getElementById('iluminacao').classList.remove('aceso')
@@ -1094,7 +1101,8 @@ function skipRound(round) {
         const audioR2Var1 = document.getElementById("audioR2");
         audioR2Var1.pause();
         audioR2Var1.currentTime = 0;
-        startCountdown(15, 500)
+        startCountdown(240, 500)
+        document.getElementById('timerContainer').classList.add('appear')
     }
     if (round === 3) {
         const audioR3Var1 = document.getElementById("audioR3");

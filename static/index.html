@@ -4,10 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criação de Sala</title>
+    <link rel="stylesheet" href="/static/style/index.css">
 </head>
 <body>
-    <h1>Criar Sala</h1>
-    <button onclick="createRoom()">Criar Sala</button>
+    <img id="logo" src="/static/images/index/planoA.png" alt="">
+    <!--<h1>Criar Sala</h1>
+    <button onclick="createRoom()">Criar Sala</button>-->
+    <div id="adPopup" class="popup">
+        <div class="popup-content">
+            <span id="closePopup" class="close">&times;</span>
+            <!-- Código de anúncio AdSense -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+                 data-ad-slot="XXXXXXXXXX"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+    <div id="gameMenu">
+        <div class="menu-part1">
+            <select name="" id="options">
+                <option value="como_jogar">Como Jogar</option>
+                <option value="trailer">Trailer</option>
+            </select>
+            <button>
+                <img src="/static/images/index/go.svg" alt="">
+            </button>
+            <a id="videoThumbnail" href="https://youtube.com" class="menu-video-player"></a>
+            <p>
+                Plágio Consentido é sobre provar quem é o melhor plagiador em uma batalha épica contra seus amigos.
+            </p>
+        </div>
+        <div class="menu-part2">
+            <img src="/static/images/LOGO.png" alt="">
+            <div class="sub-menu-part2">
+                <div class="categories-container">
+                    <div class="categories-element">
+                        <span>4-6 Jogadores</span>
+                    </div>
+                    <div class="categories-element">
+                        <span>Diversão</span>
+                    </div>
+                    <div class="categories-element">
+                        <span>Curto</span>
+                    </div>
+                </div>
+                <button onclick="createRoom()" class="play-game-btn">Criar Sala</button>
+            </div>
+        </div>
+    </div>
+    <div id="cardboardContainer">
+        <div id="cardboardOpen"></div>
+        <div id="PCGame"></div>
+    </div>
+
+    <img id="fullscreen" src="fullscreen.svg" alt="">
+    <div class="menu-inicial">
+        <img id="cardboard" class="cardboard" src="/static/images/index/box.png" alt="">
+        <div id="btnElement">
+            <button onclick="abrirCaixa()" class="primary-btn">Abrir Caixa<img src="/static/1204.png" alt=""></button>
+        </div>
+    </div>
     <script>
         function createRoom() {
             fetch('/create_room', {
@@ -25,6 +86,115 @@
                 console.error('Error:', error);
             });
         }
+        const fullscreenBtn = document.getElementById('fullscreen');
+
+        fullscreenBtn.addEventListener('click', function() {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+                document.documentElement.webkitRequestFullscreen();
+            } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+                document.documentElement.msRequestFullscreen();
+            }
+        });
+
+        document.getElementById('options').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex].value;
+            if (selectedOption === 'como_jogar') {
+                document.getElementById('videoThumbnail').style.backgroundImage = 'url(/static/images/thumbnail1.png)'
+            } else if (selectedOption === 'trailer') {
+                console.log('Trailer');
+            }
+        });
+
+        document.querySelector('.menu-video-player').addEventListener('mouseover', function() {
+            document.querySelector('.menu-part1 button').style.display = 'block';
+        });
+
+        document.querySelector('.menu-video-player').addEventListener('mouseout', function() {
+            document.querySelector('.menu-part1 button').style.display = 'none';
+        });
+
+
+        function abrirCaixa(){
+            const cardboard = document.getElementById('cardboard')
+            const cardboardContainer = document.getElementById('cardboardContainer')
+            const btn = document.getElementById('btnElement')
+
+            cardboard.classList.add('caindo')
+            btn.classList.add('desappear')
+            setTimeout(() => {
+            cardboardContainer.classList.add('aparecendo')
+            }, 2000);
+        }
+
+        function showGame(){
+            const PCGame = document.getElementById('PCGame')
+            const cardboardContainer = document.getElementById('cardboardContainer')
+            const menu = document.getElementById('gameMenu')
+            const inactive = document.createElement('div')
+            const body = document.body
+
+            PCGame.addEventListener("click", function(){
+                PCGame.classList.add('ativo')
+                menu.classList.add('ativo')
+
+                inactive.classList.add('inativo')
+                body.appendChild(inactive)
+            })
+
+            inactive.addEventListener("click", function(){
+                PCGame.classList.remove('ativo')
+                menu.classList.remove('ativo')
+
+                body.removeChild(inactive)
+            })
+        }
+
+        const pre = document.querySelector(".menu-part2");
+
+        pre.addEventListener("mousemove", (e) => {
+            rotateElement(e, pre);
+        })
+
+        pre.addEventListener("mouseleave", () => {
+            resetRotation(pre);
+        });
+
+        function rotateElement(event, element){
+            const x = event.clientX;
+            const y = event.clientY;
+            
+            // find the middle 
+            const middleX = window.innerWidth / 2;
+            const middleY = window.innerHeight/2;
+            
+            const offSetX = ((x - middleX)/middleX) * 45;
+            const offSetY = ((y - middleY)/middleY) * 45;
+            console.log(offSetX,offSetY)
+            
+            // due to how rotation works
+            // x rotates across it's y axis
+            // y rotates across it's x axis
+            element.style.setProperty("--rotateX", -0.3*offSetY + "deg");
+            element.style.setProperty("--rotateY", -1*offSetX + "deg");
+            // console.log(x,y);
+        }
+
+        function resetRotation(element) {
+            element.style.transition = 'all 200ms'
+            element.style.setProperty("--rotateX", "0deg");
+            element.style.setProperty("--rotateY", "0deg");
+
+            setTimeout(function() {
+                element.style.transition = 'all 0ms'
+            },200)
+        }
+
+        showGame()
+
     </script>
 </body>
 </html>
