@@ -117,7 +117,10 @@ document.addEventListener('keydown', function(event) {
 
 
 console.log('Connecting to server with roomId:', roomId);
-var socket = io({ query: { roomId: roomId } });
+var socket = io({
+    query: { roomId: roomId },
+    transports: ['websocket', 'polling']
+});
 
 socket.on('connect', function() {
     console.log('Connected to server');
@@ -131,14 +134,6 @@ socket.on('connect', function() {
             console.log('Mensagem recebida:', data.msg);
         });
     }, 5000)
-});
-
-socket.on('message', function(data) {
-    if (data.msg) {
-        document.getElementById('container-' + data.msg).classList.remove('in-game')
-    }
-
-    console.log('Mensagem recebida:', data.msg);
 });
 
 let previousImageSrc = {};
