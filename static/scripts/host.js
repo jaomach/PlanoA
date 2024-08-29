@@ -111,7 +111,7 @@ document.addEventListener('keydown', function(event) {
 });
 document.addEventListener('keydown', function(event) {
     if (event.key === '3' && !gameStarted) {
-        callRound4Test()
+        roundFinal()
     }
 });
 
@@ -413,6 +413,7 @@ function displayMatchup() {
         setTimeout( function() {
             const iluminacaoMatchupP1 = document.getElementById(`${player1}Iluminacao`)
             iluminacaoMatchupP1.classList.add('aceso')
+            document.getElementById('lightTurnOn').play()
         }, 6000);
 
         if (player2) {
@@ -434,7 +435,7 @@ function displayMatchup() {
                 const choosedPlayer = players[Math.floor(Math.random() * players.length)];
             
                 // Gere um número aleatório e compare com 0.8
-                if (Math.random() <= 0.8) {
+                if (Math.random() <= 0.9) {
                     sendToAI(choosedPlayer);
                     setTimeout(function() {
                         document.getElementById('messageContainer').classList.add('aparecendo');
@@ -471,8 +472,8 @@ function displayMatchup() {
                 document.getElementById('messageContainer').classList.remove('aparecendo')
             }, 25000)
             setTimeout(function() {
-            const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
-            iluminacaoMatchupP2.classList.add('aceso')
+                const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
+                iluminacaoMatchupP2.classList.add('aceso')
             }, 6000);
             
         } else {
@@ -532,8 +533,7 @@ async function saveWinners() {
 }
 
 function showWinner(winner) {
-    var circle = document.getElementById('circle');
-    circle.classList.add('close');
+    roundFinal()
 
     setTimeout(function() {
         var playerToRemove = actualPlayer1 === winner ? actualPlayer2 : actualPlayer1;
@@ -541,10 +541,7 @@ function showWinner(winner) {
         if (document.getElementById(`${playerToRemove}Container`)) {
             document.getElementById(`${playerToRemove}Container`).remove();
         }
-
-        circle.classList.remove('close');
-        circle.classList.add('open');
-    }, 5000);
+    }, 8000);
 }
 
 function processVotes(data) {
@@ -1349,6 +1346,51 @@ function round4Var1() {
             document.getElementById('papaleguas').classList.add('appear')
         }, 2000));
     }, 18600));
+}
+function roundFinal() {
+    var whistleDown = document.getElementById("whistleDown");
+    var whistleUp = document.getElementById("whistleUp");
+    var audioRodadaFinal = document.getElementById("audioFinal");
+
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logo" src="/static/images/LOGO.png" alt="">
+    <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2.png" id="rounds">
+    `
+    
+    var subtitleDiv = document.getElementById("subtitles");
+    var subtitles = [];
+
+    fetch('/static/captionFinal.json')
+        .then(response => response.json())
+        .then(data => {
+        subtitles = data;
+        });
+
+    audioRodadaFinal.ontimeupdate = function() {
+        var currentTime = audioRodadaFinal.currentTime;
+        var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+        if (subtitle) {
+        subtitleDiv.innerHTML = subtitle.text;
+        } else {
+        subtitleDiv.innerHTML = '';
+        }
+    };
+
+    setTimeout(function() {
+        document.getElementById('circle').classList.add('close')
+        whistleDown.play();
+        setTimeout(function() {
+            audioRodadaFinal.play();
+        }, 1000);
+    }, 500);
+    setTimeout(function() {
+        document.getElementById('circle').classList.remove('close')
+        document.getElementById('circle').classList.add('open')
+        whistleUp.play()
+        document.getElementById('timerContainer').classList.remove('appear')
+    }, 10500);
 }
 function skipRound(round) {
     document.getElementById('skipRoundBtn').disabled = true;
