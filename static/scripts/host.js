@@ -19,10 +19,10 @@ let currentRound = 6;
 let actualPlayer1 = ''
 let actualPlayer2 = ''
 let timeOuts = []
-let round1Time = 10
-let round2Time = 10
-let round3Time = 10
-let round4Time = 10
+let round1Time = 240
+let round2Time = 120
+let round3Time = 90
+let round4Time = 35
 console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
