@@ -15,6 +15,23 @@ body {
    background-image: url('/static/images/background.png');
    background-size: cover;
 }
+.effects-container {
+   box-shadow: rgba(0, 0, 0, 0.25) 0px 0px 140px 40px inset;
+   background: linear-gradient(transparent 50%, rgba(255, 255, 255, 0.02) 51%) 0% 0% / 100% 90px;
+   animation: 30s linear 0s infinite normal none running tv-effect;
+   pointer-events: none;
+   width: 100vw;
+   height: 100vh;
+   z-index: 5;
+   position: absolute;
+   filter: blur(12px);
+}
+@keyframes tv-effect {
+   0% {background-position: 0px 100%; opacity: 1;}
+   20% {opacity: 0.9; box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 140px 40px inset;}
+   21% {opacity: 0.4; box-shadow: rgba(0, 0, 0, 0.45) 0px 0px 140px 40px inset;}
+   22% {opacity: 1; box-shadow: rgba(0, 0, 0, 0.25) 0px 0px 140px 40px inset;}
+}
 .container {
    width: 80%;
    background-color: #fff;
@@ -313,7 +330,7 @@ h1 {
    position: absolute;
    display: flex;
    justify-content: end;
-   z-index: 105;
+   z-index: 100;
    top: 0;
    height: 100vh;
 }
@@ -323,7 +340,7 @@ h1 {
    padding: 1% 1% 1% 0%;
    right: 0;
    cursor: pointer;
-   z-index: 105;
+   z-index: 101;
    top: 0;
 }
 
@@ -366,7 +383,7 @@ h1 {
    position: absolute;
    width: 40%;
    align-self: center;
-   z-index: 101;
+   z-index: 2;
    transition: all 600ms ease-in;
    filter: brightness(0.2);
    transform: translateY(-80vh);
@@ -385,7 +402,7 @@ h1 {
    align-self: center;
    transition: all 600ms ease-in;
    filter: brightness(0.2);
-   z-index: 101;
+   z-index: 2;
    transform: translateY(-70vh);
 }
 
@@ -404,7 +421,7 @@ h1 {
    align-self: center;
    transition: all 700ms ease-in;
    filter: brightness(0.2);
-   z-index: 101;
+   z-index: 2;
    transform: translateY(80vh);
 }
 
@@ -422,7 +439,7 @@ h1 {
    height: 80vh;
    display: none;
    align-self: center;
-   z-index: 102;
+   z-index: 3;
    opacity: 0.9;
    filter: blur(70px);
    mix-blend-mode: screen;
@@ -435,7 +452,7 @@ h1 {
 
 .iluminacao-matchup {
    position: absolute;
-   z-index: 102;
+   z-index: 3;
    opacity: 0.9;
    height: 70vh;
    width: 70vh;
@@ -460,7 +477,7 @@ h1 {
    width: 200vw;
    height: 200vh;
    background-color: rgba(0, 0, 0, 0);
-   z-index: 100;
+   z-index: 2;
    border-radius: 50%;
    border: solid 100vw black; /* Cria as bordas pretas ao redor do círculo transparente */
    transform: translate(-50%, -50%);
@@ -559,7 +576,7 @@ body.desligado {
 }
 
 #subtitles {
-   z-index: 100000;
+   z-index: 100;
    position: absolute;
    color: #fff;
    text-shadow: 0 3px black;
@@ -568,6 +585,7 @@ body.desligado {
    text-align: center;
    padding-bottom: 1.7%;
    width: 100%;
+   pointer-events: none;
 }
 
 .perdedor-container {
@@ -594,7 +612,7 @@ body.desligado {
 #playerListR2 {
    display: flex;
    position: absolute;
-   z-index: 101;
+   z-index: 2;
    top: 50%;
    left: 50%;
    filter: brightness(0.7);
@@ -634,6 +652,7 @@ body.desligado {
    display: flex;
    align-items: center;
    justify-content: center;
+   z-index: 2;
    
    position: absolute;
    width: 100vw;
@@ -659,7 +678,7 @@ body.desligado {
    bottom: 0;
    opacity: 0;
    transition: all 500ms;
-   z-index: 100000000000000000000;
+   z-index: 4;
 }
 
 #messageContainer.appear {
