@@ -24,7 +24,11 @@ body {
    height: 100vh;
    z-index: 5;
    position: absolute;
+   display: block;
    filter: blur(12px);
+}
+#effectContainer.ativo {
+   display: none;
 }
 @keyframes tv-effect {
    0% {background-position: 0px 100%; opacity: 1;}
@@ -32,6 +36,46 @@ body {
    21% {opacity: 0.4; box-shadow: rgba(0, 0, 0, 0.45) 0px 0px 140px 40px inset;}
    22% {opacity: 1; box-shadow: rgba(0, 0, 0, 0.25) 0px 0px 140px 40px inset;}
 }
+#idContainer {
+   position: absolute;
+   left: 0;
+   margin: 0.5% 0.5% 0% 0.5%;
+   display: flex;
+}
+
+#roomId {
+   margin: 0;
+   position: relative;
+}
+
+.id-btn {
+   width: 20px;
+   padding-right: 2%;
+   pointer-events: all;
+   cursor: pointer;
+}
+
+#eyeBtn {
+   padding-left: 6%;
+}
+
+.context-box {
+   padding: 0.5% 0.7%;
+   border-radius: 5px;
+   border-style: solid;
+   border-width: 1px;
+   border-color: #3f3f3f;
+   color: white;
+   transform: scale(0.9);
+   background-color: #252525;
+   opacity: 0;
+   transition: opacity 200ms ease-in-out;
+}
+
+.context-box.appear {
+   opacity: 1;
+}
+
 .container {
    width: 80%;
    background-color: #fff;
@@ -98,6 +142,38 @@ body {
    transition: all 500ms;
    width: 100%;
 }
+.input-container {
+   font-family: 'inter', sans-serif;
+   border-radius: 5px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+   cursor: text;
+   padding: 6% 8%;
+   width: 30%;
+   font-weight: 400;
+   background-color: #252525;
+   font-size: 9pt;
+}
+
+.select-container {
+   font-family: 'inter', sans-serif;
+   border-radius: 5px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+   padding: 6% 8%;
+   font-weight: 400;
+   background-color: #252525;
+   font-size: 9pt;
+   appearance: none;
+}
 
 .primary-btn.desappear {
    display: none;
@@ -108,6 +184,27 @@ body {
 }
 
 .primary-btn:hover {
+   background-color: #252525;
+   transition: all 500ms;
+}
+
+.secondary-btn {
+   font-family: 'inter', sans-serif;
+   font-weight: 500;
+   font-size: 12pt;
+   margin-top: 8%;
+   padding: 2% 6%;
+   border-radius: 30px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   background-color: #1e1e1e;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+}
+
+.secondary-btn:hover {
    background-color: #252525;
    transition: all 500ms;
 }
@@ -333,6 +430,7 @@ h1 {
    z-index: 100;
    top: 0;
    height: 100vh;
+   pointer-events: none;
 }
 
 .btn-interface {
@@ -342,6 +440,7 @@ h1 {
    cursor: pointer;
    z-index: 101;
    top: 0;
+   pointer-events: all;
 }
 
 .timer-container {
@@ -617,7 +716,7 @@ body.desligado {
    left: 50%;
    filter: brightness(0.7);
 
-   transform: translate(-50%, -280%);
+   transform: translate(-50%, -320%);
    transition: all 700ms;
 }
 
@@ -722,4 +821,106 @@ body.desligado {
 
 #responseMessage {
    opacity: 0.6;
+}
+
+#gameMenu {
+   display: flex;
+   flex-direction: column;
+   gap: 1%;
+
+   width: 17vw;
+   height: 35vh;
+   background-color: #252525;
+   position: absolute;
+   z-index: 1000;
+   padding: 1%;
+   scale: 1.4;
+   transform: scale(1.4);
+
+   transform: scale(0);
+   border-width: 1.8px;
+   border-radius: 18px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   transition: transform 300ms ease-in-out;
+}
+
+#videoOption {
+   display: none;
+}
+
+#audioOption {
+   display: none;
+}
+
+#gameMenu h1 {
+   position: relative;
+}
+
+#gameMenu h2 {
+   margin: 0;
+   margin-bottom: 4%;
+   font-size: 18pt;
+   font-weight: 600;
+   color: white;
+}
+
+#gameMenu.ativo {
+   transform: scale(1);
+}
+
+.element-container {
+   width: 39%;
+   font-size: 10pt;
+   text-wrap: nowrap;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   margin: 0% 0% 5% 0;
+}
+
+.select-bar {
+   display: flex;
+   align-items: center;
+   align-self: center;
+   justify-content: space-between;
+
+   width: 80%;
+   padding: 2% 6%;
+   border-style: solid;
+   border-radius: 30px;
+   border-width: 1px;
+   border-color: #3f3f3f;
+}
+
+.bar-element {
+   color: #f0f0f06e;
+   cursor: pointer;
+}
+.bar-element.ativo {
+   color: #fff;
+   text-decoration: underline;
+}
+
+.menu-interactive {
+   display: flex;
+   flex-direction: column;
+   align-items: start;
+   overflow-y: scroll;
+   scrollbar-width: none;
+   height: 100%;
+   margin-top: 6%;
+   color: white;
+}
+
+.menu-interactive button {
+   align-self: center;
+}
+
+.inativo {
+   position: absolute;
+   z-index: 99;
+   width: 100vw;
+   height: 100vh;
+   background-color: #00000059;
 }

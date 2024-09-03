@@ -7,15 +7,16 @@
     <title>Plagio Consentido - Plano A</title>
 </head>
 <body id="body">
-    <div class="effects-container">
-        
-    </div>
+    <div id="effectContainer" class="effects-container"></div>
     <div id="circle"></div>
-    <div id="roundContainer">
-    </div>
+    <div id="roundContainer"></div>
     <link rel="stylesheet" href="/static/style/host.css">
-    <!-- <h1>{{ room_id }}</h1>-->
     <div id="interfaceContainer">
+        <div id="idContainer">
+            <h1 style="filter:blur(0px)" id="roomId">{{ room_id }}</h1>
+            <img id="eyeBtn" class="id-btn" title="Ocultar" src="/static/images/eye-open.svg" alt="">
+            <img id="copyBtn" class="id-btn" title="Copiar" src="/static//images/copy.svg" alt="">
+        </div>
         <div id="timerContainer" class="timer-container">
             <span id="timer"></span>
             <img class="timer-clock" src="/static/images/counter.png" alt="">
@@ -27,9 +28,6 @@
         <span id="version">Versão Beta</span>
     </div>
     <div id="fps" style="position: fixed; top: 10px; left: 10px; color: white; z-index: 1000000000000000000000;"></div>
-
-
-    
     <div id="barreira"></div>
     <div id="messageContainer">
         <div class="message-interface">
@@ -41,6 +39,56 @@
         </div>
     </div>
     <div class="inside" id="inside">
+        <div id="gameMenu">
+            <div class="select-bar">
+                <span class="bar-element ativo">Jogo</span>
+                <span class="bar-element">Gráficos</span>
+                <span class="bar-element">Áudio</span>
+            </div>
+            <section id="gameOption" class="menu-interactive">
+                <h2>Tempo de Jogo</h2>
+                <div class="element-container">
+                    <span>Round 1:</span> <input id="roundtime1Input" class="input-container" type="number" value="240" max="360" min="10">
+                </div>
+                <div class="element-container">
+                    <span>Round 2:</span> <input id="roundtime2Input" class="input-container" type="number" value="120" max="240" min="10">
+                </div>
+                <div class="element-container">
+                    <span>Round 3:</span> <input id="roundtime3Input" class="input-container" type="number" value="90" max="120" min="10">
+                </div>
+                <div class="element-container">
+                    <span>Votação:</span> <input id="roundtime4Input" class="input-container" type="number" value="30" max="90" min="10">
+                </div>
+                <button class="secondary-btn">Restaurar Padrão</button>
+            </section>
+            <section id="videoOption" class="menu-interactive">
+                <h2>Qualidade</h2>
+                <div class="element-container">
+                    <span>Animações:</span>
+                    <select class="select-container" id="animationSelect">
+                        <option value="Alto">Alto</option>
+                        <option value="Baixo">Baixo</option>
+                    </select>
+                </div>
+                <h2>Efeitos Visuais</h2>
+                <div class="element-container">
+                    <span>Tela:</span> 
+                    <select class="select-container" id="screenSelect">
+                        <option value="Ativado">Ativado</option>
+                        <option value="Desativado">Desativado</option>
+                    </select>
+                </div>
+                <button class="secondary-btn">Restaurar Padrão</button>
+            </section>
+            <section id="audioOption" class="menu-interactive">
+                <h2>Áudio</h2>
+                <div class="volume-control">
+                    <label for="volume-slider">Volume Global:</label>
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+                </div>
+                <button class="secondary-btn">Restaurar Padrão</button>
+            </section>
+        </div>
         <div id="playerList"></div>
         <div class="menu-inicial">
             <button class="primary-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
@@ -61,6 +109,9 @@
     <audio id="audioFinal" src="/static/audios/Final/AudioFinal.mp3" type="audio/mpeg"></audio>
     <audio id="whistleUp" src="/static/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling1" src="/static/audios/Outros/fallingCat.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling2" src="/static/audios/Outros/fallingNext.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling3" src="/static/audios/Outros/fallingTranks.mp3" type="audio/mpeg"></audio>
     <audio id="soundTrackR1" src="/static/audios/r1/soundTrackR1.mp3" type="audio/mpeg"></audio>
     <audio id="soundTrackR2" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR3" src="" type="audio/mpeg"></audio>

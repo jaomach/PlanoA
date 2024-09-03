@@ -23,6 +23,8 @@ let round1Time = 240
 let round2Time = 120
 let round3Time = 90
 let round4Time = 35
+let optionsActive = false
+gameMenuListening = false
 console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
@@ -31,6 +33,84 @@ function callRound4Test() {
     handleRound3 = true;
     roundCallRandom(round4Var1, round4Var1, round4Var1)
     socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
+}
+
+function gameMenuChange() {
+    const elements = document.querySelectorAll('.bar-element');
+    const gameOptionContainer = document.getElementById('gameOption')
+    const videoOptionContainer = document.getElementById('videoOption')
+    const audioOptionContainer = document.getElementById('audioOption')
+    const audioElements = document.querySelectorAll('audio');
+    const volumeSlider = document.getElementById('volume-slider');
+    const animationSelect = document.getElementById('animationSelect');
+    const screenEffectSelect = document.getElementById('screenSelect')
+    const screenEffectContainer = document.getElementById('effectContainer')
+    const roundtime1Input = document.getElementById('roundtime1Input');
+    const roundtime2Input = document.getElementById('roundtime2Input');
+    const roundtime3Input = document.getElementById('roundtime3Input');
+    const roundtime4Input = document.getElementById('roundtime4Input');
+    optionsActive = true
+    gameMenuListening = true
+
+    roundtime1Input.addEventListener('input', () => {
+        round1Time = roundtime1Input.value;
+    });
+    roundtime2Input.addEventListener('input', () => {
+        round2Time = roundtime2Input.value;
+    });
+    roundtime3Input.addEventListener('input', () => {
+        round3Time = roundtime3Input.value;
+    });
+    roundtime4Input.addEventListener('input', () => {
+        round4Time = roundtime4Input.value;
+    });
+
+    // Log the selected value to the console
+    animationSelect.addEventListener('change', () => {
+        console.log(animationSelect.value);
+    });
+    screenEffectSelect.addEventListener('change', () => {
+        screenEffectContainer.classList.toggle('ativo')
+        console.log('toggled')
+    });
+
+    // Volume control for all audio elements
+    volumeSlider.addEventListener('input', () => {
+        const volume = volumeSlider.value;
+        audioElements.forEach(audio => {
+            audio.volume = volume;
+        });
+    });
+
+    // Adiciona um event listener a cada elemento
+    elements.forEach((element, index) => {
+        element.addEventListener('click', () => {
+            if (index == 0) {
+                elements.forEach(el => el.classList.remove('ativo'));
+
+                element.classList.add('ativo');
+                gameOptionContainer.style.display = 'flex'
+                videoOptionContainer.style.display = 'none'
+                audioOptionContainer.style.display = 'none'
+            }
+            if (index == 1) {
+                elements.forEach(el => el.classList.remove('ativo'));
+
+                element.classList.add('ativo');
+                gameOptionContainer.style.display = 'none'
+                videoOptionContainer.style.display = 'flex'
+                audioOptionContainer.style.display = 'none'
+            }
+            if (index == 2) {
+                elements.forEach(el => el.classList.remove('ativo'));
+
+                element.classList.add('ativo');
+                gameOptionContainer.style.display = 'none'
+                videoOptionContainer.style.display = 'none'
+                audioOptionContainer.style.display = 'flex'
+            }
+        });
+    });
 }
 
 fullscreenBtn.addEventListener('click', function() {
@@ -88,6 +168,54 @@ muteBtn.addEventListener('click', function() {
     }
 });
 
+const eyeBtn = document.getElementById('eyeBtn');
+eyeBtn.addEventListener('click', function() {
+    const idElement = document.getElementById('roomId');
+
+    if (idElement.style.filter == 'blur(0px)') {
+        eyeBtn.src = '/static/images/eye-close.svg'
+        idElement.style.filter = 'blur(10px)'
+    } else {
+        eyeBtn.src = '/static/images/eye-open.svg'
+        idElement.style.filter = 'blur(0px)'
+        idElement.innerText = roomId
+    }
+});
+
+const clipboardBtn = document.getElementById('copyBtn');
+clipboardBtn.addEventListener('click', function(event) {
+    if (document.querySelector('.context-box')) {
+        return;
+    }
+
+    navigator.clipboard.writeText(roomId);
+
+    const contextBox = document.createElement('span');
+    contextBox.classList.add('context-box');
+    contextBox.classList.add('aparecendo');
+    contextBox.innerText = 'Copiado!';
+    document.body.appendChild(contextBox);
+
+    contextBox.style.position = 'absolute';
+    contextBox.style.left = (event.pageX - 40) + 'px';
+    contextBox.style.top = (event.pageY + 25) + 'px';
+
+    contextBox.classList.add('appear');
+    document.body.addEventListener('mousemove', function(event) {
+        contextBox.style.position = 'absolute';
+        contextBox.style.left = event.pageX - 40 + 'px';
+        contextBox.style.top = event.pageY + 25 + 'px';
+    });
+    setTimeout(() => {
+        contextBox.classList.remove('appear');
+    }, 1000);
+
+    setTimeout(() => {
+        contextBox.remove();
+    }, 1200);
+});
+
+
 document.addEventListener('keydown', function(event) {
     if (event.key === 'Enter' && !gameStarted) {
         gameStarted = true;
@@ -112,6 +240,18 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keydown', function(event) {
     if (event.key === '3' && !gameStarted) {
         roundFinal()
+    }
+});
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && !optionsActive && !gameMenuListening) {
+        showOptions()
+        gameMenuChange()
+    }
+    else if (event.key === 'Escape' && optionsActive) {
+        hideOptions()
+    }
+    else if (event.key === 'Escape' && !optionsActive) {
+        showOptions()
     }
 });
 
@@ -280,6 +420,37 @@ if (data.current_round >= 6) {
 });
 }
 
+function showOptions(){
+    const menu = document.getElementById('gameMenu')
+    const inactive = document.createElement('div')
+    const body = document.body
+
+    menu.classList.add('ativo')
+
+    inactive.classList.add('inativo')
+    body.appendChild(inactive)
+    optionsActive = true
+    inactive.id = 'bgInactive'
+
+    inactive.addEventListener("click", function(){
+        menu.classList.remove('ativo')
+
+        body.removeChild(inactive)
+        optionsActive = false
+    })
+}
+
+function hideOptions(){
+    const menu = document.getElementById('gameMenu')
+    const inactive = document.getElementById('bgInactive')
+    const body = document.body
+
+    menu.classList.remove('ativo')
+
+    body.removeChild(inactive)
+    optionsActive = false
+}
+
 verifyRoom()
 
 function startGame() {
@@ -293,6 +464,7 @@ function startGame() {
             document.querySelectorAll('.player-container').forEach(function(element) {
                 element.classList.add('in-game');
             });
+            document.getElementById('idContainer').remove()
         }
     })
     .catch(error => {
@@ -301,6 +473,7 @@ function startGame() {
 }
 
 function startCountdown(duration, intervalo) {
+    duration = Number(duration);
     clearInterval(countdown);
     const timerElement = document.getElementById('timer');
     timeLeft = duration
@@ -409,7 +582,7 @@ function displayMatchup() {
             const iluminacaoMatchupP1 = document.getElementById(`${player1}Iluminacao`)
             iluminacaoMatchupP1.classList.add('aceso')
             document.getElementById('lightTurnOn').play()
-        }, 6000);
+        }, 4000);
 
         if (player2) {
             const player2Comb = combinations[1][0];
@@ -469,14 +642,14 @@ function displayMatchup() {
             setTimeout(function() {
                 const iluminacaoMatchupP2 = document.getElementById(`${player2}Iluminacao`)
                 iluminacaoMatchupP2.classList.add('aceso')
-            }, 6000);
+            }, 4000);
             
         } else {
             actualPlayer2 = `${player1}`
             console.log('numero impar')
             setTimeout(function() {
                 timeLeft = 10
-            }, 2000);
+            }, 5000);
         }
         matchupsDiv.appendChild(matchupDiv);
     }
@@ -609,7 +782,16 @@ function processVotes(data) {
     console.log(`Least Voted Option: ${leastVoted}`);
 }
 
-
+function playRandomAudio() {
+    const audioIds = ['audioFalling1', 'audioFalling2', 'audioFalling3'];
+    const randomIndex = Math.floor(Math.random() * audioIds.length);
+    const selectedAudio = document.getElementById(audioIds[randomIndex]);
+    
+    // Pausa todos os áudios antes de reproduzir o novo
+    audioIds.forEach(id => document.getElementById(id).pause());
+    selectedAudio.currentTime = 0; // Reseta o tempo do áudio
+    selectedAudio.play();
+}
 
 function perderAnimation(winner) {
     const drawingVencedor = document.getElementById(`${winner}Drawing`);
@@ -624,6 +806,10 @@ function perderAnimation(winner) {
     for (let i = 0; i < drawingPerdedor.length; i++) {
     drawingPerdedor[i].classList.add('perdedor');
     phrasePerdedor[i].classList.add('perdedor');
+
+    setTimeout(function() {
+        playRandomAudio()
+    }, 420)
     }
 }
 
