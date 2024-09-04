@@ -71,7 +71,6 @@ function gameMenuChange() {
     });
     screenEffectSelect.addEventListener('change', () => {
         screenEffectContainer.classList.toggle('ativo')
-        console.log('toggled')
     });
 
     // Volume control for all audio elements
@@ -1636,28 +1635,83 @@ function sendToAI(image_path) {
 
 
 
-
 let lastTime = performance.now();
-let frame = 0;
 let fps = 0;
+let fpsArray = [];
+let testStartTime = performance.now();
+let testDuration = 5000; // 5 seconds
+let isTesting = true;
+
+function verifyQuality() {
+    if (localStorage.getItem('pc-gm-qual')){
+        const qualityValue = localStorage.getItem('pc-gm-qual')
+        if (qualityValue == 'high') {
+            autoSetQuality(qualityValue)
+        } else if (qualityValue == 'medium') {
+            autoSetQuality(qualityValue)
+        } else {
+            autoSetQuality(qualityValue)
+        }
+    } else {
+        requestAnimationFrame(calculateFPS);
+    }
+} 
+
+function autoSetQuality(performanceLevel) {
+    if (performanceLevel == 'high') {
+        localStorage.setItem('pc-gm-qual', 'high')
+        return
+    } else if (performanceLevel == 'medium'){
+        localStorage.setItem('pc-gm-qual', 'medium')
+        return
+    } else {
+        const screenEffectSelect = document.getElementById('screenSelect')
+        const screenEffectContainer = document.getElementById('effectContainer')
+        screenEffectSelect.selectedIndex = 1;
+        screenEffectContainer.classList.toggle('ativo')
+
+        localStorage.setItem('pc-gm-qual', 'low')
+    }
+}
 
 function calculateFPS() {
     const now = performance.now();
     const delta = (now - lastTime) / 1000;
     lastTime = now;
-    fps = 1 / delta; // FPS
+    fps = 1 / delta;
+
+    if (isTesting) {
+        fpsArray.push(fps);
+
+        if (now - testStartTime >= testDuration) {
+            isTesting = false;
+            const averageFPS = fpsArray.reduce((sum, value) => sum + value, 0) / fpsArray.length;
+            
+            let performanceLevel;
+            if (averageFPS < 10) {
+                performanceLevel = 'low';
+            } else if (averageFPS < 30) {
+                performanceLevel = 'medium';
+            } else {
+                performanceLevel = 'high';
+            }
+            
+            autoSetQuality(performanceLevel)
+        }
+    }
 
     document.getElementById('fps').textContent = `FPS: ${fps.toFixed(2)}`;
-
     requestAnimationFrame(calculateFPS);
 }
 
-calculateFPS();
+function showLoadingScreen(interval) {
+    const loadingScreen = document.getElementById('loadingScreen')
+    if (interval == 'skip') {
+        loadingScreen.classList.add('skip')
+        loadingScreen.remove()
+    } else {
+        loadingScreen.classList.add('ativo')
+    }
+}
 
-const observer = new PerformanceObserver((list) => {
-    list.getEntries().forEach((entry) => {
-        console.log(`${entry.entryType} [${entry.name}]: ${entry.duration}ms`);
-    });
-});
-
-observer.observe({ entryTypes: ['longtask'] }); // Observe "long tasks" que podem indicar uso intenso de CPU
+verifyQuality()
