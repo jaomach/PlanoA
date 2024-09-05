@@ -1660,15 +1660,18 @@ function verifyQuality() {
 function autoSetQuality(performanceLevel) {
     if (performanceLevel == 'high') {
         localStorage.setItem('pc-gm-qual', 'high')
+        showLoadingScreen(performanceLevel)
         return
     } else if (performanceLevel == 'medium'){
         localStorage.setItem('pc-gm-qual', 'medium')
+        showLoadingScreen(performanceLevel)
         return
     } else {
         const screenEffectSelect = document.getElementById('screenSelect')
         const screenEffectContainer = document.getElementById('effectContainer')
         screenEffectSelect.selectedIndex = 1;
         screenEffectContainer.classList.toggle('ativo')
+        showLoadingScreen(performanceLevel)
 
         localStorage.setItem('pc-gm-qual', 'low')
     }
@@ -1686,6 +1689,7 @@ function calculateFPS() {
         if (now - testStartTime >= testDuration) {
             isTesting = false;
             const averageFPS = fpsArray.reduce((sum, value) => sum + value, 0) / fpsArray.length;
+            console.log(averageFPS)
             
             let performanceLevel;
             if (averageFPS < 10) {
@@ -1706,12 +1710,20 @@ function calculateFPS() {
 
 function showLoadingScreen(interval) {
     const loadingScreen = document.getElementById('loadingScreen')
-    if (interval == 'skip') {
-        loadingScreen.classList.add('skip')
+    loadingScreen.classList.add('skip')
+    setTimeout(function(){
         loadingScreen.remove()
-    } else {
-        loadingScreen.classList.add('ativo')
-    }
+    }, 1000)
 }
 
 verifyQuality()
+
+if ('serviceWorker' in navigator) {
+navigator.serviceWorker.register('/static/scripts/sw.js')
+    .then((registration) => {
+    console.log('Service Worker registrado com sucesso:', registration);
+    })
+    .catch((error) => {
+    console.log('Falha ao registrar o Service Worker:', error);
+    });
+}
