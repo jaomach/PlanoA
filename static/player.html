@@ -17,30 +17,37 @@
     </head>
     <body>
         <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
-        <div id="waitingMessage" style="display: none;">
+        <div class="message-screen" id="waitingMessage" style="display: none;">
             <img src="/static/images/player/Asset 2.svg" alt="">
-            <span>Olhe a tela do host!</span>
+            <span class="message-screen-span">De olho!</span>
+            <p class="message-screen-p">Fique de olho na tela do host para receber as informações necessárias dos rounds.</p>
+        </div>
+        <div class="message-screen" id="kickMessage" style="display: none;">
+            <span class="message-screen-span">Vish...</span>
+            <p class="message-screen-p">O host da sala optou por te expulsar, você será redirecionado à caixa em instantes.</p>
+            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+            
         </div>
         <div id="userSelect" style="display: flex;">
             <swiper-container class="swiper-container" navigation="true">
                 <swiper-slide>
-                    <img src="/static/images/Berro.png " alt="">
+                    <img class="character-img" src="/static/images/Berro.png " alt="">
                     <span id="character">Berro</span></swiper-slide>
                 <swiper-slide>
-                    <img src="/static/images/Davinte.png " alt="">
+                    <img class="character-img" src="/static/images/Davinte.png " alt="">
                     <span id="character">Davinte</span></swiper-slide>
                 <swiper-slide>
-                    <img src="/static/images/Vanderlei.png " alt="">
+                    <img class="character-img" src="/static/images/Vanderlei.png " alt="">
                     <span id="character">Vanderlei</span></swiper-slide>
                 <swiper-slide>
-                    <img src="/static/images/Empregada.png " alt="">
+                    <img class="character-img" src="/static/images/Empregada.png " alt="">
                     <span id="character">Empregada</span></swiper-slide>
                 <swiper-slide>
-                    <img src="/static/images/Maria.png " alt="">
+                    <img class="character-img" src="/static/images/Maria.png " alt="">
                     <span id="character">Maria</span>
                 </swiper-slide>
                 <swiper-slide>
-                    <img src="/static/images/Merda.png " alt="">
+                    <img class="character-img" src="/static/images/Merda.png " alt="">
                     <span id="character">Merda</span>
                 </swiper-slide>
             </swiper-container>
@@ -55,30 +62,29 @@
             <div class="toolbar">
                 <div class="tool-colors">
                     <button id="black" class="colors no-style-btn" onclick="setColor('black')"></button>
-                    <button id="red" class="colors no-style-btn" onclick="setColor('red')"></button>
-                    <button id="green" class="colors no-style-btn" onclick="setColor('green')"></button>
-                    <button id="blue" class="colors no-style-btn" onclick="setColor('blue')"></button>
-                    <button id="yellow" class="colors no-style-btn" onclick="setColor('yellow')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
-                    <button id="purple" class="colors no-style-btn" onclick="setColor('purple')"></button>
+                    <button id="white" class="colors no-style-btn" onclick="setColor('white')"></button>
+                    <button id="#FF0027" class="colors no-style-btn" onclick="setColor('#FF0027')"></button>
+                    <button id="#990000" class="colors no-style-btn" onclick="setColor('#990000')"></button>
+                    <button id="#00B02B" class="colors no-style-btn" onclick="setColor('#00B02B')"></button>
+                    <button id="#017405" class="colors no-style-btn" onclick="setColor('#017405')"></button>
+                    <button id="#0050FF" class="colors no-style-btn" onclick="setColor('#0050FF')"></button>
+                    <button id="#003BB5" class="colors no-style-btn" onclick="setColor('#003BB5')"></button>
+                    <button id="#FFC126" class="colors no-style-btn" onclick="setColor('#FFC126')"></button>
+                    <button id="#B0701C" class="colors no-style-btn" onclick="setColor('#B0701C')"></button>
+                    <button id="#D203D8" class="colors no-style-btn" onclick="setColor('#D203D8')"></button>
+                    <button id="#99004E" class="colors no-style-btn" onclick="setColor('#99004E')"></button>
+                    <input id="inputColor" type="color" class="colors no-style-btn" onchange="setColor(this.value)">
                     <div id="actualColor" class="actual-color"></div>
                 </div>
             </div>
             <div class="drawing-section">
+                <div id="drawingCounter">0/4</div>
                 <canvas id="canvas" width="400" height="500"></canvas>
                 <button class="primary-btn" id="exportDrawingBtn" onclick="exportDrawing()">Enviar Pintura</button> 
             </div>
             <div class="toolbar">
-                <div id="drawingCounter">0/4</div>
                 <div class="tool-other">
-                    <button class="primary-btn" id="eraserBtn" onclick="setEraser()"><img src="/static/images/eraser.png" alt=""></button>
+                    <button class="primary-btn" id="eraserBtn" onclick="setEraser()"><img src="/static/images/player/eraser.png" alt=""></button>
                     <button class="primary-btn brush-btn" onclick="setBrushSize(5)"><img src="/static/images/player/bSize.png" alt=""></button>
                     <button class="primary-btn brush-btn" onclick="setBrushSize(10)"><img src="/static/images/player/bSize.png" alt=""></button>
                     <button class="primary-btn brush-btn" onclick="setBrushSize(20)"><img src="/static/images/player/bSize.png" alt=""></button>

@@ -8,11 +8,16 @@
 </head>
 <body id="body">
     <div id="loadingScreen">
-        <img src="/static/images/LOGO.png" alt="">
+        <img class="loading-screen-img" src="/static/images/LOGO.png" alt="">
         <span>Carregando...</span>
     </div>
     <div id="effectContainer" class="effects-container"></div>
     <div id="circle"></div>
+    <div id="timerContainer" class="timer-container">
+        <span id="timer"></span>
+        <img class="timer-clock" src="/static/images/counter.png" alt="">
+        <img src="/static/images/counterLight.png" style="z-index: 2;" alt="">
+    </div>
     <div id="roundContainer"></div>
     <link rel="stylesheet" href="/static/style/host.css">
     <div id="interfaceContainer">
@@ -21,12 +26,7 @@
             <img id="eyeBtn" class="id-btn" title="Ocultar" src="/static/images/eye-open.svg" alt="">
             <img id="copyBtn" class="id-btn" title="Copiar" src="/static//images/copy.svg" alt="">
         </div>
-        <div id="timerContainer" class="timer-container">
-            <span id="timer"></span>
-            <img class="timer-clock" src="/static/images/counter.png" alt="">
-            <img src="/static/images/counterLight.png" style="z-index: 2;" alt="">
-        </div>
-        <img class="btn-interface" id="volume" src="/static/images/volume-up.svg" alt="">
+        <img class="btn-interface" id="setting" src="/static/images/setting.svg" alt="">
         <img class="btn-interface" id="fullscreen" src="/static/images/fullscreen.svg" alt="">
         <button class="primary-btn" id="skipRoundBtn" onclick="skipRound()">Pular<img src="/static/skip.png" alt=""></button>
         <span id="version">Versão Beta</span>
@@ -63,7 +63,7 @@
                 <div class="element-container">
                     <span>Votação:</span> <input id="roundtime4Input" class="input-container" type="number" value="30" max="90" min="10">
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
             </section>
             <section id="videoOption" class="menu-interactive">
                 <h2>Qualidade</h2>
@@ -82,15 +82,15 @@
                         <option value="Desativado">Desativado</option>
                     </select>
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
             </section>
             <section id="audioOption" class="menu-interactive">
                 <h2>Áudio</h2>
                 <div class="volume-control">
-                    <label for="volume-slider">Volume Global:</label>
+                    <label class="volume-slider-label" for="volume-slider">Volume Global:</label>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
             </section>
         </div>
         <div id="playerList"></div>
@@ -101,12 +101,12 @@
             <div class="matchup" id="papaleguas"></div>
         </div>
     </div>
-
     
 
     <audio id="audioR1" src="/static/audios/r1/narradorR1.mp3" type="audio/mpeg"></audio>
     <audio id="audioR2" src="" type="audio/mpeg"></audio>
     <audio id="audioR3" src="" type="audio/mpeg"></audio>
+    <audio id="sampleAudio" src="/static/audios/Outros/audioSample.mp3" type="audio/mpeg"></audio>
     <audio id="lightTurnOn" src="/static/audios/Outros/LuzLigando.mp3" type="audio/mpeg"></audio>
     <audio id="lightTurnOff" src="/static/audios/Outros/LuzDesligando.mp3" type="audio/mpeg"></audio>
     <audio id="audioR4" src="/static/audios/r4/audioR4.mp3" type="audio/mpeg"></audio>

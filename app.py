@@ -16,7 +16,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-api_key = os.environ["GPT_KEY"]
+#api_key = os.environ["GPT_KEY"]
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
@@ -24,10 +24,10 @@ rooms = {
         'players': {
             'player1': {'username': 'Alice', 'character': 'Vanderlei'},
             'player2': {'username': 'Bob', 'character': 'Merda'},
-            'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
-            'player4': {'username': 'Charlie', 'character': 'Maria'},
-            'player5': {'username': 'Charlie', 'character': 'Berro'},
-            'playerControl': {'username': 'Player', 'character': 'Davinte'},
+            #'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
+            #'player4': {'username': 'Charlie', 'character': 'Maria'},
+            #'player5': {'username': 'Charlie', 'character': 'Berro'},
+            #'playerControl': {'username': 'Player', 'character': 'Davinte'},
         },
         'started': False,
         'start_time': time.time(),
@@ -207,8 +207,21 @@ def join_room_character():
             return jsonify({'message': 'Room is full'}), 400
     else:
         return jsonify({'message': 'Room does not exist'}), 404
+    
+@app.route('/api/leave_room', methods=['POST'])
+def leave_room(room_id, player_id):
+    if room_id in rooms:
+        room = rooms[room_id]
 
+        if player_id in room['players']:
+            del room['players'][player_id]  # Remove o jogador
+            room['last_activity'] = time.time()
 
+            return {'message': 'Player removed from room'}, 200
+        else:
+            return {'message': 'Player not in room'}, 404
+    else:
+        return {'message': 'Room does not exist'}, 404
 
 @app.route('/start_game/<room_id>', methods=['POST'])
 def start_game(room_id):
@@ -240,17 +253,47 @@ def room_status(room_id):
 def start_round(room_id):
     if room_id in rooms:
         data = request.get_json()
-        duration = data.get('duration', 30)  # se não tiver duração na resposta, manda 30sec
+        duration = data.get('duration', 30)  # Padrão 30 segundos se não informado
+        round_number = data.get('round')  # O round pode ser fornecido ou não
 
         if isinstance(duration, int) and duration > 0:
+            if round_number is None:  # Se não foi passado um round, avança para o próximo
+                rooms[room_id]['current_round'] += 1
+            else:  # Caso contrário, seta o round fornecido
+                rooms[room_id]['current_round'] = round_number
+
             rooms[room_id]['duration'] = duration
-            rooms[room_id]['current_round'] += 1
             rooms[room_id]['start_time'] = time.time()
             rooms[room_id]['votes'] = {}
             rooms[room_id]['last_activity'] = time.time()
-            return jsonify({'message': 'Round started', 'duration': duration})
+
+            return jsonify({'message': 'Round started', 'round': rooms[room_id]['current_round'], 'duration': duration})
         else:
             return jsonify({'message': 'Invalid duration'}), 400
+    return jsonify({'message': 'Room not found'}), 404
+
+@app.route('/change_duration/<room_id>', methods=['POST'])
+def change_duration(room_id):
+    if room_id in rooms:
+        data = request.get_json()
+        new_remaining_time = data.get('new_remaining_time')  # Tempo restante fornecido no corpo da requisição
+
+        if isinstance(new_remaining_time, int) and new_remaining_time > 0:
+            elapsed_time = time.time() - rooms[room_id]['start_time']
+
+            if elapsed_time >= rooms[room_id]['duration']:
+                return jsonify({'message': 'Round already finished, cannot change remaining time'}), 400
+
+            # Atualizar a duração e definir o novo tempo restante
+            rooms[room_id]['duration'] = elapsed_time + new_remaining_time
+            rooms[room_id]['start_time'] = time.time()  # Resetar o tempo de início
+
+            return jsonify({
+                'message': 'Remaining time updated',
+                'new_remaining_time': new_remaining_time
+            })
+        else:
+            return jsonify({'message': 'Invalid remaining time'}), 400
     return jsonify({'message': 'Room not found'}), 404
 
 @app.route('/upload', methods=['POST'])
@@ -476,6 +519,20 @@ def on_join(data):
     join_room(room_id)
     print(f'User {request.sid} joined room {room_id}')
     emit('message', {'msg': f'User {request.sid} has joined the room {room_id}'}, room=room_id)
+
+@socketio.on('remove_player')
+def on_remove_player(data):
+    room_id = data['room_id']
+    player_id = data['player_id']
+
+    response, status_code = leave_room(room_id, player_id)
+
+    if status_code == 200:
+        emit('remove_success', {'msg': f'{player_id}'}, room=request.sid)
+        emit('update_players', list(rooms[room_id]['players'].values()), room=room_id)
+    else:
+        emit('remove_error', {'msg': response['message']}, room=request.sid)
+
 
 
 @app.route('/receptor/<room_id>')

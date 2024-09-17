@@ -11,6 +11,7 @@ let history = [];
 let redoHistory = [];
 let historyStep = -1;
 let selectedWinnerId = null;
+let actualUsername
 
 console.log('Connecting to server with roomId:', roomId);
 var socket = io({ query: { roomId: roomId } });
@@ -87,6 +88,18 @@ socket.on('message', function(data) {
     console.log('Mensagem recebida:', data.msg);
 });
 
+socket.on('update_players', function(data) {
+    const usernameExists = data.some(item => item.username === actualUsername);
+    if (!usernameExists) {
+        socket.disconnect()
+        localStorage.setItem('room', '')
+        document.getElementById('kickMessage').style.display = 'flex'
+        setTimeout(function() {
+            backToBox()
+        }, 5000)
+    }
+})
+
 function checkGameStatus() {
     fetch(`/room_status/${roomId}`)
         .then(response => response.json())
@@ -141,13 +154,11 @@ function saveUsername(){
     const playerId = localStorage.getItem('playerId');
     let characterNew
     const character = document.querySelector('.swiper-slide-active').querySelectorAll('span').forEach(element => {
-        console.log(element.innerHTML)
         characterNew = element.innerHTML
     });
 
 
     localStorage.setItem('username', username);
-    localStorage.setItem('character', characterNew);
     localStorage.setItem('room', roomId);
     joinRoom(playerId, username, characterNew);
 }
@@ -162,16 +173,22 @@ function joinRoom(playerId, username, character) {
     })
     .then(response => response.json())
     .then(data => {
-        console.log('Response data:', data);
         if (data.message === 'Player added' || data.message === 'Rejoining...') {
             console.log('Token:', data.token); // O token é o próprio playerId
             console.log(data.message);
 
             localStorage.setItem('playerId', data.token);
             localStorage.setItem('username', username);
+            localStorage.setItem('character', character);
             document.getElementById('userSelect').innerHTML = ''
-        } else {
-            window.location.href = 'https://youtube.com';
+            actualUsername = username
+        } else if (data.message === 'Character already taken') {
+            document.querySelectorAll('.character-img').forEach(function(element) {
+                element.classList.add('error');
+                setTimeout(function() {
+                    element.classList.remove('error');
+                }, 200)
+            });
         }
     })
     .catch(error => {
@@ -199,20 +216,27 @@ function fillCanvasWithWhite() {
    ctx.fillRect(0, 0, canvas.width, canvas.height);
    saveState();
 }
+let firstIteration = false
 
 function setColor(color) {
-    currentColor = color;            
-    if (lastColor === undefined) {
-         document.getElementById('black').style.borderColor = 'black'
-        document.getElementById(color).style.borderColor = 'white'
-        document.getElementById('actualColor').style.backgroundColor = currentColor
-    } else if (lastColor != color) {
-        document.getElementById(lastColor).style.borderColor = 'black'
-        document.getElementById(color).style.borderColor = 'white'
-        document.getElementById('actualColor').style.backgroundColor = currentColor
+    currentColor = color;
+    if (firstIteration == false) {
+        lastColor = 'black'  
     }
+    document.getElementById('actualColor').style.backgroundColor = currentColor;
+
+    if (lastColor && document.getElementById(lastColor)) {
+        document.getElementById(lastColor).style.borderColor = '#3f3f3f';
+    }
+
+    if (document.getElementById(color)) {
+        document.getElementById(color).style.borderColor = 'white';
+    }
+
+    firstIteration = true
     lastColor = color;
 }
+
 
 function setBrushSize(size) {
     currentSize = size;
@@ -580,4 +604,8 @@ function cancelVote() {
     const sendVoteBtn = document.getElementById('sendVote')
     sendVoteBtn.innerText = 'Enviar Voto'
     sendVoteBtn.onclick = sendVote
+}
+
+function backToBox() {
+    window.location.href = `/`;
 }

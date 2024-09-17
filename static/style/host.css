@@ -30,12 +30,15 @@ body {
 #loadingScreen.skip {
    animation: skipLoadingScreen 1000ms forwards;
 }
+#loadingScreen.show {
+   animation: showFinalScreen 500ms forwards
+}
 #loadingScreen span {
    color: #fff;
    font-weight: 500;
    font-size: 16pt;
 }
-#loadingScreen img {
+.loading-screen-img {
    width: 400px;
    animation: bounceLoading 2000ms ease-in-out infinite;
 }
@@ -47,6 +50,10 @@ body {
    0% {opacity: 1;}
    90% {opacity: 1;}
    100% {opacity: 0;}
+}
+@keyframes showFinalScreen {
+   from {opacity: 0;}
+   to {opacity: 1;}
 }
 .effects-container {
    box-shadow: rgba(0, 0, 0, 0.25) 0px 0px 140px 40px inset;
@@ -364,15 +371,43 @@ h1 {
    animation: caindo 900ms ease-in forwards;
    z-index: 2;
 }
-.phrases.perdedor {
+.phrase-container.perdedor {
    animation: caindo 900ms ease-in 500ms forwards;
 }
 .phrases {
-   margin-top: 3%;
-   padding: 3% 5%;
-   border-radius: 5px;
-   background-color: #f0f0f0;
-   filter: brightness(1);
+   font-weight: 600;
+   color: #f0f0f0;
+   text-wrap: wrap;
+   text-align: center;
+   font-size: 12pt;
+   width: 60%;
+   box-shadow: inset 0px 0px 10px 0px #3c3006e0;
+   border-radius: 6px;
+   padding: 2.5%;
+}
+.phrase-container {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin-top: 20px;
+   height: 66px;
+   width: 100%;
+   background-image: url('/static/images/molduraTitulo.png');
+   background-repeat: no-repeat;
+   background-size: 100%;
+   filter: brightness(0.54);
+}
+.phrase-container-hold {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   margin-top: 20px;
+   height: 66px;
+   width: 100%;
+   background-image: url('/static/images/molduraTitulo.png');
+   background-repeat: no-repeat;
+   background-size: 100%;
+   filter: brightness(0.54);
 }
 .drawing-hold {
    width: 446px;
@@ -382,11 +417,20 @@ h1 {
 }
 
 .phrases-hold {
-   margin-top: 3%;
-   padding: 3% 5%;
-   border-radius: 5px;
-   background-color: #f0f0f0;
-   filter: brightness(0.6);
+   filter: brightness(0.54);
+   background-image: url('/static/images/molduraTitulo.png');
+   width: 100%;
+   background-repeat: no-repeat;
+   background-size: 100%;
+   height: 66px;
+   margin-top: 20px;
+   font-weight: 600;
+   color: #f0f0f0;
+   text-wrap: wrap;
+   font-size: 14pt;
+   display: flex;
+   align-items: center;
+   justify-content: center;
 }
 
 .character-image {
@@ -406,6 +450,34 @@ h1 {
 
 .player-container.in-game {
    opacity: 0.6;
+}
+
+.player-del-btn {
+   width: 20px;
+   height: 20px;
+   position: absolute;
+   padding: 3px;
+   margin-top: 220px;
+   margin-left: 130px;
+   border-radius: 20px;
+   background-color: #1e1e1e;
+   background-image: url('/static/images/cross.svg');
+   background-size: 100%;
+   opacity: 0.7;
+   border-color: var(--secondary-color);
+   border-width: 1.8px;
+   border-style: solid;
+   z-index: 2;
+   cursor: pointer;
+}
+
+.player-del-btn:hover {
+   background-color: #252525;
+   opacity: 1;
+}
+
+.player-del-btn.in-game {
+   display: none;
 }
 
 #inside {
@@ -468,7 +540,7 @@ h1 {
 
 .btn-interface {
    height: 25px;
-   padding: 1% 1% 1% 0%;
+   margin: 15px 15px 15px 0%;
    right: 0;
    cursor: pointer;
    z-index: 101;
@@ -508,12 +580,13 @@ h1 {
 }
 
 .btn-interface:nth-child(2) {
-   padding: 1%;
+   margin: 15px 15px 15px 0;
+   padding: 0;
 }
 
 #rounds {
    position: absolute;
-   width: 40%;
+   width: 18%;
    align-self: center;
    z-index: 2;
    transition: all 600ms ease-in;
@@ -577,6 +650,13 @@ h1 {
    mix-blend-mode: screen;
 }
 
+#iluminacao.final {
+   display: block;
+   right: 5%;
+   opacity: 0.6;
+   height: 700px;
+}
+
 #iluminacao.aceso {
    opacity: 0.9;
    display: block;
@@ -623,6 +703,10 @@ h1 {
    animation: closeCircle 1.2s ease-out forwards;
 }
 
+#circle.final-round {
+   animation: finalCircle 1.2s ease-out forwards
+}
+
 @keyframes closeCircle {
    from {
        width: 200vw;
@@ -645,6 +729,21 @@ h1 {
    to {
       width: 200vw;
       height: 200vw;
+      border-width: 100vw; /* Borda inicial larga */
+  }
+}
+
+@keyframes finalCircle {
+   from {
+       width: 0;
+       height: 0;
+       border-width: 100vw; /* Borda final fechando o círculo */
+       left: 27vw;
+   }
+   to {
+      left: 27vw;
+      width: 45vw;
+      height: 45vw;
       border-width: 100vw; /* Borda inicial larga */
   }
 }
@@ -731,6 +830,19 @@ body.desligado {
    flex-direction: column;
    top: 25%;
 }
+.vencedor-container {
+   z-index: 2;
+   filter: brightness(0.6);
+   position: absolute;
+   display: flex;
+   align-self: center;
+   align-items: center;
+   justify-content: center;
+   justify-self: center;
+   flex-direction: column;
+   bottom: -6%;
+   right: -36px;
+}
 
 .perdedor-image {
    display: flex;
@@ -739,6 +851,19 @@ body.desligado {
 .perdedor-sign {
    display: flex;
    padding-top: 6%;
+}
+
+#matchups.final-round {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
+.matchup.final-round {
+   width: 70vw;
+   align-self: center;
+   align-items: center;
+   justify-content: space-between;
 }
 
 #playerListR2 {
@@ -765,8 +890,8 @@ body.desligado {
    width: fit-content;
    height: fit-content;
 
-   padding: 0.7% 1%;
-   margin: 0% 0% 2% 0%;
+   padding: 0.5% 0.7%;
+   margin: 0% 2% 2% 0%;
    align-items: center;
    display: flex;
    cursor: pointer;
@@ -950,10 +1075,202 @@ body.desligado {
    align-self: center;
 }
 
+.volume-control {
+   display: flex;
+   width: 100%;
+}
+
+.volume-slider-label {
+   text-wrap: nowrap;
+}
+
+#volume-slider {
+   width: 100%;
+}
+
+/*********** Baseline, reset styles ***********/
+input[type="range"] {
+   -webkit-appearance: none;
+   appearance: none;
+   background: transparent;
+   cursor: pointer;
+   width: 25rem;
+ }
+ 
+ /* Removes default focus */
+ input[type="range"]:focus {
+   outline: none;
+ }
+ 
+ /******** Chrome, Safari, Opera and Edge Chromium styles ********/
+ /* slider track */
+ input[type="range"]::-webkit-slider-runnable-track {
+   background-color: #c2c2c2;
+   border-radius: 0.5rem;
+   height: 0.5rem;
+ }
+ 
+ /* slider thumb */
+ input[type="range"]::-webkit-slider-thumb {
+   -webkit-appearance: none; /* Override default look */
+   appearance: none;
+   background-color: #1e1e1e;
+   border-radius: 0.5rem;
+   height: 0.5rem;
+   width: 1rem;
+ }
+ 
+ input[type="range"]:focus::-webkit-slider-thumb {
+   outline: 1px solid #3f3f3f;
+ }
+ 
+ /*********** Firefox styles ***********/
+ /* slider track */
+ input[type="range"]::-moz-range-track {
+   background-color: #c2c2c2;
+   border-radius: 0.5rem;
+   height: 0.5rem;
+ }
+ 
+ /* slider thumb */
+ input[type="range"]::-moz-range-thumb {
+   background-color: #808080;
+   border: none; /*Removes extra border that FF applies*/
+   border-radius: 0.5rem;
+   height: 0.5rem;
+   width: 1rem;
+ }
+ 
+ input[type="range"]:focus::-moz-range-thumb{
+   outline: 3px solid #808080;
+   outline-offset: 0.125rem;
+ }
+
 .inativo {
    position: absolute;
    z-index: 99;
    width: 100vw;
    height: 100vh;
    background-color: #00000059;
+}
+
+#creditosContainer {
+   z-index: 100;
+   text-align: center;
+   scale: 1.2;
+   width: 16vw;
+   animation: subirCreditos 100s forwards;
+   display: flex;
+   flex-direction: column;
+}
+
+#creditosContainer.final {
+   opacity: 0.9;
+   filter: brightness(0.75);
+}
+
+.h1-creditos {
+   color: #f0f0f0;
+   font-size: 20pt;
+   position: relative;
+   text-wrap: nowrap;
+}
+.p-creditos {
+   color: #f0f0f0c7;
+   font-size: 14pt;
+   position: relative;
+}
+
+.list-creditos {
+   list-style: none;
+   margin: 0;
+   padding: 0;
+}
+
+.list-element-creditos {
+   display: flex;
+   color: #f0f0f0c7;
+   justify-content: space-between;
+   margin-bottom: 2%;
+}
+
+.creditos-element {
+   margin-bottom: 20%;
+}
+
+.span-creditos {
+   color: #f0f0f0;
+}
+
+.logo-creditos {
+   padding-top: 10%;
+   width: 60%;
+   align-self: center;
+}
+
+.final-btn {
+   font-family: 'inter', sans-serif;
+   font-weight: 800;
+   font-size: 12pt;
+   margin-bottom: 1%;
+   padding: 0.5% 0.7%;
+   border-radius: 5px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   background-color: #1e1e1e;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+}
+
+.final-btn:hover {
+   background-color: #252525;
+}
+
+@keyframes subirCreditos {
+   from {
+      transform: translateY(90vh);
+   }
+   to {
+      transform: translateY(-90vh);
+   }
+}
+
+#finalLogo {
+   width: 150px;
+   position: absolute;
+   left: 0;
+   bottom: 0;
+   z-index: 10000;
+   padding: 1%;
+}
+
+#setting.roll {
+   animation: settingsRoll 500ms ease-in-out forwards;
+   transform-origin: center;
+}
+
+#fullscreen.pop {
+   animation: fullscreenPop 500ms ease-in-out forwards;
+}
+
+@keyframes settingsRoll {
+   from {
+      transform: rotate(180deg);
+      scale: 0.9;
+   }
+   to {
+      transform: rotate(0deg);
+      scale: 1;
+   }
+}
+
+@keyframes fullscreenPop {
+   from {
+      scale: 0.9;
+   }
+   to {
+      scale: 1;
+   }
 }
