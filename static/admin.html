@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Caixa - Plano A</title>
+    <link rel="stylesheet" href="/static/style/admin.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <nav id="sideBar">
+        <div class="sidebar-element-container">
+            <span>Salas</span>
+            <div class="sidebar-element">Enviar Mensagem</div>
+            <div class="sidebar-element">Criar Salas</div>
+            <div class="sidebar-element">Deletar Salas</div>
+        </div>
+        <div class="sidebar-element-container">
+            <span>Reports</span>
+            <div class="sidebar-element">Visualizar</div>
+        </div>
+    </nav>
+    <section class="main-section">
+        <div class="template-section">
+            <h1>Enviar Mensagem</h1>
+            <div>
+                <h3>Salas</h3>
+                <div id="roomsList"></div>
+            </div>
+            <div>
+                <h3>Enviar</h3>
+                <input id="roomId" placeholder="Insira o código da sala" maxlength="4" type="text">
+                <input id="phrase" placeholder="Insira a frase" type="text">
+                <button onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+    </section>
+    <img id="logo" src="/static/images/index/planoA.png" alt="">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        var socket = io({ query: { roomId: roomId } });
+
+        socket.on('connect', function() {
+            console.log('Connected to server');
+            socket.emit('join', { room_id: roomId, user_type: 'player' });
+        });
+
+        let admKey = localStorage.getItem('adm_key');
+        
+        function listRooms() {
+
+            // Fazendo a requisição GET para o servidor com a chave de administrador
+            fetch(`/list_rooms?adm_key=${admKey}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('roomsList');
+                resultDiv.innerHTML = '';
+
+                if (data.error) {
+                    resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+                } else {
+                    if (data.rooms && data.rooms.length > 0) {
+                        const roomList = document.createElement('ul');
+                        data.rooms.forEach(room => {
+                            const listItem = document.createElement('li');
+                            listItem.textContent = room;
+                            roomList.appendChild(listItem);
+                        });
+                        resultDiv.appendChild(roomList);
+                    } else {
+                        resultDiv.innerHTML = '<p>No rooms available</p>';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching rooms:', error);
+                document.getElementById('result').innerHTML = `<p style="color: red;">An error occurred</p>`;
+            });
+        }
+
+        window.onload = () => {
+            listRooms();
+            setInterval(listRooms, 1000);
+        };
+
+        function sendMessage() {
+            const roomId = document.getElementById('roomId').value
+            const phrase = document.getElementById('phrase').value
+
+            socket.emit('admin_message', {
+                admin_key: admKey,
+                room_id: roomId,
+                message: phrase
+            });
+            roomId.value = ' ';
+        }
+
+    </script>
+</body>
+</html>

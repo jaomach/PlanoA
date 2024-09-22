@@ -1,5 +1,5 @@
 const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas.getContext('2d', { willReadFrequently: true });
 let drawing = false;
 let currentColor = 'black';
 let currentSize = 2;
@@ -12,13 +12,14 @@ let redoHistory = [];
 let historyStep = -1;
 let selectedWinnerId = null;
 let actualUsername
+let fillMode = false;
 
 console.log('Connecting to server with roomId:', roomId);
 var socket = io({ query: { roomId: roomId } });
 
 socket.on('connect', function() {
     console.log('Connected to server');
-    socket.emit('join', { room_id: roomId });
+    socket.emit('join', { room_id: roomId, user_type: 'player' });
 });
 
 socket.on('message', function(data) {
@@ -34,7 +35,7 @@ socket.on('message', function(data) {
     if (data.msg === 'Round 1 finished') {
         document.getElementById('drawingArea').style.display = 'none';
         document.getElementById('round1').style.display = 'none';
-        document.getElementById('waitingMessage').style.display = 'block';
+        document.getElementById('waitingMessage').style.display = 'flex';
         exportDrawing();
     }
     if (data.msg === 'Round 2 started') {
@@ -45,7 +46,7 @@ socket.on('message', function(data) {
     if (data.msg === 'Round 2 finished') {
         document.getElementById('phraseInput').style.display = 'none';
         document.getElementById('round2').style.display = 'none';
-        document.getElementById('waitingMessage').style.display = 'block';
+        document.getElementById('waitingMessage').style.display = 'flex';
     }
     if (data.msg === 'Round 3 started') {
         phrasesFetched = true
@@ -86,6 +87,14 @@ socket.on('message', function(data) {
         displayMatchup()
     }
     console.log('Mensagem recebida:', data.msg);
+    const contemHostELeft = data.msg.includes('Host') && data.msg.includes('left');
+    const contemHostEJoined = data.msg.includes('Host') && data.msg.includes('joined');
+
+    if (contemHostELeft) {
+        document.getElementById('oopsHostMessage').style.display = 'flex'
+    } else if (contemHostEJoined) {
+        document.getElementById('oopsHostMessage').style.display = 'none'
+    }
 });
 
 socket.on('update_players', function(data) {
@@ -102,31 +111,67 @@ socket.on('update_players', function(data) {
 
 function checkGameStatus() {
     fetch(`/room_status/${roomId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.started && !gameStarted) {
-                gameStarted = true;
-                document.getElementById('waitingMessage').style.display = 'none';
-                document.getElementById('drawingArea').style.display = 'block';
-                localStorage.setItem('drawings', 0)
-                initializeCanvas();
+    .then(response => response.json())
+    .then(data => {
+        // Verifica se o playerId está presente na resposta
+
+        if (data.started && !gameStarted) {
+            const playerId = localStorage.getItem('playerId');
+
+            if (!data.players[playerId]) {
+                document.getElementById('userSelect').style.display = 'none'
+                document.getElementById('oopsMessage').style.display = 'flex'
+                socket.disconnect()
+                return
             }
-            if (data.remaining_time === 0) {
+            gameStarted = true;
+        }
+        if (data.current_round === 1 && data.remaining_time > 0) {
+            document.getElementById('userSelect').style.display = 'none'
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('drawingArea').style.display = 'flex';
+            const drawingCheck = localStorage.getItem('drawings')
+            if (drawingCheck >= 3) {
                 document.getElementById('drawingArea').style.display = 'none';
+                document.getElementById('waitingMessage').style.display = 'flex';
             }
-            if (data.current_round === 2) {
-                document.getElementById('phraseInput').style.display = 'flex';
-            }
-            if (data.current_round === 3 && !phrasesFetched) {
-                phrasesFetched = true
-                fetchDistributedPhrases()
-                fetchDistributedDrawings()
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+            initializeCanvas();
+        }
+        if (data.current_round === 1 && data.remaining_time === 0) {
+            document.getElementById('drawingArea').style.display = 'none';
+            document.getElementById('waitingMessage').style.display = 'flex';
+        }
+        if (data.current_round === 2 && data.remaining_time > 0) {
+            document.getElementById('userSelect').style.display = 'none'
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('phraseInput').style.display = 'flex';
+        }
+        if (data.current_round === 2 && data.remaining_time === 0) {
+            document.getElementById('phraseInput').style.display = 'none';
+            document.getElementById('waitingMessage').style.display = 'flex';
+        }
+        if (data.current_round > 2) {
+            document.getElementById('userSelect').style.display = 'none'
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('roundErrorMessage').style.display = 'flex';
+            socket.disconnect()
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
+
+
+window.addEventListener('beforeunload', function (event) {
+    // Define a mensagem a ser exibida no alerta
+    const message = 'Tem certeza de que deseja sair da página? As alterações não salvas serão perdidas.';
+    
+    // Alguns navegadores modernos ignoram a customização da mensagem,
+    // mas ainda assim exibem um alerta padrão de confirmação
+    event.returnValue = message; // Definido para compatibilidade com alguns navegadores
+    return message; // Para outros navegadores que utilizam essa forma
+});
 
 window.onload = () => {
     const savedPlayerId = localStorage.getItem('playerId');
@@ -197,12 +242,17 @@ function joinRoom(playerId, username, character) {
 }
 
 function initializeCanvas() {
-   canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousedown', (e) => {
+        if (!fillMode) startDrawing();
+        fill(e);
+    });
    canvas.addEventListener('mousemove', draw);
    canvas.addEventListener('mouseup', stopDrawing);
-   canvas.addEventListener('mouseout', stopDrawing);
 
-   canvas.addEventListener('touchstart', startDrawing);
+   canvas.addEventListener('touchstart', (e) => {
+        if (!fillMode) startDrawing();
+        fill(e);
+    });
    canvas.addEventListener('touchmove', draw);
    canvas.addEventListener('touchend', stopDrawing);
    canvas.addEventListener('touchcancel', stopDrawing);
@@ -216,6 +266,15 @@ function fillCanvasWithWhite() {
    ctx.fillRect(0, 0, canvas.width, canvas.height);
    saveState();
 }
+
+document.getElementById('bucketBtn').addEventListener('click', () => {
+    fillMode = !fillMode;
+    document.querySelectorAll('.active-other').forEach(function(element) {
+        element.classList.remove('active-other');
+    });
+    document.getElementById('bucketBtn').classList.add('active-other')
+});
+
 let firstIteration = false
 
 function setColor(color) {
@@ -237,13 +296,29 @@ function setColor(color) {
     lastColor = color;
 }
 
-
-function setBrushSize(size) {
+function setBrushSize(size, element) {
     currentSize = size;
+    fillMode = false;
+    document.querySelectorAll('.active').forEach(function(element) {
+        element.classList.remove('active');
+    });
+    document.querySelectorAll('.active-other').forEach(function(element) {
+        if (element.id == 'bucketBtn') { // Verifica se o ID é diferente de 'bucketBtn'
+            element.classList.remove('active-other');
+        }
+    });
+    element.classList.add('active'); // Add 'active' to the clicked element
 }
 
-function setEraser() {
+
+function setEraser(element) {
     currentColor = 'white';
+    fillMode = false
+    document.querySelectorAll('.active-other').forEach(function(element) {
+        element.classList.remove('active-other');
+    });
+
+    element.classList.add('active-other')
 }
 
 function startDrawing(event) {
@@ -251,22 +326,80 @@ function startDrawing(event) {
    draw(event);
 }
 
-function draw(event) {
-   if (!drawing) return;
+function draw(e) {
+    if (!drawing) return;
+    ctx.lineWidth = currentSize;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = currentColor;
+    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+    ctx.stroke();
+}
 
-   event.preventDefault();
-   const rect = canvas.getBoundingClientRect();
-   const x = (event.clientX || event.touches[0].clientX) - rect.left;
-   const y = (event.clientY || event.touches[0].clientY) - rect.top;
+function fill(e) {
+    if (fillMode) {
+        const x = e.clientX - canvas.offsetLeft;
+        const y = e.clientY - canvas.offsetTop;
+        const fillColor = hexToRgb(currentColor);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        const targetColor = getPixelColor(data, x, y);
 
-   ctx.lineWidth = currentSize;
-   ctx.lineCap = 'round';
-   ctx.strokeStyle = currentColor;
+        if (!colorsMatch(targetColor, fillColor)) {
+            floodFill(x, y, targetColor, fillColor, data);
+            ctx.putImageData(imageData, 0, 0);
+        }
+    }
+}
 
-   ctx.lineTo(x, y);
-   ctx.stroke();
-   ctx.beginPath();
-   ctx.moveTo(x, y);
+function floodFill(x, y, targetColor, fillColor, data) {
+    const stack = [[x, y]];
+    const width = canvas.width;
+    const height = canvas.height;
+
+    while (stack.length > 0) {
+        const [cx, cy] = stack.pop();
+        const index = (cy * width + cx) * 4;
+
+        if (cx < 0 || cx >= width || cy < 0 || cy >= height) continue;
+        if (data[index] !== targetColor.r || data[index + 1] !== targetColor.g || data[index + 2] !== targetColor.b) continue;
+
+        data[index] = fillColor.r;
+        data[index + 1] = fillColor.g;
+        data[index + 2] = fillColor.b;
+        data[index + 3] = 255;
+
+        stack.push([cx + 1, cy]);
+        stack.push([cx - 1, cy]);
+        stack.push([cx, cy + 1]);
+        stack.push([cx, cy - 1]);
+    }
+}
+
+function getPixelColor(data, x, y) {
+    const index = (y * canvas.width + x) * 4;
+    return {
+        r: data[index],
+        g: data[index + 1],
+        b: data[index + 2]
+    };
+}
+
+function colorsMatch(color1, color2) {
+    return color1.r === color2.r && color1.g === color2.g && color1.b === color2.b;
+}
+
+function hexToRgb(hex) {
+    let r = 0, g = 0, b = 0;
+    if (hex.length === 4) {
+        r = parseInt(hex[1] + hex[1], 16);
+        g = parseInt(hex[2] + hex[2], 16);
+        b = parseInt(hex[3] + hex[3], 16);
+    } else if (hex.length === 7) {
+        r = parseInt(hex[1] + hex[2], 16);
+        g = parseInt(hex[3] + hex[4], 16);
+        b = parseInt(hex[5] + hex[6], 16);
+    }
+    return { r, g, b };
 }
 
 function stopDrawing() {
@@ -329,7 +462,7 @@ function exportDrawing() {
     })
     .then(data => {
         console.log('Success:', data);
-        var drawings = localStorage.getItem('drawings');
+        let drawings = localStorage.getItem('drawings');
         if (drawings) {
             drawings = parseInt(drawings);
         } else {
@@ -343,7 +476,7 @@ function exportDrawing() {
             clearCanvas();
         } else {
             document.getElementById('drawingArea').style.display = 'none'
-            document.getElementById('waitingMessage').style.display = 'block';
+            document.getElementById('waitingMessage').style.display = 'flex';
             socket.emit('message', {message: playerId, room_id: roomId });
         }
     })
@@ -382,7 +515,7 @@ function submitPhrase() {
                     console.log(phraseCounter)
                 } else {
                     document.getElementById('round2').style.display = 'none';
-                    document.getElementById('waitingMessage').style.display = 'block';
+                    document.getElementById('waitingMessage').style.display = 'flex';
                     socket.emit(playerId);
                 }
                 document.getElementById('phrase').value = '';

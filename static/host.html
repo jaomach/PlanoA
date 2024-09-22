@@ -7,9 +7,14 @@
     <title>Plagio Consentido - Plano A</title>
 </head>
 <body id="body">
-    <div id="loadingScreen">
+    <div class="message-screen" id="loadingScreen">
         <img class="loading-screen-img" src="/static/images/LOGO.png" alt="">
         <span>Carregando...</span>
+    </div>
+    <div class="message-screen" id="oopsMessage" style="display: none;">
+        <span class="message-screen-span">Oops!</span>
+        <p class="message-screen-p">Parece que você perdeu o fio da meada, a partida já está rolando...</p>
+        <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
     </div>
     <div id="effectContainer" class="effects-container"></div>
     <div id="circle"></div>
@@ -95,13 +100,16 @@
         </div>
         <div id="playerList"></div>
         <div class="menu-inicial">
-            <button class="primary-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
+            <button class="primary-btn" id="startButton" onclick="startGame()"><span>Iniciar Partida</span><img src="/static/1204.png" alt=""></button>
         </div>
         <div id="matchups">
             <div class="matchup" id="papaleguas"></div>
         </div>
     </div>
     
+    <div id="errorContainer">
+        <span id="errorMsg"></span>
+    </div>
 
     <audio id="audioR1" src="/static/audios/r1/narradorR1.mp3" type="audio/mpeg"></audio>
     <audio id="audioR2" src="" type="audio/mpeg"></audio>

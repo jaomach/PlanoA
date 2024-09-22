@@ -88,6 +88,9 @@ body {
     border-radius: 6px;
     touch-action: none;
 }
+#canvas:hover {
+    cursor: crosshair;
+}
 #exportDrawingBtn {
     padding: 2.5% 7%;
 }
@@ -172,6 +175,11 @@ input[type="color"]::-webkit-color-swatch {
 .tool-other {
     display: flex;
     flex-direction: column;
+}
+.tool-other button {
+    width: 50px;
+    height: 50px;
+    padding: 0;
 }
 .actual-color {
     width: 100%;
@@ -289,6 +297,14 @@ swiper-slide img {
     justify-content: center;
 }
 
+.primary-btn.active {
+    border-color: #fff;
+}
+
+.primary-btn.active-other {
+    border-color: #fff;
+}
+
 .primary-select {
     font-family: 'inter', sans-serif;
     margin-top: 8%;
@@ -332,7 +348,7 @@ swiper-slide img {
 }
 
 #drawingCounter {
-    padding: 1rem;
+    padding: 0.7rem;
     color: #fff;
     font-weight: 600;
     font-size: 16pt;
@@ -341,6 +357,14 @@ swiper-slide img {
     border-color: var(--secondary-color);
     border-width: 1px;
     position: absolute;
+    border-radius: 100px;
+    box-shadow: #00000061 0px 0px 10px;
+    margin-bottom: 680px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .brush-btn {
@@ -349,19 +373,19 @@ swiper-slide img {
     height: 50px;
 }
 
-.brush-btn:nth-child(2) img {
+.brush-btn:nth-child(3) img {
     width: 10px;
 }
 
-.brush-btn:nth-child(3) img {
+.brush-btn:nth-child(4) img {
     width: 15px;
 }
 
-.brush-btn:nth-child(4) img {
+.brush-btn:nth-child(5) img {
     width: 20px;
 }
 
-.brush-btn:nth-child(5) {
+.brush-btn:nth-child(6) {
     margin-bottom: 20%;
 }
 

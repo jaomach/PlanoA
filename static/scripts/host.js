@@ -223,7 +223,8 @@ clipboardBtn.addEventListener('click', function(event) {
         return;
     }
 
-    navigator.clipboard.writeText(roomId);
+    var urlAtual = window.location.hostname;
+    navigator.clipboard.writeText(urlAtual + ':5000/drawing/' + roomId);
 
     const contextBox = document.createElement('span');
     contextBox.classList.add('context-box');
@@ -307,7 +308,28 @@ var socket = io({
 
 socket.on('connect', function() {
     console.log('Connected to server');
-    socket.emit('join', { room_id: roomId });
+    socket.emit('join', { room_id: roomId, user_type: 'host' });
+});
+
+socket.on('admin_message', function(data) {
+    const errorMsg = document.getElementById('errorMsg')
+    const errorContainer = document.getElementById('errorContainer')
+    errorMsg.innerText = `${data.msg}`
+    errorContainer.classList.add('appear')
+    setTimeout(function(){
+        errorContainer.classList.remove('appear')
+    }, 9000)
+})
+
+socket.on('message', function(data) {
+    if (data.msg) {
+        const playerId = data.msg;
+        const container = document.getElementById(`container-${playerId}`);
+
+        if (container) {
+            container.classList.remove('in-game');
+        }
+    }
 });
 
 let previousImageSrc = {};
@@ -392,7 +414,6 @@ if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === fa
 }
 if (data.current_round === 3 && round3 === false) {
     round3 = true;
-    document.getElementById('rounds').classList.remove('aparecendo')
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.add('in-game');
     });
@@ -409,7 +430,6 @@ if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === fa
 }
 if (data.current_round === 4 && round4 === false) {
     round4 = true;
-    document.getElementById('rounds').classList.remove('aparecendo')
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.add('in-game');
     });
@@ -531,6 +551,9 @@ function startGame() {
             roundCallRandom(round1Var1, round1Var1, round1Var1)
             document.querySelectorAll('.player-container').forEach(function(element) {
                 element.classList.add('in-game');
+            });
+            document.querySelectorAll('.input-container').forEach(function(element) {
+                element.disabled = true
             });
             document.querySelectorAll('.player-del-btn').forEach(function(element) {
                 element.classList.add('in-game');
@@ -925,28 +948,11 @@ function verifyRoom() {
     fetch(`/room_status/${roomId}`)
     .then(response => response.json())
     .then(data => {
-        console.log('Response data:', data);
         if (data.started === true) {
             setTimeout(function() {
-                auxGameStarted = false
-                console.log(auxGameStarted)
-                const remainingTime = data.remaining_time
-                document.getElementById('timer').style.display = 'block'
-                document.getElementById('startButton').style.display = 'none'
-                document.getElementById('timer').classList.add('appear')
-                startCountdown(remainingTime - 5, 0)
-            }, 2000)
-        }
-        if (data.currentRound === 1) {
-            setTimeout(function() {
-                auxGameStarted = false
-                console.log(auxGameStarted)
-                const remainingTime = data.remaining_time
-                document.getElementById('timer').style.display = 'block'
-                document.getElementById('startButton').style.display = 'none'
-                document.getElementById('timer').classList.add('appear')
-                startCountdown(remainingTime - 5, 0)
-            }, 2000)
+                document.getElementById('oopsMessage').style.display = 'flex'
+                socket.disconnect()
+            }, 890)
         }
     })
     .catch(error => {
@@ -1650,6 +1656,8 @@ function roundFinal() {
     var whistleDown = document.getElementById("whistleDown");
     var whistleUp = document.getElementById("whistleUp");
     var audioRodadaFinal = document.getElementById("audioFinal");
+    var soundTrackR4 = document.getElementById("soundTrackR4");
+    soundTrackR4.pause();
 
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
@@ -1826,28 +1834,28 @@ function skipRound(roundNum) {
         const audioR1Var1 = document.getElementById("audioR1");
         audioR1Var1.pause();
         audioR1Var1.currentTime = 0;
-        startCountdown(15, 500)
+        startCountdown(round1Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     } 
     if (roundNum === 2) {
         const audioR2Var1 = document.getElementById("audioR2");
         audioR2Var1.pause();
         audioR2Var1.currentTime = 0;
-        startCountdown(10, 500)
+        startCountdown(round2Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     }
     if (roundNum === 3) {
         const audioR3Var1 = document.getElementById("audioR3");
         audioR3Var1.pause();
         audioR3Var1.currentTime = 0;
-        startCountdown(30, 500)
+        startCountdown(round3Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     }
     if (roundNum === 4) {
         const audioR4Var1 = document.getElementById("audioR4");
         audioR4Var1.pause();
         audioR4Var1.currentTime = 0;
-        startCountdown(40, 500)
+        startCountdown(round4Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     }
     if (roundNum === 'final') {

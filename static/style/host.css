@@ -15,7 +15,7 @@ body {
    background-image: url('/static/images/background.png');
    background-size: cover;
 }
-#loadingScreen {
+.message-screen {
    width: 100%;
    height: 100%;
    position: absolute;
@@ -26,6 +26,27 @@ body {
    align-items: center;
    justify-content: center;
    flex-direction: column;
+}
+.message-screen img {
+   width: 30%;
+   margin-bottom: 6%;
+}
+
+.message-screen-span {
+   font-size: 30pt;
+   color: #f0f0f0;
+   font-weight: 600;
+}
+
+.message-screen-p {
+   font-size: 11pt;
+   width: 60%;
+   color: #8e8e8e;
+   font-weight: 400;
+   text-align: center;
+}
+#loadingScreen {
+   z-index: 3000000000000000001;
 }
 #loadingScreen.skip {
    animation: skipLoadingScreen 1000ms forwards;
@@ -71,7 +92,7 @@ body {
    display: none;
 }
 @keyframes tv-effect {
-   0% {background-position: 0px 100%; opacity: 1;}
+   0% {background-position: 0px 125%; opacity: 1;}
    20% {opacity: 0.9; box-shadow: rgba(0, 0, 0, 0.35) 0px 0px 140px 40px inset;}
    21% {opacity: 0.4; box-shadow: rgba(0, 0, 0, 0.45) 0px 0px 140px 40px inset;}
    22% {opacity: 1; box-shadow: rgba(0, 0, 0, 0.25) 0px 0px 140px 40px inset;}
@@ -170,8 +191,8 @@ body {
    font-family: 'inter', sans-serif;
    font-weight: 800;
    font-size: 12pt;
-   margin-top: 8%;
-   padding: 4% 52%;
+   margin-top: 2rem;
+   padding: 0.6rem 0.9rem;
    border-radius: 5px;
    border-style: solid;
    border-color: #3f3f3f;
@@ -180,7 +201,9 @@ body {
    border-width: 1.8px;
    cursor: pointer;
    transition: all 500ms;
-   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: center;
 }
 .input-container {
    font-family: 'inter', sans-serif;
@@ -210,6 +233,7 @@ body {
    transition: all 500ms;
    padding: 6% 8%;
    font-weight: 400;
+   margin-left: 8%;
    background-color: #252525;
    font-size: 9pt;
    appearance: none;
@@ -330,8 +354,7 @@ h1 {
 
 .menu-inicial img {
    height: 24px;
-   width: 50px;
-   padding-left: 3.5%;
+   width: 29px;
 }
 #startButton.translate{
    position: relative;
@@ -988,7 +1011,7 @@ body.desligado {
 
    width: 17vw;
    height: 35vh;
-   background-color: #252525;
+   background-color: var(--primary-color);
    position: absolute;
    z-index: 1000;
    padding: 1%;
@@ -1049,6 +1072,8 @@ body.desligado {
    border-radius: 30px;
    border-width: 1px;
    border-color: #3f3f3f;
+   background-color: #252525;
+   box-shadow: #00000061 0px 0px 10px;
 }
 
 .bar-element {
@@ -1272,5 +1297,41 @@ input[type="range"] {
    }
    to {
       scale: 1;
+   }
+}
+
+#errorContainer {
+   width: 100%;
+   height: 30px;
+   background-color: #252525;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   position: absolute;
+   opacity: 0;
+   bottom: 0;
+   font-size: 10pt;
+}
+
+#errorContainer.appear {
+   animation: errorAppear 9000ms ease-in-out forwards;
+}
+#errorMsg {
+   color: white;
+}
+
+@keyframes errorAppear {
+   0% {
+       opacity: 0;
+   }
+   
+   2% {
+       opacity: 1;
+   }
+   98% {
+       opacity: 1;
+   }
+   100% {
+       opacity: 0;
    }
 }

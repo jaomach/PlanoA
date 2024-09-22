@@ -22,6 +22,21 @@
             <span class="message-screen-span">De olho!</span>
             <p class="message-screen-p">Fique de olho na tela do host para receber as informações necessárias dos rounds.</p>
         </div>
+        <div class="message-screen" id="oopsMessage" style="display: none;">
+            <span class="message-screen-span">Oops!</span>
+            <p class="message-screen-p">Parece que você perdeu o fio da meada, a partida já está rolando...</p>
+            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+        </div>
+        <div class="message-screen" id="oopsHostMessage" style="display: none;">
+            <span class="message-screen-span">Oops!</span>
+            <p class="message-screen-p">Parece que o host se desconectou, aguarde um host se conectar novamente...</p>
+            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+        </div>
+        <div class="message-screen" id="roundErrorMessage" style="display: none;">
+            <span class="message-screen-span">Perdão...</span>
+            <p class="message-screen-p">Infelizmente não foi possivel reconectar ao jogo.</p>
+            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+        </div>
         <div class="message-screen" id="kickMessage" style="display: none;">
             <span class="message-screen-span">Vish...</span>
             <p class="message-screen-p">O host da sala optou por te expulsar, você será redirecionado à caixa em instantes.</p>
@@ -84,11 +99,12 @@
             </div>
             <div class="toolbar">
                 <div class="tool-other">
-                    <button class="primary-btn" id="eraserBtn" onclick="setEraser()"><img src="/static/images/player/eraser.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(5)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(10)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(20)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(30)"><img src="/static/images/player/bSize.png" alt=""></button>
+                    <button class="primary-btn" id="bucketBtn"><img src="/static/images/player/bucket.svg" alt=""></button>
+                    <button class="primary-btn" id="eraserBtn" onclick="setEraser(this)"><img src="/static/images/player/eraser.png" alt=""></button>
+                    <button class="primary-btn brush-btn active" onclick="setBrushSize(5, this)"><img src="/static/images/player/bSize.png" alt=""></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(10, this)"><img src="/static/images/player/bSize.png" alt=""></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(20, this)"><img src="/static/images/player/bSize.png" alt=""></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(30, this)"><img src="/static/images/player/bSize.png" alt=""></button>
                     <button class="primary-btn" onclick="undo()"><img src="/static/images/undo.svg" alt=""></button>
                     <button class="primary-btn" onclick="redo()"><img style="transform: scale(-1,1)" src="/static/images/undo.svg" alt=""></button>
                 </div>
@@ -109,14 +125,14 @@
         <div class="selection-container" id="combinationArea" style="display: flex;">
             <span class="primary-title">Combine um título com uma pintura:</span>
             <swiper-container id="swiperCombine" class="swiper-container" navigation="true">
-                <swiper-slide>
+ <!--               <swiper-slide>
                     <img src="/uploads/KCTB_534EZe8YXMKM_1722528836.png" alt="">
                     <span id="character">Berro</span>
                 </swiper-slide>
                 <swiper-slide>
                     <img src="/static/images/Berro.png " alt="">
                     <span id="character">Berro</span>
-                </swiper-slide>
+                </swiper-slide> -->
             </swiper-container>
             <select class="primary-select" id="phraseSelect">
                 <option value=""></option>

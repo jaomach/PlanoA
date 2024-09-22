@@ -59,6 +59,7 @@ rooms = {
 }
 clients = []
 ip_cooldowns = {}
+users = {}
 COOLDOWN_PERIOD = 60
 ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 
@@ -490,6 +491,12 @@ def index():
         html_content = f.read()
     return render_template_string(html_content)
 
+@app.route('/admin')
+def admin():
+    with open('static/admin.html', encoding='utf-8') as f:
+        html_content = f.read()
+    return render_template_string(html_content)
+
 
 @app.route('/drawing/<room_id>')
 def drawing(room_id):
@@ -503,7 +510,18 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    print('Client disconnected:', request.sid)
+    user_type = users.get(request.sid, 'player')  # Se não encontrar, assume que é um player
+    
+    if user_type == 'host':
+        print(f'Host disconnected: {request.sid}')
+        emit('message', {'msg': f'Host {request.sid} has left the room'}, broadcast=True)
+    else:
+        print(f'Player disconnected: {request.sid}')
+        emit('message', {'msg': f'Player {request.sid} has left the room'}, broadcast=True)
+
+    # Removendo o usuário do dicionário
+    users.pop(request.sid, None)
+
 
 @socketio.on('message')
 def handle_message(data):
@@ -513,12 +531,44 @@ def handle_message(data):
         emit('message', {'msg': message}, room=room_id)
         print(f'Message sent to room {room_id}: {message}')
 
+@socketio.on('admin_message')
+def admin_handle_message(data):
+    # Pegue a admin_key dos dados
+    admin_key = data.get('admin_key')
+    room_id = data.get('room_id')
+    message = data.get('message')
+
+    # Verifique se a admin_key está correta
+    if admin_key != ADMIN_KEY:
+        emit('error', {'msg': 'Invalid admin key'})
+        print('Failed admin key check')
+        return
+
+    # Se a admin_key for válida, enviar a mensagem para a sala
+    if room_id and message:
+        emit('admin_message', {'msg': message}, room=room_id)
+        print(f'Message sent to room {room_id}: {message}')
+    else:
+        emit('error', {'msg': 'Room ID or message missing'})
+        print('Room ID or message missing')
+
 @socketio.on('join')
 def on_join(data):
     room_id = data['room_id']
+    user_type = data.get('user_type', 'player')  # Por padrão, considera que é um player
     join_room(room_id)
-    print(f'User {request.sid} joined room {room_id}')
-    emit('message', {'msg': f'User {request.sid} has joined the room {room_id}'}, room=room_id)
+
+    # Armazenando o tipo de usuário no dicionário
+    users[request.sid] = user_type
+
+    if user_type == 'host':
+        print(f'Host {request.sid} joined room {room_id}')
+        emit('message', {'msg': f'Host {request.sid} has joined the room {room_id}'}, room=room_id)
+    else:
+        print(f'Player {request.sid} joined room {room_id}')
+        emit('message', {'msg': f'Player {request.sid} has joined the room {room_id}'}, room=room_id)
+
+
 
 @socketio.on('remove_player')
 def on_remove_player(data):
@@ -674,6 +724,24 @@ def vote():
         return jsonify({'message': 'Vote received'})
     else:
         return jsonify({'message': 'Invalid room or player'}), 400
+
+# Defina a chave de administrador
+ADMIN_KEY = 'batata'
+
+@app.route('/list_rooms', methods=['GET'])
+def list_rooms():
+    # Pegue a chave de administrador da query string
+    adm_key = request.args.get('adm_key')
+    
+    # Verifique se a chave está correta
+    if adm_key == ADMIN_KEY:
+        room_titles = list(rooms.keys())
+        return jsonify({"rooms": room_titles})
+    else:
+        # Retorne uma mensagem de erro se a chave estiver incorreta
+        return jsonify({"error": "Invalid admin key"}), 403
+
+
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)
