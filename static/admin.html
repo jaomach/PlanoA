@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Caixa - Plano A</title>
+    <title>Admin</title>
     <link rel="stylesheet" href="/static/style/admin.css">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 </head>
@@ -11,27 +11,34 @@
     <nav id="sideBar">
         <div class="sidebar-element-container">
             <span>Salas</span>
-            <div class="sidebar-element">Enviar Mensagem</div>
-            <div class="sidebar-element">Criar Salas</div>
-            <div class="sidebar-element">Deletar Salas</div>
+            <div id="btnEMessage" class="sidebar-element">Enviar Mensagem</div>
+            <div id="btnCSala" class="sidebar-element">Criar Salas</div>
+            <div id="btnDSala" class="sidebar-element">Deletar Salas</div>
         </div>
         <div class="sidebar-element-container">
             <span>Reports</span>
-            <div class="sidebar-element">Visualizar</div>
+            <div id="btnVReport" class="sidebar-element">Visualizar</div>
         </div>
     </nav>
     <section class="main-section">
-        <div class="template-section">
+        <div id="EMessageSection" class="template-section">
             <h1>Enviar Mensagem</h1>
-            <div>
+            <div class="template-subsection">
                 <h3>Salas</h3>
                 <div id="roomsList"></div>
             </div>
-            <div>
+            <div class="template-subsection">
                 <h3>Enviar</h3>
                 <input id="roomId" placeholder="Insira o código da sala" maxlength="4" type="text">
                 <input id="phrase" placeholder="Insira a frase" type="text">
                 <button onclick="sendMessage()">Enviar</button>
+            </div>
+        </div>
+        <div id="reportSection" class="template-section">
+            <h1>Visualizar Reports</h1>
+            <div class="template-subsection">
+                <h3>Reports</h3>
+                <div id="reportsList"></div>
             </div>
         </div>
     </section>
@@ -46,9 +53,26 @@
         });
 
         let admKey = localStorage.getItem('adm_key');
+        const btnEMessage = document.getElementById('btnEMessage')
+        const btnCSala = document.getElementById('btnCSala')
+        const btnDSala = document.getElementById('btnCSala')
+        const btnVReport = document.getElementById('btnVReport')
+
+        btnVReport.addEventListener('click', function(){
+            document.querySelectorAll('.template-section').forEach(function(element) {
+                element.classList.remove('active');
+            });
+            document.getElementById('reportSection').classList.add('active')
+        })
+
+        btnEMessage.addEventListener('click', function(){
+            document.querySelectorAll('.template-section').forEach(function(element) {
+                element.classList.remove('active');
+            });
+            document.getElementById('EMessageSection').classList.add('active')
+        })
         
         function listRooms() {
-
             // Fazendo a requisição GET para o servidor com a chave de administrador
             fetch(`/list_rooms?adm_key=${admKey}`)
             .then(response => response.json())
@@ -78,7 +102,52 @@
             });
         }
 
+        async function fetchReports() {
+            const url = `/call_reports?adm_key=${admKey}`;
+
+            try {
+                const response = await fetch(url);
+
+                if (response.ok) {
+                    const reports = await response.json();
+
+                    displayReports(reports);
+                } else {
+                    const errorData = await response.json();
+                }
+            } catch (error) {
+            }
+        }
+
+        function displayReports(reports) {
+            const resultDiv = document.getElementById('reportsList');
+            resultDiv.innerHTML = ''; // Limpa o conteúdo anterior
+
+            if (reports.length === 0) {
+                resultDiv.innerText = 'Nenhum report encontrado.';
+                return;
+            }
+
+            // Cria uma lista de reports
+            const ul = document.createElement('ul');
+            let actualCount = 0
+            reports.forEach(report => {
+                actualCount = actualCount+1
+                const li = document.createElement('li');
+                li.classList.add('reports-container')
+                li.innerHTML = `<span>${actualCount}. ${report.motive}</span>
+                <span class="reports-second-span">${report.description}</span>
+                <span class="reports-second-span">${report.platform}</span>
+                <span class="reports-second-span">${report.browser}</span>
+                <span class="reports-second-span">${report.user_agent}</span>`;
+                ul.appendChild(li);
+            });
+
+            resultDiv.appendChild(ul);
+        }
+
         window.onload = () => {
+            fetchReports();
             listRooms();
             setInterval(listRooms, 1000);
         };

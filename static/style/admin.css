@@ -40,15 +40,21 @@ canvas { display: block; position: absolute; }
 }
 
 .sidebar-element {
-    margin-left: 2%;
+    margin-left: 3%;
+    margin-right: 3%;
     font-size: 11pt;
     color: white;
     opacity: 0.7;
     cursor: pointer;
+    padding: 3% 5%;
+    border-radius: 0.2rem;
+    background-color: #3f3f3f;
+    transition: all 100ms;
 }
 
 .sidebar-element:hover {
     margin-left: 2%;
+    margin-right: 4%;
     font-size: 11pt;
     color: white;
     opacity: 0.9;
@@ -74,18 +80,67 @@ canvas { display: block; position: absolute; }
 
 .template-section {
     width: 94.5%;
-    height: 90.5%;
+    height: 92.5%;
     padding: 2%;
     border-radius: 0.7rem;
-    background-color: #2c2c2c;
-    border-style: solid;
+    /*background-color: #2c2c2c;
+    border-style: solid;*/
+    display: none;
     border-width: 1px 1px 1px 1px;
     border-color: var(--secondary-color);
     color: white;
+    overflow-y: scroll;
+    scrollbar-width: none;
 }
 
 .template-section h1 {
     padding: 0;
     margin: 0;
     color: white;
+}
+
+.template-section.active {
+    display: block;
+    opacity: 0;
+    animation: sectionAppearing 500ms ease-in-out 200ms forwards;
+}
+
+.template-subsection {
+    margin-left: 1%;
+    margin-top: 1%;
+}
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+.reports-container {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 2%;
+    background-color: #2c2c2c;
+    width: auto;
+    padding: 1%;
+    border-radius: 0.2rem;
+    cursor: pointer;
+    border-style: solid;
+    border-width: 1px 1px 1px 1px;
+    border-color: var(--secondary-color);
+    transition: all 100ms;
+}
+
+.reports-container:hover {
+    transform: translateY(-2px);
+}
+
+.reports-second-span {
+    margin-top: 0.2rem;
+    opacity: 0.6;
+    font-size: 9pt;
+}
+
+@keyframes sectionAppearing {
+    from {opacity: 0;}
+    to {opacity: 1;}
 }

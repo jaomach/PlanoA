@@ -6,9 +6,12 @@ import random
 import threading
 import json
 from flask_socketio import SocketIO, emit, join_room
+import mysql.connector
+from mysql.connector import Error
 import secrets
 import openai
 import requests
+import traceback
 
 app = Flask(__name__, static_folder='static')
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -24,7 +27,7 @@ rooms = {
         'players': {
             'player1': {'username': 'Alice', 'character': 'Vanderlei'},
             'player2': {'username': 'Bob', 'character': 'Merda'},
-            #'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
+            'player3': {'username': 'Alanzoka', 'character': 'Empregada'},
             #'player4': {'username': 'Charlie', 'character': 'Maria'},
             #'player5': {'username': 'Charlie', 'character': 'Berro'},
             #'playerControl': {'username': 'Player', 'character': 'Davinte'},
@@ -62,6 +65,22 @@ ip_cooldowns = {}
 users = {}
 COOLDOWN_PERIOD = 60
 ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
+ADMIN_KEY = 'batata'
+db_config = {
+    "host": "autorack.proxy.rlwy.net",
+    "user": "root",
+    "password": "OtgCwJSchszoxekPiKtNYcSdtWThIlaN",
+    "database": "planoA",
+    "port": "20770",
+}
+
+def connect_to_db():
+    try:
+        connection = mysql.connector.connect(**db_config)
+        return connection
+    except Error as e:
+        print(f"Error connecting to MySQL database: {e}")
+        return None
 
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -342,6 +361,7 @@ def distribute_drawing(room_id):
     players = list(rooms[room_id]['players'].keys())
     drawings = []
 
+    # Coleta todos os desenhos de todos os jogadores
     for player_id in players:
         if player_id in rooms[room_id]:
             for image_path in rooms[room_id][player_id]:
@@ -349,21 +369,74 @@ def distribute_drawing(room_id):
     
     random.shuffle(drawings)
     assignments = {player_id: [] for player_id in players}
+
+    # Distribuir os desenhos para os jogadores
+    remaining_drawings = drawings[:]
+    min_assignments = len(drawings) // len(players)
     
+    # Primeiro, distribuir igualmente o número mínimo de desenhos por jogador
     for player_id in players:
-        available_drawings = [drawing for drawing in drawings if drawing['player_id'] != player_id]
+        available_drawings = [drawing for drawing in remaining_drawings if drawing['player_id'] != player_id]
         random.shuffle(available_drawings)
         
-        count = 0
-        while count < 4 and available_drawings:
+        while len(assignments[player_id]) < min_assignments and available_drawings:
             drawing = available_drawings.pop()
             assignments[player_id].append(drawing['image_path'])
-            drawings.remove(drawing)
-            count += 1
+            remaining_drawings.remove(drawing)
+
+    # Redistribuir os desenhos restantes
+    for player_id in players:
+        available_drawings = [drawing for drawing in remaining_drawings if drawing['player_id'] != player_id]
+        random.shuffle(available_drawings)
+        
+        while len(assignments[player_id]) < 4 and available_drawings:
+            drawing = available_drawings.pop()
+            assignments[player_id].append(drawing['image_path'])
+            remaining_drawings.remove(drawing)
     
+    # Gera URLs para acessar as imagens distribuídas
     for player_id in assignments:
         assignments[player_id] = [url_for('get_image', filename=os.path.basename(path), _external=True) for path in assignments[player_id]]
     
+    return jsonify(assignments)
+
+@app.route('/distribute_phrases/<room_id>', methods=['GET'])
+def distribute_phrases(room_id):
+    if room_id not in rooms or 'phrases' not in rooms[room_id]:
+        return jsonify({'message': 'Invalid room or no phrases found'}), 400
+    
+    players = list(rooms[room_id]['players'].keys())
+    phrases = rooms[room_id]['phrases']
+    
+    random.shuffle(players)
+    random.shuffle(phrases)
+    
+    assignments = {player_id: [] for player_id in players}
+    remaining_phrases = phrases[:]
+    
+    # Primeiro, garante que todos recebem o número mínimo de frases
+    min_assignments = len(phrases) // len(players)
+    
+    # Distribuir o mínimo de frases para cada jogador
+    for player_id in players:
+        available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
+        random.shuffle(available_phrases)
+        
+        while len(assignments[player_id]) < min_assignments and available_phrases:
+            phrase = available_phrases.pop()
+            assignments[player_id].append(phrase['phrase'])
+            remaining_phrases.remove(phrase)
+
+    # Redistribuir as frases restantes
+    for player_id in players:
+        available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
+        random.shuffle(available_phrases)
+        
+        while len(assignments[player_id]) < 4 and available_phrases:
+            phrase = available_phrases.pop()
+            assignments[player_id].append(phrase['phrase'])
+            remaining_phrases.remove(phrase)
+
     return jsonify(assignments)
 
 @app.route('/uploads/<filename>')
@@ -456,34 +529,6 @@ def submit_phrase():
         return jsonify({'message': 'Phrase submitted! Próximo round iniciado automaticamente.'})
     
     return jsonify({'message': 'Phrase submitted'})
-
-@app.route('/distribute_phrases/<room_id>', methods=['GET'])
-def distribute_phrases(room_id):
-    if room_id not in rooms or 'phrases' not in rooms[room_id]:
-        return jsonify({'message': 'Invalid room or no phrases found'}), 400
-    
-    players = list(rooms[room_id]['players'].keys())
-    phrases = rooms[room_id]['phrases']
-    
-    random.shuffle(players)
-    random.shuffle(phrases)
-    
-    assignments = {player_id: [] for player_id in players}
-    phrase_index = 0
-    
-    for i, player_id in enumerate(players):
-        assigned_count = 0
-        while assigned_count < 4 and phrase_index < len(phrases):
-            phrase = phrases[phrase_index]
-            if phrase['player_id'] != player_id:
-                assignments[player_id].append(phrase['phrase'])
-                assigned_count += 1
-            phrase_index += 1
-        if phrase_index >= len(phrases):
-            phrase_index = 0
-            random.shuffle(phrases)
-    
-    return jsonify(assignments)
 
 @app.route('/')
 def index():
@@ -725,9 +770,6 @@ def vote():
     else:
         return jsonify({'message': 'Invalid room or player'}), 400
 
-# Defina a chave de administrador
-ADMIN_KEY = 'batata'
-
 @app.route('/list_rooms', methods=['GET'])
 def list_rooms():
     # Pegue a chave de administrador da query string
@@ -741,7 +783,81 @@ def list_rooms():
         # Retorne uma mensagem de erro se a chave estiver incorreta
         return jsonify({"error": "Invalid admin key"}), 403
 
+@app.route("/send_report", methods=["POST"])
+def send_report():
+    if request.method == "POST":
+        connection = None  # Inicializa a variável para uso no finally
+        try:
+            connection = connect_to_db()
+            if connection is not None:
+                cursor = connection.cursor()
 
+                data = request.get_json()
+                motive = data.get("motive", "")
+                description = data.get("description", "")
+                browser = data.get("browser", "")
+                platform = data.get("platform", "")
+                user_agent = data.get("user_agent", "")
+
+                cursor.execute(
+                    "INSERT INTO reports (browser, motive, description, platform, user_agent) VALUES (%s, %s, %s, %s, %s)",
+                    (browser, motive, description, platform, user_agent),
+                )
+                connection.commit()
+
+                # Retorno em caso de sucesso
+                return jsonify({"message": "Report enviado com sucesso"}), 200
+
+        except Exception as e:
+            traceback.print_exc()  # Log da exceção completa
+            return jsonify({"message": f"Erro ao mandar o report: {e}"}), 500
+        finally:
+            if connection:
+                connection.close()
+    else:
+        return jsonify({"message": "Método não permitido"}), 405
+    
+@app.route("/call_reports", methods=["GET"])
+def call_reports():
+    # Pegue a chave de administrador da query string
+    adm_key = request.args.get('adm_key')
+
+    # Verifique se a chave está correta
+    if adm_key == ADMIN_KEY:  # Supondo que ADMIN_KEY esteja definido em outro lugar
+        connection = None  # Inicializa a variável para uso no finally
+        try:
+            connection = connect_to_db()
+            if connection is not None:
+                cursor = connection.cursor()
+
+                # Consulta todos os reports do banco de dados
+                cursor.execute("SELECT browser, motive, description, platform, user_agent FROM reports")
+                reports = cursor.fetchall()
+
+                # Formata os reports em uma lista de dicionários para retorno JSON
+                reports_list = [
+                    {
+                        "browser": report[0],
+                        "motive": report[1],
+                        "description": report[2],
+                        "platform": report[3],
+                        "user_agent": report[4],
+                    }
+                    for report in reports
+                ]
+
+                # Retorno dos reports
+                return jsonify(reports_list), 200
+
+        except Exception as e:
+            traceback.print_exc()  # Log da exceção completa
+            return jsonify({"message": f"Erro ao buscar os reports: {e}"}), 500
+        finally:
+            if connection:
+                connection.close()
+    else:
+        # Retorne uma mensagem de erro se a chave estiver incorreta
+        return jsonify({"error": "Invalid admin key"}), 403
 
 if __name__ == '__main__':
     socketio.run(app, host='0.0.0.0', port=5000)

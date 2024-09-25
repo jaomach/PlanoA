@@ -18,6 +18,7 @@ let roundsHandled = {};
 let currentRound = 6;
 let actualPlayer1 = ''
 let actualPlayer2 = ''
+let quality = localStorage.getItem('pc-gm-qual')
 let timeOuts = []
 let round1Time = 240
 let round2Time = 120
@@ -26,7 +27,7 @@ let round4Time = 35
 let optionsActive = false
 let gameWinner
 gameMenuListening = false
-console.log(auxGameStarted)
+//console.log(auxGameStarted)
 const fullscreenBtn = document.getElementById('fullscreen');
 
 function callRound4Test() {
@@ -69,7 +70,7 @@ function gameMenuChange() {
 
     // Log the selected value to the console
     animationSelect.addEventListener('change', () => {
-        console.log(animationSelect.value);
+    //    console.log(animationSelect.value);
     });
     screenEffectSelect.addEventListener('change', () => {
         screenEffectContainer.classList.toggle('ativo')
@@ -178,6 +179,28 @@ configBtn.addEventListener('click', function() {
         configBtn.classList.add('roll')
         setTimeout(function() {
             configBtn.classList.remove('roll')
+        }, 1000)
+    }
+});
+
+const reportBtn = document.getElementById('report');
+reportBtn.addEventListener('click', function() {
+    if (!optionsActive && !gameMenuListening) {
+        showReport()
+        gameMenuChange()
+        reportBtn.classList.add('pop')
+        setTimeout(function() {
+            reportBtn.classList.remove('pop')
+        }, 1000)
+    }
+    else if (optionsActive) {
+        hideReport()
+    }
+    else if (!optionsActive) {
+        showReport()
+        reportBtn.classList.add('pop')
+        setTimeout(function() {
+            reportBtn.classList.remove('pop')
         }, 1000)
     }
 });
@@ -395,7 +418,11 @@ if (data.remaining_time === 0 && round1 === true) {
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.remove('in-game');
     });
-    roundCallRandom(round2Var1, round2Var2, round2Var3)
+    if (quality === 'low') {
+        roundCallRandom(round2Var1Low, round2Var2Low, round2Var3Low)
+    } else {
+        roundCallRandom(round2Var1, round2Var2, round2Var3)
+    }
 }
 if (data.current_round === 2 && round2 === false) {
     round2 = true;
@@ -410,7 +437,11 @@ if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === fa
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.remove('in-game');
     });
-    roundCallRandom(round3Var1, round3Var2, round3Var3)
+    if (quality === 'low') {
+        roundCallRandom(round3Var1Low, round3Var2Low, round3Var3Low)
+    } else {
+        roundCallRandom(round3Var1, round3Var2, round3Var3)
+    }
 }
 if (data.current_round === 3 && round3 === false) {
     round3 = true;
@@ -539,6 +570,81 @@ function hideOptions(){
     optionsActive = false
 }
 
+function showReport(){
+    const menu = document.getElementById('reportMenu')
+    const inactive = document.createElement('div')
+    const body = document.body
+
+    menu.classList.add('ativo')
+
+    inactive.classList.add('inativo')
+    body.appendChild(inactive)
+    inactive.id = 'bgInactive'
+
+    inactive.addEventListener("click", function(){
+        menu.classList.remove('ativo')
+
+        body.removeChild(inactive)
+        optionsActive = false
+    })
+}
+
+function hideReport(){
+    const menu = document.getElementById('reportMenu')
+    const inactive = document.getElementById('bgInactive')
+    const body = document.body
+
+    menu.classList.remove('ativo')
+
+    body.removeChild(inactive)
+    optionsActive = false
+}
+
+function getSystemInfo() {
+    const browserInfo = {
+        browserName: navigator.userAgentData ? navigator.userAgentData.brands[0].brand : navigator.userAgent,
+        browserVersion: navigator.userAgentData ? navigator.userAgentData.brands[0].version : navigator.appVersion,
+        platform: navigator.platform,
+        language: navigator.language,
+        userAgent: navigator.userAgent
+    };
+    return browserInfo;
+}
+
+function sendReport() {
+    const systemInfo = getSystemInfo();
+
+    const formData = {
+        browser: `${systemInfo.browserName} (versão: ${systemInfo.browserVersion})`,
+        description: document.getElementById('descricaoInput').value,
+        motive: document.getElementById('motivoInput').value,
+        platform: systemInfo.platform,
+        user_agent: systemInfo.userAgent
+    };
+
+    fetch('/send_report', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            console.log(data.message)
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+    });
+}
+
+document.getElementById('reportForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    sendReport();
+});
+
 verifyRoom()
 
 function startGame() {
@@ -548,7 +654,11 @@ function startGame() {
     .then(response => response.json())
     .then(data => {
         if (data.message === 'Game started') {
-            roundCallRandom(round1Var1, round1Var1, round1Var1)
+            if (quality === 'low') {
+                roundCallRandom(round1Var1Low, round1Var1Low, round1Var1Low)
+            } else {
+                roundCallRandom(round1Var1, round1Var1, round1Var1)
+            }
             document.querySelectorAll('.player-container').forEach(function(element) {
                 element.classList.add('in-game');
             });
@@ -747,15 +857,15 @@ function displayMatchup() {
             
         } else {
             actualPlayer2 = `${player1}`
-            console.log('numero impar')
             setTimeout(function() {
                 timeLeft = 10
                 changeDuration(1)
             }, 1000);
             document.getElementById('timerContainer').classList.remove('appear')
             player1Div.innerHTML = `
-            <img src="/static/images/mistery.png"></img>
+            <img class="drawings aparecendo" src="/static/images/mistery.png"></img>
             `
+            player1Div.classList.add('aparecendo')
         }
         matchupsDiv.appendChild(matchupDiv);
     }
@@ -966,6 +1076,7 @@ function roundCallRandom(variavel1, variavel2, variavel3) {
     selectVar();
 }
 
+// rounds normais
 function round1Var1() {
     timeOuts.length = 0;
     document.getElementById('skipRoundBtn').disabled = true;
@@ -1407,6 +1518,7 @@ function round3Var1() {
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
 }, 31100));
 }
+
 function round3Var2() {
     timeOuts.length = 0;
     socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
@@ -1491,6 +1603,7 @@ function round3Var2() {
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
     }, 23700));
 }
+
 function round3Var3() {
     timeOuts.length = 0;
     socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
@@ -1575,6 +1688,7 @@ function round3Var3() {
         document.getElementById('skipRoundBtn').classList.remove('aparecendo')
     }, 16800));
 }
+
 function round4Var1() {
     timeOuts.length = 0;
     socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
@@ -1650,6 +1764,7 @@ function round4Var1() {
         }, 2000));
     }, 18600));
 }
+
 function roundFinal() {
     timeOuts.length = 0;
     document.getElementById('skipRoundBtn').setAttribute('onclick', `skipRound('final')`)
@@ -1811,6 +1926,7 @@ function roundFinal() {
     timeOuts.push(setTimeout(function() {
         const finalScreen = document.createElement('div')
         finalScreen.id = "loadingScreen"
+        finalScreen.classList.add('message-screen')
         finalScreen.classList.add('show')
 
         finalScreen.innerHTML = `
@@ -1822,6 +1938,72 @@ function roundFinal() {
         document.body.appendChild(finalScreen)
     }, 90000));
 }
+
+function round1Var1Low() {
+    timeOuts.length = 0;
+    document.getElementById('skipRoundBtn').disabled = true;
+    document.getElementById('startButton').disabled = true;
+    document.getElementById('timer').style.display = 'block'
+    document.getElementById('startButton').classList.add('translate')
+    var whistleDown = document.getElementById("whistleDown");
+    var whistleUp = document.getElementById("whistleUp");
+    var soundTrackR1 = document.getElementById("soundTrackR1");
+    var audioRodada1 = document.getElementById("audioR1");
+    const body = document.body
+    auxGameStarted = true
+
+    document.getElementById('roundContainer').innerHTML = `
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
+    <img src="/static/images/Round1Low.png" id="roundsLow">
+    `
+    
+    var subtitleDiv = document.getElementById("subtitles");
+    var subtitles = [];
+
+    fetch('/static/legenda.json')
+        .then(response => response.json())
+        .then(data => {
+        subtitles = data;
+        });
+
+    audioRodada1.ontimeupdate = function() {
+        var currentTime = audioRodada1.currentTime;
+        var subtitle = subtitles.find(sub => currentTime >= sub.start && currentTime <= sub.end);
+        if (subtitle) {
+        subtitleDiv.innerHTML = subtitle.text;
+        } else {
+        subtitleDiv.innerHTML = '';
+        }
+    };
+
+    document.getElementById('startButton').classList.add('desappear')
+    setTimeout(function() {
+        document.getElementById('timerContainer').classList.remove('appear')
+        document.getElementById('circleLow').classList.add('close')
+        setTimeout(function() {
+            startCountdown(round1Time, 16000);
+            soundTrackR1.play();
+            audioRodada1.play();
+            document.getElementById('logoLow').classList.add('aparecendo')
+        }, 1000);
+    }, 1500);
+    setTimeout(function() {
+        document.getElementById('logoLow').classList.remove('aparecendo')
+    }, 10210);
+    setTimeout(function() {
+        document.getElementById('roundsLow').classList.add('aparecendo')
+    }, 13210);
+    setTimeout(function() {
+        document.getElementById('circleLow').classList.remove('close')
+        document.getElementById('circleLow').classList.add('open')
+        document.getElementById('roundsLow').classList.remove('aparecendo')
+        socket.emit('message', { message: 'Game started', room_id: roomId });
+        document.getElementById('skipRoundBtn').classList.remove('aparecendo')
+        document.getElementById('timerContainer').classList.add('appear')
+    }, 17000);
+    //console.log(auxGameStarted)
+}
+
 function skipRound(roundNum) {
     document.getElementById('skipRoundBtn').disabled = true;
     document.getElementById('skipRoundBtn').classList.remove('aparecendo')
@@ -1912,13 +2094,13 @@ let isTesting = true;
 
 function verifyQuality() {
     if (localStorage.getItem('pc-gm-qual')){
-        const qualityValue = localStorage.getItem('pc-gm-qual')
-        if (qualityValue == 'high') {
-            autoSetQuality(qualityValue)
-        } else if (qualityValue == 'medium') {
-            autoSetQuality(qualityValue)
+        quality = localStorage.getItem('pc-gm-qual')
+        if (quality == 'high') {
+            autoSetQuality(quality)
+        } else if (quality == 'medium') {
+            autoSetQuality(quality)
         } else {
-            autoSetQuality(qualityValue)
+            autoSetQuality(quality)
         }
     } else {
         requestAnimationFrame(calculateFPS);

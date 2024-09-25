@@ -3,6 +3,13 @@
    --secondary-color: #3f3f3f;
 }
 
+form {
+   display: flex;
+   justify-content: center;
+   flex-direction: column;
+   width: 100%;
+}
+
 body {
    font-family: Arial, sans-serif;
    margin: 0;
@@ -187,24 +194,6 @@ body {
    opacity: 1;
 }
 
-.primary-btn {
-   font-family: 'inter', sans-serif;
-   font-weight: 800;
-   font-size: 12pt;
-   margin-top: 2rem;
-   padding: 0.6rem 0.9rem;
-   border-radius: 5px;
-   border-style: solid;
-   border-color: #3f3f3f;
-   background-color: #1e1e1e;
-   color: #fff;
-   border-width: 1.8px;
-   cursor: pointer;
-   transition: all 500ms;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-}
 .input-container {
    font-family: 'inter', sans-serif;
    border-radius: 5px;
@@ -220,6 +209,17 @@ body {
    font-weight: 400;
    background-color: #252525;
    font-size: 9pt;
+}
+
+#motivoInput {
+   margin-top: 6%;
+   width: 235%;
+}
+
+#descricaoInput {
+   margin-top: 6%;
+   width: 235%;
+   height: 6rem;
 }
 
 .select-container {
@@ -239,8 +239,28 @@ body {
    appearance: none;
 }
 
+.primary-btn {
+   font-family: 'inter', sans-serif;
+   font-weight: 800;
+   font-size: 12pt;
+   margin-top: 2rem;
+   padding: 0.6rem 0.9rem;
+   border-radius: 5px;
+   border-style: solid;
+   border-color: #3f3f3f;
+   background-color: #1e1e1e;
+   color: #fff;
+   border-width: 1.8px;
+   cursor: pointer;
+   transition: all 500ms;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+}
+
 .primary-btn.desappear {
-   display: none;
+   transition: all 500ms;
+   opacity: 0;
 }
 
 .primary-btn img {
@@ -271,6 +291,10 @@ body {
 .secondary-btn:hover {
    background-color: #252525;
    transition: all 500ms;
+}
+
+#sendReportBtn {
+   margin-top: 3%;
 }
 
 .iluminacao {
@@ -356,14 +380,6 @@ h1 {
    height: 24px;
    width: 29px;
 }
-#startButton.translate{
-   position: relative;
-   transition: all 0.5s;
-   padding: 0;
-   height: 0;
-   background-color: none;
-   transform: translateY(500px);
-}
 .matchup {
    display: flex;
    justify-content: center;
@@ -384,12 +400,16 @@ h1 {
    align-items: center;
    flex-direction: column;
 }
+.fodinha.aparecendo {
+   animation: fadeInLow 400ms ease-in-out forwards;
+}
 .drawings {
    width: 446px;
    background-repeat: no-repeat;
    background-position: center;
-   filter: brightness(0.6);
+   filter: brightness(0.4);
 }
+
 .drawings.perdedor {
    animation: caindo 900ms ease-in forwards;
    z-index: 2;
@@ -624,6 +644,21 @@ h1 {
    transform: translateY(0vh);
 }
 
+#roundsLow {
+   position: absolute;
+   height: 70vh;
+   align-self: center;
+   z-index: 2;
+   transition: all 100ms ease-in;
+   transform: translateY(0vh);
+   animation: fadeOutLow 100ms ease-in-out forwards;
+   opacity: 0;
+}
+
+#roundsLow.aparecendo {
+   animation: fadeInLow 100ms ease-in-out forwards;
+}
+
 #logo {
    position: absolute;
    height: 80vh;
@@ -641,6 +676,31 @@ h1 {
    transition: all 600ms ease-out;
    filter: brightness(0.6);
    transform: translateY(0vh);
+}
+
+#logoLow {
+   position: absolute;
+   height: 70vh;
+   align-self: center;
+   transition: all 100ms ease-in;
+   opacity: 0;
+   z-index: 2;
+   transform: translateY(0vh);
+}
+
+#logoLow.aparecendo {
+   transition: all 100ms ease-out;
+   opacity: 1;
+}
+
+@keyframes fadeInLow {
+   from {opacity: 0;}
+   to {opacity: 1;}
+}
+
+@keyframes fadeOutLow {
+   from {opacity: 1;}
+   to {opacity: 0;}
 }
 
 #show {
@@ -703,6 +763,23 @@ h1 {
 .iluminacao-matchup.aceso {
    opacity: 0.9;
    display: block;
+}
+
+#circleLow {
+   position: fixed;
+   width: 100vw;
+   height: 100vh;
+   background-color: rgb(0, 0, 0);
+   opacity: 0;
+   z-index: 2;
+}
+
+#circleLow.open {
+   animation: fadeOutLow 600ms ease-in-out forwards;
+}
+
+#circleLow.close {
+   animation: fadeInLow 600ms ease-in-out forwards;
 }
 
 #circle {
@@ -1004,7 +1081,7 @@ body.desligado {
    opacity: 0.6;
 }
 
-#gameMenu {
+.menu-container {
    display: flex;
    flex-direction: column;
    gap: 1%;
@@ -1024,6 +1101,10 @@ body.desligado {
    border-style: solid;
    border-color: #3f3f3f;
    transition: transform 300ms ease-in-out;
+}
+
+#reportMenu {
+   height: min-content;
 }
 
 #videoOption {
@@ -1046,8 +1127,12 @@ body.desligado {
    color: white;
 }
 
-#gameMenu.ativo {
+.menu-container.ativo {
    transform: scale(1);
+}
+
+#reportMenu h2 {
+   margin-top: 0;
 }
 
 .element-container {
@@ -1058,6 +1143,11 @@ body.desligado {
    align-items: center;
    justify-content: space-between;
    margin: 0% 0% 5% 0;
+}
+
+.element-container.report {
+   flex-direction: column;
+   align-items: flex-start;
 }
 
 .select-bar {
@@ -1092,8 +1182,11 @@ body.desligado {
    overflow-y: scroll;
    scrollbar-width: none;
    height: 100%;
-   margin-top: 6%;
    color: white;
+}
+
+#gameOption {
+   margin-top: 6%;
 }
 
 .menu-interactive button {
@@ -1277,6 +1370,10 @@ input[type="range"] {
 }
 
 #fullscreen.pop {
+   animation: fullscreenPop 500ms ease-in-out forwards;
+}
+
+#report.pop {
    animation: fullscreenPop 500ms ease-in-out forwards;
 }
 
