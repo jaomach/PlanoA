@@ -5,24 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <title>Plagio Consentido - Plano A</title>
+    <link rel="stylesheet" href="/static/pgGame/style/host.css">
 </head>
 <body id="body">
+    <div class="message-screen" id="loadingScreen">
+        <img class="loading-screen-img" src="/static/images/LOGO.png" alt="">
+        <span>Carregando...</span>
+    </div>
+    <div class="message-screen" id="oopsMessage" style="display: none;">
+        <span class="message-screen-span">Oops!</span>
+        <p class="message-screen-p">Parece que você perdeu o fio da meada, a partida já está rolando...</p>
+        <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+    </div>
     <div id="effectContainer" class="effects-container"></div>
     <div id="circle"></div>
+    <div id="circleLow"></div>
+    <div id="timerContainer" class="timer-container">
+        <span id="timer"></span>
+        <img class="timer-clock" src="/static/images/counter.png" alt="">
+        <img src="/static/images/counterLight.png" style="z-index: 2;" alt="">
+    </div>
     <div id="roundContainer"></div>
-    <link rel="stylesheet" href="/static/style/host.css">
     <div id="interfaceContainer">
         <div id="idContainer">
             <h1 style="filter:blur(0px)" id="roomId">{{ room_id }}</h1>
             <img id="eyeBtn" class="id-btn" title="Ocultar" src="/static/images/eye-open.svg" alt="">
             <img id="copyBtn" class="id-btn" title="Copiar" src="/static//images/copy.svg" alt="">
         </div>
-        <div id="timerContainer" class="timer-container">
-            <span id="timer"></span>
-            <img class="timer-clock" src="/static/images/counter.png" alt="">
-            <img src="/static/images/counterLight.png" style="z-index: 2;" alt="">
-        </div>
-        <img class="btn-interface" id="volume" src="/static/images/volume-up.svg" alt="">
+        <img class="btn-interface" id="report" src="/static/images/report.svg" alt="">
+        <img class="btn-interface" id="setting" src="/static/images/setting.svg" alt="">
         <img class="btn-interface" id="fullscreen" src="/static/images/fullscreen.svg" alt="">
         <button class="primary-btn" id="skipRoundBtn" onclick="skipRound()">Pular<img src="/static/skip.png" alt=""></button>
         <span id="version">Versão Beta</span>
@@ -39,7 +50,7 @@
         </div>
     </div>
     <div class="inside" id="inside">
-        <div id="gameMenu">
+        <div class="menu-container" id="gameMenu">
             <div class="select-bar">
                 <span class="bar-element ativo">Jogo</span>
                 <span class="bar-element">Gráficos</span>
@@ -59,7 +70,7 @@
                 <div class="element-container">
                     <span>Votação:</span> <input id="roundtime4Input" class="input-container" type="number" value="30" max="90" min="10">
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
             </section>
             <section id="videoOption" class="menu-interactive">
                 <h2>Qualidade</h2>
@@ -78,41 +89,59 @@
                         <option value="Desativado">Desativado</option>
                     </select>
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
             </section>
             <section id="audioOption" class="menu-interactive">
                 <h2>Áudio</h2>
                 <div class="volume-control">
-                    <label for="volume-slider">Volume Global:</label>
+                    <label class="volume-slider-label" for="volume-slider">Volume Global:</label>
                     <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
                 </div>
-                <button class="secondary-btn">Restaurar Padrão</button>
+                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
+            </section>
+        </div>
+        <div class="menu-container" id="reportMenu">
+            <section id="reportOption" class="menu-interactive">
+                <h2>Reportar</h2>
+                <form id="reportForm">
+                    <div class="element-container report">
+                        <span>Motivo:</span>
+                        <input maxlength="32" placeholder="Digite aqui o motivo!" id="motivoInput" class="input-container" type="text" required>
+                    </div>
+                    <div class="element-container report">
+                        <span>Descrição:</span>
+                        <textarea maxlength="256" placeholder="Digite aqui a descrição" rows="3" class="input-container" id="descricaoInput" required></textarea>
+                    </div>
+                    <button type="submit" id="sendReportBtn" class="secondary-btn">Enviar</button>
+                </form>
             </section>
         </div>
         <div id="playerList"></div>
         <div class="menu-inicial">
-            <button class="primary-btn" id="startButton" onclick="startGame()">Iniciar Partida<img src="/static/1204.png" alt=""></button>
+            <button class="primary-btn" id="startButton" onclick="startGame()"><span>Iniciar Partida</span><img src="/static/1204.png" alt=""></button>
         </div>
         <div id="matchups">
             <div class="matchup" id="papaleguas"></div>
         </div>
     </div>
-
     
+    <div id="errorContainer">
+        <span id="errorMsg"></span>
+    </div>
 
-    <audio id="audioR1" src="/static/audios/r1/narradorR1.mp3" type="audio/mpeg"></audio>
+    <audio id="audioR1" src="/static/pgGame/audios/r1/narradorR1.mp3" type="audio/mpeg"></audio>
     <audio id="audioR2" src="" type="audio/mpeg"></audio>
     <audio id="audioR3" src="" type="audio/mpeg"></audio>
-    <audio id="lightTurnOn" src="/static/audios/Outros/LuzLigando.mp3" type="audio/mpeg"></audio>
-    <audio id="lightTurnOff" src="/static/audios/Outros/LuzDesligando.mp3" type="audio/mpeg"></audio>
-    <audio id="audioR4" src="/static/audios/r4/audioR4.mp3" type="audio/mpeg"></audio>
-    <audio id="audioFinal" src="/static/audios/Final/AudioFinal.mp3" type="audio/mpeg"></audio>
-    <audio id="whistleUp" src="/static/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
-    <audio id="whistleDown" src="/static/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
-    <audio id="audioFalling1" src="/static/audios/Outros/fallingCat.mp3" type="audio/mpeg"></audio>
-    <audio id="audioFalling2" src="/static/audios/Outros/fallingNext.mp3" type="audio/mpeg"></audio>
-    <audio id="audioFalling3" src="/static/audios/Outros/fallingTranks.mp3" type="audio/mpeg"></audio>
-    <audio id="soundTrackR1" src="/static/audios/r1/soundTrackR1.mp3" type="audio/mpeg"></audio>
+    <audio id="audioR4" src="/static/pgGame/audios/r4/audioR4.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFinal" src="/static/pgGame/audios/Final/AudioFinal.mp3" type="audio/mpeg"></audio>
+    <audio id="sampleAudio" src="/static/pgGame/audios/Outros/audioSample.mp3" type="audio/mpeg"></audio>
+    <audio id="lightTurnOn" src="/static/pgGame/audios/Outros/LuzLigando.mp3" type="audio/mpeg"></audio>
+    <audio id="lightTurnOff" src="/static/pgGame/audios/Outros/LuzDesligando.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling1" src="/static/pgGame/audios/Outros/fallingCat.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling2" src="/static/pgGame/audios/Outros/fallingNext.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFalling3" src="/static/pgGame/audios/Outros/fallingTranks.mp3" type="audio/mpeg"></audio>
+    <audio id="audioFallingSolo" src="/static/pgGame/audios/Outros/fallingSolo.mp3" type="audio/mpeg"></audio>
+    <audio id="soundTrackR1" src="/static/pgGame/audios/r1/soundTrackR1.mp3" type="audio/mpeg"></audio>
     <audio id="soundTrackR2" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR3" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR4" src="" type="audio/mpeg"></audio>
@@ -122,6 +151,6 @@
     <script>
         const roomId = "{{ room_id }}";
     </script>
-    <script src="/static/scripts/host.js"></script>
+    <script src="/static/pgGame/scripts/host.js"></script>
 </body>
 </html>

@@ -13,6 +13,7 @@ let historyStep = -1;
 let selectedWinnerId = null;
 let actualUsername
 let fillMode = false;
+let soloAux = 10
 
 console.log('Connecting to server with roomId:', roomId);
 var socket = io({ query: { roomId: roomId } });
@@ -68,8 +69,11 @@ socket.on('message', function(data) {
         document.getElementById('round4').style.display = 'none'
     }
     if (data.msg === 'Round 5 started') {
-        document.getElementById('round4').style.display = 'flex'
-        displayMatchup()
+        if (soloAux>0) {
+            document.getElementById('round4').style.display = 'flex'
+            displayMatchup()
+        }
+        soloAux = soloAux+1
     }
     if (data.msg === 'Round 5 finished') {
         document.getElementById('round4').style.display = 'none'
@@ -81,10 +85,17 @@ socket.on('message', function(data) {
         document.getElementById('round4').style.display = 'none'
     }
     if (data.msg === 'Next round started') {
-        document.getElementById('round4').style.display = 'flex'
+        if (soloAux>0) {
+            document.getElementById('round4').style.display = 'flex'
+            displayMatchup()
+        }
+        soloAux = soloAux+1
     }
     if (data.msg === 'Tournament next') {
         displayMatchup()
+    }
+    if (data.msg === 'Player Solo') {
+        soloAux = 0
     }
     console.log('Mensagem recebida:', data.msg);
     const contemHostELeft = data.msg.includes('Host') && data.msg.includes('left');
@@ -652,6 +663,7 @@ function displayMatchup() {
         matchupDiv.appendChild(player1Div);
 
         if (player2) {
+            document.getElementById('waitingMessage').style.display = 'none'
             const player2Comb = combinations[1][0];
             const player2Div = document.createElement('div');
             player2Div.classList.add('player-vote')

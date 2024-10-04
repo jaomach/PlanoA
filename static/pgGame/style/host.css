@@ -186,6 +186,14 @@ body {
    align-items: center;
    width: 100%;
    gap: 2%;
+   transition: all 700ms;
+}
+#playerList.desappear {
+   display: none;
+}
+
+#playerList.ofuscado {
+   filter: blur(10px);
 }
 .fodao {
    padding: 1% 5%;
@@ -400,18 +408,25 @@ h1 {
    align-items: center;
    flex-direction: column;
 }
-.fodinha.aparecendo {
-   animation: fadeInLow 400ms ease-in-out forwards;
+
+.fodinha.perdedor {
+   animation: caindo 900ms ease-in forwards;
 }
+
 .drawings {
    width: 446px;
    background-repeat: no-repeat;
    background-position: center;
-   filter: brightness(0.4);
+   filter: brightness(0.6);
 }
 
 .drawings.perdedor {
    animation: caindo 900ms ease-in forwards;
+   z-index: 2;
+}
+
+.drawings.aparecendo {
+   animation: fadeInLow 200ms ease-in forwards;
    z-index: 2;
 }
 .phrase-container.perdedor {
@@ -529,14 +544,6 @@ h1 {
 
 #inside.ofuscado {
    backdrop-filter: blur(10px);
-}
-
-#playerList {
-   transition: all 700ms;
-}
-
-#playerList.ofuscado {
-   filter: blur(10px);
 }
 
 @keyframes caindo {
@@ -859,7 +866,7 @@ h1 {
    height: 151px;
    width: 100%;
    bottom: 0;
-
+   z-index: 1;
 }
 
 #barreira.animada{
@@ -1108,10 +1115,12 @@ body.desligado {
 }
 
 #videoOption {
+   margin-top: 6%;
    display: none;
 }
 
 #audioOption {
+   margin-top: 6%;
    display: none;
 }
 

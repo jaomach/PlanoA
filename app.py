@@ -532,20 +532,20 @@ def submit_phrase():
 
 @app.route('/')
 def index():
-    with open('static/index.html', encoding='utf-8') as f:
+    with open('static/index/index.html', encoding='utf-8') as f:
         html_content = f.read()
     return render_template_string(html_content)
 
 @app.route('/admin')
 def admin():
-    with open('static/admin.html', encoding='utf-8') as f:
+    with open('static/index/admin.html', encoding='utf-8') as f:
         html_content = f.read()
     return render_template_string(html_content)
 
 
 @app.route('/drawing/<room_id>')
 def drawing(room_id):
-    with open('static/player.html', encoding='utf-8') as f:
+    with open('static/pgGame/player.html', encoding='utf-8') as f:
         html_content = f.read()
     return render_template_string(html_content, room_id=room_id)
 
@@ -632,7 +632,7 @@ def on_remove_player(data):
 
 @app.route('/receptor/<room_id>')
 def receptor(room_id):
-    with open('static/host.html', encoding='utf-8') as f:
+    with open('static/pgGame/host.html', encoding='utf-8') as f:
         html_content = f.read()
     return render_template_string(html_content, room_id=room_id)
 

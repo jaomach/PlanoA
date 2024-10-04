@@ -4,6 +4,7 @@ self.addEventListener('install', (event) => {
         return cache.addAll([
           '/static/images/plaquinha.png',
           '/static/images/LOGO.png',
+          '/static/pgGame/style/host.css',
         ]);
       })
     );
