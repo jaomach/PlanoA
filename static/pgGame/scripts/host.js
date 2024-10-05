@@ -753,7 +753,7 @@ function startCountdown(duration, intervalo, roundNumber) {
     const timerElement = document.getElementById('timer');
     timeLeft = isPaused ? timeLeft : duration; // Se estiver pausado, continua de onde parou
 
-    if (auxGameStarted === true) {
+    if (auxGameStarted === false) {
         timeOuts.push(setTimeout(function () {
             console.log(auxGameStarted);
             startNextRound(duration, roundNumber);
