@@ -345,7 +345,7 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('keydown', function(event) {
     if (event.key === '1' && !gameStarted) {
-        round3Var1()
+        round3Var3()
     }
 });
 
@@ -2161,7 +2161,6 @@ function round4Var1() {
     var soundTrackR3 = document.getElementById("soundTrackR3");
     var soundTrackR4 = document.getElementById("soundTrackR4");
     var audioR4 = document.getElementById("audioR4");
-    soundTrackR4.src = '/static/pgGame/audios/r4/soundTrackR4.mp3'    
 
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
