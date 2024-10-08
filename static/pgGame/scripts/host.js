@@ -1905,7 +1905,7 @@ function round3Var2() {
     var soundTrackR2 = document.getElementById("soundTrackR2");
     var soundTrackR3 = document.getElementById("soundTrackR3");
     var audioR3Var1 = document.getElementById("audioR3");
-    soundTrackR3.src = '/static/pgGame/audios/r3/soundTrackR3var2.mp3'
+    soundTrackR3.src = '/static/pgGame/audios/r3/soundTrackR3Var2.mp3'
     audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var2.mp3'
 
     const playerList = document.getElementById('playerList');
@@ -1915,7 +1915,7 @@ function round3Var2() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
-    <img id="logoLow" src="/static/images/LOGO.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
     <img src="/static/images/Round3Low.png" id="roundsLow">
