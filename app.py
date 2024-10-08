@@ -9,7 +9,6 @@ from flask_socketio import SocketIO, emit, join_room
 import mysql.connector
 from mysql.connector import Error
 import secrets
-import openai
 import requests
 import traceback
 
@@ -19,7 +18,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-api_key = os.environ["GPT_KEY"]
+#api_key = os.environ["GPT_KEY"]
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
