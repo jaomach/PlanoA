@@ -1778,7 +1778,7 @@ function round3Var1() {
     var soundTrackR2 = document.getElementById("soundTrackR2");
     var soundTrackR3 = document.getElementById("soundTrackR3");
     var audioR3Var1 = document.getElementById("audioR3");
-    soundTrackR3.src = '/static/pgGame/audios/r3/soundTrackR3var1.mp3'
+    soundTrackR3.src = '/static/pgGame/audios/r3/soundTrackR3Var1.mp3'
     audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var1.mp3'
 
     const playerList = document.getElementById('playerList');
