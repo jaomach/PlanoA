@@ -63,6 +63,8 @@ rooms = {
 clients = []
 ip_cooldowns = {}
 users = {}
+queue = []
+max_rooms = 2
 COOLDOWN_PERIOD = 60
 ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 ADMIN_KEY = 'batata'
@@ -90,9 +92,10 @@ def cleanup_inactive_rooms():
     while True:
         current_time = time.time()
         inactive_rooms = [room_id for room_id, room in rooms.items() if current_time - room.get('last_activity', 0) > ROOM_TIMEOUT]
-        
         for room_id in inactive_rooms:
             room = rooms.pop(room_id, None)
+            if not any(thread.name == 'queue_manager_thread' for thread in threading.enumerate()):
+                threading.Thread(target=queue_manager, name='queue_manager_thread', daemon=True).start()
             if room:
                 for player_id in room.get('players', {}):
                     player_images = room.get(player_id, [])
@@ -162,33 +165,52 @@ def call_ai():
 
 @app.route('/create_room', methods=['POST'])
 def create_room():
-    client_ip = request.remote_addr
-    current_time = time.time()
-    
-    # Verifica se o IP já fez uma requisição e se está no período de cooldown
-    if client_ip in ip_cooldowns:
-        last_request_time = ip_cooldowns[client_ip]
-        if current_time - last_request_time < COOLDOWN_PERIOD:
-            cooldown_remaining = COOLDOWN_PERIOD - (current_time - last_request_time)
-            return jsonify({'error': 'Cooldown ativo', 'cooldown_remaining': cooldown_remaining}), 429
-    
-    # Gera o ID da sala e armazena as informações
-    room_id = generate_room_id()
-    rooms[room_id] = {
-        'players': {},
-        'started': False,
-        'start_time': None,
-        'duration': 10000,  # ajustar tempo
-        'current_round': 0,
-        'last_activity': time.time(),
-        'votes': {} 
-    }
+    socket_id = request.json.get('socket_id')
 
-    # Atualiza o tempo da última requisição para o IP atual
-    ip_cooldowns[client_ip] = current_time
-    
-    return jsonify({'room_id': room_id})
+    if len(rooms) < max_rooms:
+        room_id = generate_room_id()
+        rooms[room_id] = {
+            'players': {},
+            'started': False,
+            'start_time': None,
+            'duration': 10000, 
+            'current_round': 0,
+            'last_activity': time.time(),
+            'votes': {}
+        }
+        return jsonify({'room_id': room_id})
+    else:
+        if socket_id not in queue:
+            queue.append(socket_id)
+        return jsonify({'message': 'All rooms are full, you have been added to the queue', 'queue_position': queue.index(socket_id) + 1})
 
+@app.route('/find_room', methods=['POST'])
+def find_room():
+    data = request.json
+    room_id = data['roomId']
+    if room_id in rooms:
+        return jsonify({"success": True})
+    else:
+        return jsonify({"success": False})
+
+def queue_manager():
+    while True:
+        if len(rooms) < max_rooms and queue:
+            socket_id = queue.pop(0)
+            room_id = generate_room_id()
+            rooms[room_id] = {
+                'players': {},
+                'started': False,
+                'start_time': None,
+                'duration': 10000, 
+                'current_round': 0,
+                'last_activity': time.time(),
+                'votes': {}
+            }
+            socketio.emit('room_created', {'socket_id': socket_id, 'room_id': room_id})
+            print(f"Jogador {socket_id} foi movido para uma sala.")
+        time.sleep(20)  # Adicione um tempo de espera para evitar uso excessivo de CPU
+        
 def generate_token(length=12):
     return secrets.token_urlsafe(length)[:length]
 
@@ -536,6 +558,12 @@ def index():
         html_content = f.read()
     return render_template_string(html_content)
 
+@app.route('/join')
+def join_screen():
+    with open('static/index/join.html', encoding='utf-8') as f:
+        html_content = f.read()
+    return render_template_string(html_content)
+
 @app.route('/admin')
 def admin():
     with open('static/index/admin.html', encoding='utf-8') as f:
@@ -543,7 +571,7 @@ def admin():
     return render_template_string(html_content)
 
 
-@app.route('/drawing/<room_id>')
+@app.route('/player/<room_id>')
 def drawing(room_id):
     with open('static/pgGame/player.html', encoding='utf-8') as f:
         html_content = f.read()
@@ -555,18 +583,30 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    user_type = users.get(request.sid, 'player')  # Se não encontrar, assume que é um player
+    user_info = users.get(request.sid)  # Obtém as informações do usuário (incluindo o tipo e sala)
     
-    if user_type == 'host':
-        print(f'Host disconnected: {request.sid}')
-        emit('message', {'msg': f'Host {request.sid} has left the room'}, broadcast=True)
+    if user_info:
+        user_type = user_info.get('type', 'client')  # Se não for player nem host, será client
+        room_id = user_info.get('room_id')  # Obtém o ID da sala
+        
+        if room_id:
+            if user_type == 'host':
+                print(f'Host disconnected: {request.sid}')
+                emit('message', {'msg': f'Host {request.sid} has left the room'}, room=room_id)
+            elif user_type == 'player':
+                print(f'Player disconnected: {request.sid}')
+                emit('message', {'msg': f'Player {request.sid} has left the room'}, room=room_id)
+            else:
+                print(f'Client disconnected: {request.sid}')
+                emit('message', {'msg': f'Client {request.sid} has left the room'}, room=room_id)
+
+        # Removendo o usuário do dicionário
+        users.pop(request.sid, None)
     else:
-        print(f'Player disconnected: {request.sid}')
-        emit('message', {'msg': f'Player {request.sid} has left the room'}, broadcast=True)
-
-    # Removendo o usuário do dicionário
-    users.pop(request.sid, None)
-
+        print(f'Usuário com SID {request.sid} não encontrado em `users`.')
+        if request.sid in queue:
+            queue.remove(request.sid)  # Remove o jogador da fila
+            print(f'Player {request.sid} foi removido da fila devido à desconexão.')
 
 @socketio.on('message')
 def handle_message(data):
@@ -603,8 +643,11 @@ def on_join(data):
     user_type = data.get('user_type', 'player')  # Por padrão, considera que é um player
     join_room(room_id)
 
-    # Armazenando o tipo de usuário no dicionário
-    users[request.sid] = user_type
+    # Armazenando o tipo de usuário e o room_id no dicionário
+    users[request.sid] = {
+        'type': user_type,
+        'room_id': room_id
+    }
 
     if user_type == 'host':
         print(f'Host {request.sid} joined room {room_id}')
@@ -630,7 +673,7 @@ def on_remove_player(data):
 
 
 
-@app.route('/receptor/<room_id>')
+@app.route('/host/<room_id>')
 def receptor(room_id):
     with open('static/pgGame/host.html', encoding='utf-8') as f:
         html_content = f.read()

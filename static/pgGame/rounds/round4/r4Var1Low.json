@@ -1,0 +1,21 @@
+[
+  { "time": 14.6, "elementId": "roundsLow", "classlistAdd": "aparecendo" },
+  
+  { "time": 17.2, "elementId": "iluminacao", "classlistRemove": "aceso" },
+  { "time": 17.2, "elementId": "barreira", "classlistAdd": "animada" },
+  { "time": 17.2, "elementId": "circleLow", "classlistRemove": "close" },
+  { "time": 17.2, "elementId": "circleLow", "classlistAdd": "open" },
+  { "time": 17.2, "elementId": "whistleUp", "play": "null" },
+  { "time": 17.2, "elementId": "timerContainer", "classlistAdd": "appear" },
+  { "time": 17.2, "elementId": "roundsLow", "classlistRemove": "aparecendo" },
+  { "time": 17.2, "elementId": "body", "classlistAdd": "desligado" },
+  { "time": 17.2, "elementId": "playerList", "classlistAdd": "desappear" },
+  { "time": 17.2, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
+  { "time": 17.2, "elementId": "iluminacao", "startTournament": " " },
+  { "time": 17.2, "elementId": "iluminacao", "timeOut": "null" },
+  { "time": 17.2, "elementId": "iluminacao", "startCountdown": "round4Time, 0, 4" },
+
+  { "time": 18, "elementId": "audioR4", "remove": "null" },
+  { "time": 18, "elementId": "whistleUp", "remove": "null" },
+  { "time": 18, "elementId": "whistleDown", "remove": "null" }
+]

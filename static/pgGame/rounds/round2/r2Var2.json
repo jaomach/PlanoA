@@ -18,13 +18,10 @@
   { "time": 11, "elementId": "whistleUp", "play": "null" },
 
   { "time": 11, "elementId": "rounds", "remove": "null" },
-  { "time": 11, "elementId": "iluminacao", "remove": "null" },
   { "time": 11, "elementId": "playerListR2", "remove": "null" },
-
+  
   { "time": 11, "elementId": "iluminacao", "startCountdown": "round2Time, 0" },
-
-  { "time": 14, "elementId": "whistleUp", "remove": "null" },
-  { "time": 14, "elementId": "whistleDown", "remove": "null" },
-  { "time": 14, "elementId": "audioR2", "remove": "null" }
+  
+  { "time": 14, "elementId": "iluminacao", "remove": "null" }
 ]
   

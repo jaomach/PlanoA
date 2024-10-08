@@ -1,0 +1,11 @@
+[
+  { "time": 27.2, "elementId": "roundsLow", "classlistAdd": "aparecendo" },
+  { "time": 29.4, "elementId": "circleLow", "classlistRemove": "close" },
+  { "time": 29.4, "elementId": "circleLow", "classlistAdd": "open" },
+  { "time": 29.4, "elementId": "whistleUp", "play": "null" },
+  { "time": 29.4, "elementId": "timerContainer", "classlistAdd": "appear" },
+  { "time": 29.4, "elementId": "roundsLow", "classlistRemove": "aparecendo" },
+  { "time": 29.4, "elementId": "iluminacao", "startCountdown": "round3Time, 2" },
+  { "time": 29.4, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" }
+]
+  

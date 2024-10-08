@@ -1,16 +1,14 @@
 [
-    { "time": 0.4, "elementId": "playerListR2", "classlistAdd": "appear" },
+    { "time": 0.4, "elementId": "playerListR2", "classlistAdd": "appearLow" },
     { "time": 1.6, "elementId": "iluminacao", "classlistAdd": "aceso" },
     { "time": 5.2, "elementId": "iluminacao", "classlistRemove": "aceso" },
-    { "time": 5.2, "elementId": "playerListR2", "classlistRemove": "appear" },
+    { "time": 5.2, "elementId": "playerListR2", "classlistRemove": "appearLow" },
     
-    { "time": 7.6, "elementId": "rounds", "classlistAdd": "aparecendo" },
-    { "time": 7.6, "elementId": "iluminacao", "classlistAdd": "aceso" },
+    { "time": 7.6, "elementId": "roundsLow", "classlistAdd": "aparecendo" },
     
-    { "time": 10.6, "elementId": "rounds", "classlistRemove": "aparecendo" },
-    { "time": 10.6, "elementId": "iluminacao", "classlistRemove": "aceso" },
-    { "time": 10.6, "elementId": "circle", "classlistRemove": "close" },
-    { "time": 10.6, "elementId": "circle", "classlistAdd": "open" },
+    { "time": 10.6, "elementId": "roundsLow", "classlistRemove": "aparecendo" },
+    { "time": 10.6, "elementId": "circleLow", "classlistRemove": "close" },
+    { "time": 10.6, "elementId": "circleLow", "classlistAdd": "open" },
     
     { "time": 10.6, "elementId": "playerListR2", "remove": "null" },
     { "time": 10.6, "elementId": "rounds", "remove": "null" },

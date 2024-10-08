@@ -1,6 +1,6 @@
 [
-  { "time": 27.5, "elementId": "iluminacao", "classlistAdd": "aceso" },
-  { "time": 27.5, "elementId": "rounds", "classlistAdd": "aparecendo" },
+  { "time": 27.2, "elementId": "iluminacao", "classlistAdd": "aceso" },
+  { "time": 27.2, "elementId": "rounds", "classlistAdd": "aparecendo" },
   { "time": 29.6, "elementId": "iluminacao", "classlistRemove": "aceso" },
   { "time": 29.6, "elementId": "circle", "classlistRemove": "close" },
   { "time": 29.6, "elementId": "whistleUp", "play": "null" },

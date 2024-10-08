@@ -13,7 +13,7 @@
   { "time": 11.3, "elementId": "iluminacao", "classlistRemove": "aceso" },
 
   { "time": 13.8, "elementId": "rounds", "classlistAdd": "aparecendo" },
-  { "time": 13.8, "elementId": "rounds", "src": "/static/images/Round2Var2.png" },
+  { "time": 13.8, "elementId": "rounds", "src": "/static/images/Round2.png" },
   { "time": 13.8, "elementId": "iluminacao", "classlistAdd": "aceso" },
 
   { "time": 17, "elementId": "rounds", "classlistRemove": "aparecendo" },
@@ -26,11 +26,8 @@
 
   { "time": 17, "elementId": "playerListR2", "remove": "null" },
   { "time": 17, "elementId": "rounds", "remove": "null" },
-  { "time": 17, "elementId": "iluminacao", "remove": "null" },
   
   { "time": 17, "elementId": "iluminacao", "startCountdown": "round2Time, 0" },
-
-  { "time": 17.8, "elementId": "whistleUp", "remove": "null" },
-  { "time": 17.8, "elementId": "whistleDown", "remove": "null" },
-  { "time": 17.8, "elementId": "audioR2", "remove": "null" }
+  
+  { "time": 17.8, "elementId": "iluminacao", "remove": "null" }
 ]

@@ -2,7 +2,6 @@
   { "time": 0.2, "elementId": "iluminacao", "classlistAdd": "aceso" },
   { "time": 0.2, "elementId": "logo", "classlistAdd": "aparecendo" },
   { "time": 0.2, "elementId": "show", "classlistAdd": "aparecendo" },
-  { "time": 1, "elementId": "whistleDown", "remove": "null" },
   { "time": 7.7, "elementId": "logo", "classlistRemove": "aparecendo" },
   { "time": 7.7, "elementId": "show", "classlistRemove": "aparecendo" },
   { "time": 7.7, "elementId": "iluminacao", "classlistRemove": "aceso" },
@@ -15,9 +14,7 @@
   { "time": 14, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
   { "time": 14, "elementId": "timerContainer", "classlistAdd": "appear" },
   { "time": 14, "elementId": "whistleUp", "play": "null" },
-  { "time": 14, "elementId": "null", "socketEmit": "Game Started" },
-  { "time": 15, "elementId": "whistleUp", "remove": "null" },
-  { "time": 14.8, "elementId": "iluminacao", "startCountdown": "round1Time, 0" },
-  { "time": 14.8, "elementId": "audioR1", "remove": "null" }
+  { "time": 14, "elementId": "iluminacao", "socketEmit": "Game started" },
+  { "time": 14.8, "elementId": "audioR1", "remove": "null" },
+  { "time": 14.8, "elementId": "iluminacao", "startCountdown": "round1Time, 0" }
 ]
-  

@@ -37,6 +37,7 @@
                         <span>Curto</span>
                     </div>
                 </div>
+                <button onclick="joinRoom()" class="play-game-btn">Entrar em Sala</button>
                 <button onclick="createRoom()" class="play-game-btn">Criar Sala</button>
             </div>
         </div>
@@ -56,40 +57,74 @@
     <div id="errorContainer">
         <span id="errorMsg"></span>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
+        var socket = io({
+            transports: ['websocket', 'polling']
+        });
+
+        let isCreatingRoom = false; // Rastreia se uma sala está sendo criada
+        let socketId = null;
+
+        socket.on('connect', function() {
+            socketId = socket.id;
+        });
+
+        function joinRoom() {
+            window.location.href = '/join'
+        }
+
         function createRoom() {
+            if (isCreatingRoom) return; // Evita múltiplos cliques
+            isCreatingRoom = true; // Marca que o processo de criação está em andamento
+
             fetch('/create_room', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({
+                    'socket_id': socketId  // Passa o socket.id em vez de client_id
+                })
             })
             .then(response => response.json())
             .then(data => {
-                if (data.room_id === undefined) {
-                    const errorMsg = document.getElementById('errorMsg')
-                    const errorContainer = document.getElementById('errorContainer')
-                    if (data.cooldown_remaining !== undefined) {
-                        errorMsg.innerText = `Cooldown ativo. Tente novamente em ${Math.ceil(data.cooldown_remaining)} segundos.`
-                        errorContainer.classList.add('appear')
-                        setTimeout(function(){
-                        errorContainer.classList.remove('appear')
-                    }, 2000)
-                    } else {
-                        console.error('Erro: room_id retornou undefined');
-                    }
-                } else {
+                const errorMsg = document.getElementById('errorMsg');
+                const errorContainer = document.getElementById('errorContainer');
+
+                if (data.message === 'All rooms are full, you have been added to the queue') {
+                    const queuePosition = data.queue_position;
+                    errorMsg.innerText = `Todas as salas estão cheias. Você está na fila, posição: ${queuePosition}. Se você recarregar a página, perderá sua posição na fila.`;
+                    errorContainer.classList.add('appear');
+                    setTimeout(function() {
+                        errorContainer.classList.remove('appear');
+                    }, 4000);
+                    listenForQueueUpdates(socketId); // Conecta ao socket para ouvir atualizações
+                } 
+                else if (data.room_id !== undefined) {
                     const roomId = data.room_id;
-                    window.location.href = `/receptor/${roomId}`;
+                    socket.disconnect()
+                    window.location.href = `/host/${roomId}`;
+                } 
+                else {
+                    console.error('Erro: Não foi possível criar a sala ou adicionar à fila');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
+            })
+            .finally(() => {
+                isCreatingRoom = false; // Restaura o estado após a tentativa de criação
             });
         }
 
-        function showError() {
-
+        function listenForQueueUpdates(socketId) {
+            socket.on('room_created', function(data) {
+                if (data.socket_id === socketId) {
+                    const roomId = data.room_id;
+                    window.location.href = `/host/${roomId}`; // Redireciona para a sala
+                }
+            });
         }
 
         const fullscreenBtn = document.getElementById('fullscreen');

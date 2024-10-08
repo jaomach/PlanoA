@@ -1,0 +1,28 @@
+[
+  { "time": 0.8, "elementId": "playerListR2", "classlistAdd": "appearLow" },
+  { "time": 0.8, "elementId": "iluminacao", "classlistAdd": "aceso" },
+
+  { "time": 5.2, "elementId": "iluminacao", "classlistRemove": "aceso" },
+  { "time": 5.2, "elementId": "playerListR2", "classlistRemove": "appearLow" },
+
+  { "time": 9.5, "elementId": "roundsLow", "classlistAdd": "aparecendo" },
+
+  { "time": 11.3, "elementId": "roundsLow", "classlistRemove": "aparecendo" },
+
+  { "time": 13.8, "elementId": "roundsLow", "src": "/static/images/Round2Low.png" },
+  { "time": 13.8, "elementId": "roundsLow", "classlistAdd": "aparecendo" },
+
+  { "time": 17, "elementId": "roundsLow", "classlistRemove": "aparecendo" },
+  { "time": 17, "elementId": "circleLow", "classlistRemove": "close" },
+  { "time": 17, "elementId": "circleLow", "classlistAdd": "open" },
+  { "time": 17, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
+  { "time": 17, "elementId": "timerContainer", "classlistAdd": "appear" },
+  { "time": 17, "elementId": "whistleUp", "play": "null" },
+
+  { "time": 17, "elementId": "playerListR2", "remove": "null" },
+  { "time": 17, "elementId": "rounds", "remove": "null" },
+  
+  { "time": 17, "elementId": "iluminacao", "startCountdown": "round2Time, 0" },
+  
+  { "time": 17.8, "elementId": "iluminacao", "remove": "null" }
+]

@@ -86,10 +86,29 @@ function gameMenuChange() {
 
     // Log the selected value to the console
     animationSelect.addEventListener('change', () => {
-    //    console.log(animationSelect.value);
+        if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Ativado') {
+            localStorage.setItem('pc-gm-qual', 'high')
+            quality = 'high'
+        } else if (animationSelect.value === 'Baixo' && screenEffectSelect.value === 'Desativado') {
+            localStorage.setItem('pc-gm-qual', 'low')
+            quality = 'low'
+        } else if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Desativado') {
+            localStorage.setItem('pc-gm-qual', 'medium')
+            quality = 'medium'
+        }
     });
     screenEffectSelect.addEventListener('change', () => {
         screenEffectContainer.classList.toggle('ativo')
+        if (screenEffectSelect.value === 'Desativado' && animationSelect.value === 'Alto') {
+            localStorage.setItem('pc-gm-qual', 'medium')
+            quality = 'medium'
+        } else if (animationSelect.value === 'Baixo' && screenEffectSelect.value === 'Desativado') {
+            localStorage.setItem('pc-gm-qual', 'low')
+            quality = 'low'
+        } else if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Ativado') {
+            localStorage.setItem('pc-gm-qual', 'high')
+            quality = 'high'
+        }
     });
 
     // Volume control for all audio elements
@@ -265,7 +284,7 @@ clipboardBtn.addEventListener('click', function(event) {
     }
 
     var urlAtual = window.location.hostname;
-    navigator.clipboard.writeText(urlAtual + ':5000/drawing/' + roomId);
+    navigator.clipboard.writeText(urlAtual + '/player/' + roomId);
 
     const contextBox = document.createElement('span');
     contextBox.classList.add('context-box');
@@ -304,8 +323,29 @@ document.addEventListener('keydown', function(event) {
 });
 
 document.addEventListener('keydown', function(event) {
+    if (event.key === 'f' && !reportActive && !gameMenuListening) {
+        showReport()
+        gameMenuChange()
+        reportBtn.classList.add('pop')
+        setTimeout(function() {
+            reportBtn.classList.remove('pop')
+        }, 1000)
+    }
+    else if (event.key === 'f' && reportActive) {
+        hideReport()
+    }
+    else if (event.key === 'f' && !reportActive) {
+        showReport()
+        reportBtn.classList.add('pop')
+        setTimeout(function() {
+            reportBtn.classList.remove('pop')
+        }, 1000)
+    }
+});
+
+document.addEventListener('keydown', function(event) {
     if (event.key === '1' && !gameStarted) {
-        round2Var1()
+        round3Var1()
     }
 });
 
@@ -328,15 +368,25 @@ document.addEventListener('keydown', function(event) {
     }
 });
 document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape' && !optionsActive && !gameMenuListening) {
-        showOptions()
-        gameMenuChange()
-    }
-    else if (event.key === 'Escape' && optionsActive) {
-        hideOptions()
-    }
-    else if (event.key === 'Escape' && !optionsActive) {
-        showOptions()
+    if (!finalScreenDisable) {
+        if (event.key === 'Escape' && !optionsActive && !gameMenuListening) {
+            showOptions()
+            gameMenuChange()
+            configBtn.classList.add('roll')
+            setTimeout(function() {
+                configBtn.classList.remove('roll')
+            }, 1000)
+        }
+        else if (event.key === 'Escape' && optionsActive) {
+            hideOptions()
+        }
+        else if (event.key === 'Escape' && !optionsActive) {
+            showOptions()
+            configBtn.classList.add('roll')
+            setTimeout(function() {
+                configBtn.classList.remove('roll')
+            }, 1000)
+        }
     }
 });
 
@@ -437,7 +487,7 @@ if (data.remaining_time === 0 && round1 === true) {
         element.classList.remove('in-game');
     });
     if (quality === 'low') {
-        roundCallRandom(round2Var1, round2Var2, round2Var3)
+        roundCallRandom(round2Var1, round2Var1, round2Var1)
     } else {
         roundCallRandom(round2Var1, round2Var2, round2Var3)
     }
@@ -456,7 +506,7 @@ if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === fa
         element.classList.remove('in-game');
     });
     if (quality === 'low') {
-        roundCallRandom(round3Var1Low, round3Var2Low, round3Var3Low)
+        roundCallRandom(round3Var1, round3Var2, round3Var3)
     } else {
         roundCallRandom(round3Var1, round3Var2, round3Var3)
     }
@@ -582,7 +632,6 @@ function showOptions(){
     const allAudios = document.querySelectorAll('audio');
 
     menu.classList.add('ativo')
-    
 
     inactive.classList.add('inativo')
     body.appendChild(inactive)
@@ -590,10 +639,7 @@ function showOptions(){
     inactive.id = 'bgInactive'
 
     inactive.addEventListener("click", function(){
-        menu.classList.remove('ativo')
-
-        body.removeChild(inactive)
-        optionsActive = false
+        hideOptions()
     })
     
     allAudios.forEach(audio => {
@@ -613,7 +659,9 @@ function hideOptions(){
     menu.classList.remove('ativo')
 
     playingAudios.forEach(audio => {
-        audio.play()
+        if (audio.currentTime < audio.duration) {
+            audio.play();
+        }
     });  
 
     body.removeChild(inactive)
@@ -635,17 +683,14 @@ function showReport(){
     body.appendChild(inactive)
     inactive.id = 'bgInactive'
     reportActive = true
+    togglePauseResumeCountdown()
 
     inactive.addEventListener("click", function(){
-        menu.classList.remove('ativo')
-
-        body.removeChild(inactive)
-        reportActive = false
+        hideReport()
     })
     allAudios.forEach(audio => {
         audio.pause()
     });
-    togglePauseResumeCountdown()
 }
 
 function hideReport(){
@@ -659,8 +704,10 @@ function hideReport(){
 
     body.removeChild(inactive)
     playingAudios.forEach(audio => {
-        audio.play()
-    });  
+        if (audio.currentTime < audio.duration) {
+            audio.play();
+        }
+    });   
     reportActive = false
     togglePauseResumeCountdown()
 }
@@ -753,7 +800,7 @@ function startCountdown(duration, intervalo, roundNumber) {
     const timerElement = document.getElementById('timer');
     timeLeft = isPaused ? timeLeft : duration; // Se estiver pausado, continua de onde parou
 
-    if (auxGameStarted === false) {
+    if (auxGameStarted === true) {
         timeOuts.push(setTimeout(function () {
             console.log(auxGameStarted);
             startNextRound(duration, roundNumber);
@@ -1210,9 +1257,8 @@ function round1Var1() {
     document.getElementById('startButton').disabled = true;
     document.getElementById('timer').style.display = 'block'
     document.getElementById('startButton').classList.add('translate')
-    var soundTrackR1 = document.getElementById("soundTrackR1");
-    var audioRodada1 = document.getElementById("audioR1");
-    const body = document.body
+    let soundTrackR1 = document.getElementById("soundTrackR1");
+    let audioRodada1 = document.getElementById("audioR1");
     const round1 = document.createElement('img')
     round1.src = '/static/images/Round1.png'
     round1.id = 'rounds'
@@ -1221,8 +1267,10 @@ function round1Var1() {
 
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round1Low.png" id="roundsLow">
     <img src="/static/images/Round1.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1248,11 +1296,41 @@ function round1Var1() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round1/r1Var1.json')
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round1/r1Var1Low.json')
         .then(response => response.json())
         .then(data => {
         audioData = data;
         });
+
+        setTimeout(function() {
+            document.getElementById('startButton').classList.add('desappear')
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            setTimeout(function() {
+                soundTrackR1.play();
+                audioRodada1.play();
+            }, 1000);
+        }, 500);
+    } else {
+        fetch('/static/pgGame/rounds/round1/r1Var1.json')
+        .then(response => response.json())
+        .then(data => {
+        audioData = data;
+        });
+
+        setTimeout(function() {
+            document.getElementById('startButton').classList.add('desappear')
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            setTimeout(function() {
+                soundTrackR1.play();
+                audioRodada1.play();
+            }, 1000);
+        }, 500);
+    }
     audioRodada1.addEventListener('timeupdate', () => {
         const currentTime = audioRodada1.currentTime;
         audioData.forEach(item => {
@@ -1286,17 +1364,6 @@ function round1Var1() {
         }
       });
     });
-
-    setTimeout(function() {
-        document.getElementById('startButton').classList.add('desappear')
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        setTimeout(function() {
-            soundTrackR1.play();
-            audioRodada1.play();
-        }, 1000);
-    }, 500);
 }
 
 function round2Var1() {
@@ -1333,8 +1400,10 @@ function round2Var1() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2Low.png" id="roundsLow">
     <img src="/static/images/Round2.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1360,65 +1429,79 @@ function round2Var1() {
         }
     };
 
-    let audioData; // Declare a variável no escopo global
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round2/r2Var1Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data; // Agora audioData está acessível aqui
+            });
 
-    fetch('/static/pgGame/rounds/round2/r2Var1.json')
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round2/r2Var1.json')
         .then(response => response.json())
         .then(data => {
             audioData = data; // Agora audioData está acessível aqui
         });
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    }
+    setTimeout(function() {
+        audioR2Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR2Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                            console.log(1)
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                            console.log(2)
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                            console.log(3)
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
     
-    audioR2Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR2Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                        console.log(1)
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                        console.log(2)
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                        console.log(3)
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
-
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
-
-                        startCountdown(param1, param2);
-                        console.log(4)
-                    }
-                    if (item.socketEmit) {
-                        socket.emit('message', { message: item.socketEmit, room_id: roomId });
-                        console.log(5)
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                            console.log(4)
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR1.pause();
-            soundTrackR2.play();
-            audioR2Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 
 function round2Var2() {
@@ -1444,8 +1527,10 @@ function round2Var2() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round2Low.png" id="roundsLow">
     <img src="/static/images/Round2.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1472,59 +1557,78 @@ function round2Var2() {
         }
     };
 
-    let audioData; // Declare a variável no escopo global
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round2/r2Var2Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data; // Agora audioData está acessível aqui
+            });
 
-    fetch('/static/pgGame/rounds/round2/r2Var2.json')
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round2/r2Var2.json')
         .then(response => response.json())
         .then(data => {
             audioData = data; // Agora audioData está acessível aqui
         });
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    }
+    setTimeout(function() {
+        audioR2Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR2Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
     
-    audioR2Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR2Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
-
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
-
-                        startCountdown(param1, param2);
-                    }
-                    if (item.socketEmit) {
-                        socket.emit('message', { message: item.socketEmit, room_id: roomId });
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                        }
+                        if (item.socketEmit) {
+                            socket.emit('message', { message: item.socketEmit, room_id: roomId });
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR1.pause();
-            soundTrackR2.play();
-            audioR2Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 
 function round2Var3() {
@@ -1550,9 +1654,11 @@ function round2Var3() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
-    <img src="/static/images/Round2Vote.png" id="rounds">
+    <img src="/static/images/Round2Var2Low.png" id="roundsLow">
+    <img src="/static/images/Round2Var2.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
     `
@@ -1587,59 +1693,82 @@ function round2Var3() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round2/r2Var3.json')
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round2/r2Var3Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data; // Agora audioData está acessível aqui
+            });
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round2/r2Var3.json')
         .then(response => response.json())
         .then(data => {
             audioData = data; // Agora audioData está acessível aqui
         });
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR1.remove();
+                soundTrackR2.play();
+                audioR2Var1.play();
+            }, 1000));
+        }, 500));
+    }
+    setTimeout(function() {
+        audioR2Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR2Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
     
-    audioR2Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR2Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
-
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
-
-                        startCountdown(param1, param2);
-                    }
-                    if (item.src) {
-                        targetElement.src = item.src;
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                        }
+                        if (item.src) {
+                            targetElement.src = item.src;
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR1.pause();
-            soundTrackR2.play();
-            audioR2Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 function round3Var1() {
     timeOuts.length = 0;
+    roundVar = 1
     socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
 
     document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(3)')
@@ -1659,8 +1788,10 @@ function round3Var1() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round3Low.png" id="roundsLow">
     <img src="/static/images/Round3.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1687,61 +1818,84 @@ function round3Var1() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round3/r3Var1.json')
-    .then(response => response.json())
-    .then(data => {
-    audioData = data;
-    });
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round3/r3Var1Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data; // Agora audioData está acessível aqui
+            });
 
-    audioR3Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR3Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round3/r3Var1.json')
+        .then(response => response.json())
+        .then(data => {
+            audioData = data; // Agora audioData está acessível aqui
+        });
 
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    }
 
-                        startCountdown(param1, param2);
-                    }
-                    if (item.src) {
-                        targetElement.src = item.src;
+    setTimeout(function() {
+        audioR3Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR3Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
+    
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                        }
+                        if (item.src) {
+                            targetElement.src = item.src;
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR2.pause();
-            soundTrackR3.play();
-            audioR3Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 
 function round3Var2() {
     timeOuts.length = 0;
+    roundVar = 2
     socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
 
     document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(3)')
@@ -1761,8 +1915,10 @@ function round3Var2() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LOGO.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round3Low.png" id="roundsLow">
     <img src="/static/images/Round3.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1789,61 +1945,85 @@ function round3Var2() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round3/r3Var2.json')
-    .then(response => response.json())
-    .then(data => {
-    audioData = data;
-    });
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round3/r3Var2Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data; // Agora audioData está acessível aqui
+            });
 
-    audioR3Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR3Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round3/r3Var2.json')
+        .then(response => response.json())
+        .then(data => {
+            audioData = data; // Agora audioData está acessível aqui
+        });
 
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    }
 
-                        startCountdown(param1, param2);
-                    }
-                    if (item.src) {
-                        targetElement.src = item.src;
+
+    setTimeout(function() {
+        audioR3Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR3Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
+    
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                        }
+                        if (item.src) {
+                            targetElement.src = item.src;
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR2.pause();
-            soundTrackR3.play();
-            audioR3Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 
 function round3Var3() {
     timeOuts.length = 0;
+    roundVar = 3
     socket.emit('message', { message: 'Round 2 finished', room_id: roomId });
 
     document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(3)')
@@ -1863,8 +2043,10 @@ function round3Var3() {
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round3Low.png" id="roundsLow">
     <img src="/static/images/Round3.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1891,61 +2073,86 @@ function round3Var3() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round3/r3Var3.json')
-    .then(response => response.json())
-    .then(data => {
-    audioData = data;
-    });
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round3/r3Var3Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data;
+            });
 
-    audioR3Var1.addEventListener('timeupdate', () => {
-        const currentTime = audioR3Var1.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
+        console.log(audioData)
 
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round3/r3Var3.json')
+        .then(response => response.json())
+        .then(data => {
+            audioData = data; // Agora audioData está acessível aqui
+        });
 
-                        startCountdown(param1, param2);
-                    }
-                    if (item.src) {
-                        targetElement.src = item.src;
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR2.remove();
+                soundTrackR3.play();
+                audioR3Var1.play();
+            }, 1000));
+        }, 500));
+    }
+
+    setTimeout(function() {
+        audioR3Var1.addEventListener('timeupdate', () => {
+            const currentTime = audioR3Var1.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
+    
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+    
+                            startCountdown(param1, param2);
+                        }
+                        if (item.src) {
+                            targetElement.src = item.src;
+                        }
                     }
                 }
-            }
+            });
         });
-    });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR2.pause();
-            soundTrackR3.play();
-            audioR3Var1.play();
-        }, 1000));
-    }, 500));
+    }, 100)
 }
 
 function round4Var1() {
     timeOuts.length = 0;
+    roundVar = 1
     socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
 
     document.getElementById('skipRoundBtn').setAttribute('onclick', 'skipRound(4)')
@@ -1958,8 +2165,10 @@ function round4Var1() {
 
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
+    <img id="logoLow" src="/static/images/LogoLow.png" alt="">
     <img id="logo" src="/static/images/LOGO.png" alt="">
     <img id="show" src="/static/images/OSHOW.png" alt="">
+    <img src="/static/images/Round4Low.png" id="roundsLow">
     <img src="/static/images/Round4.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
@@ -1984,11 +2193,45 @@ function round4Var1() {
         }
     };
 
-    fetch('/static/pgGame/rounds/round4/r4Var1.json')
-    .then(response => response.json())
-    .then(data => {
-    audioData = data;
-    });
+    if (quality === 'low') {
+        fetch('/static/pgGame/rounds/round3/r4Var1Low.json')
+            .then(response => response.json())
+            .then(data => {
+                audioData = data;
+            });
+
+        console.log(audioData)
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circleLow').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR3.remove();
+                soundTrackR4.play();
+                audioR4.play();
+            }, 1000));
+        }, 500));
+    } else {
+        fetch('/static/pgGame/rounds/round3/r4Var1.json')
+        .then(response => response.json())
+        .then(data => {
+            audioData = data; // Agora audioData está acessível aqui
+        });
+
+        timeOuts.push(setTimeout(function() {
+            document.getElementById('timerContainer').classList.remove('appear')
+            document.getElementById('timer').classList.add('appear')
+            document.getElementById('circle').classList.add('close')
+            whistleDown.play();
+            timeOuts.push(setTimeout(function() {
+                soundTrackR3.remove();
+                soundTrackR4.play();
+                audioR4.play();
+            }, 1000));
+        }, 500));
+    }
 
     audioR4.addEventListener('timeupdate', () => {
         const currentTime = audioR4.currentTime;
@@ -2014,11 +2257,6 @@ function round4Var1() {
                         const param1 = roundTimes[args[0]]; 
                         const param2 = parseInt(args[1], 10); 
                         const param3 = parseInt(args[2], 10); 
-
-                        console.log(param1)
-                        console.log(param2)
-                        console.log(param3)
-
                         startCountdown(35, 0, 4);
                         //startCountdown(param1, param2, param3);
                     }
@@ -2040,22 +2278,11 @@ function round4Var1() {
             }
         });
     });
-
-    timeOuts.push(setTimeout(function() {
-        document.getElementById('timerContainer').classList.remove('appear')
-        document.getElementById('timer').classList.add('appear')
-        document.getElementById('circle').classList.add('close')
-        whistleDown.play();
-        timeOuts.push(setTimeout(function() {
-            soundTrackR3.pause();
-            soundTrackR4.play();
-            audioR4.play();
-        }, 1000));
-    }, 500));
 }
 
 function roundFinal() {
     timeOuts.length = 0;
+    roundVar = 1
     document.getElementById('skipRoundBtn').setAttribute('onclick', `skipRound('final')`)
     var audioRodadaFinal = document.getElementById("audioFinal");
     var soundTrackR4 = document.getElementById("soundTrackR4");
@@ -2269,13 +2496,29 @@ function skipRound(roundNum) {
     }
     if (roundNum === 3) {
         const audioR3Var1 = document.getElementById("audioR3");
-        audioR3Var1.pause();
-        audioR3Var1.currentTime = 0;
+        if (roundVar === 1) {
+            audioR3Var1.currentTime = 29.4;
+            setTimeout(function() {
+                audioR3Var1.currentTime = 30;
+            }, 100)
+        }
+        if (roundVar === 2) {
+            audioR3Var1.currentTime = 22.2;
+            setTimeout(function() {
+                audioR3Var1.currentTime = 22.2;
+            }, 100)
+        }
+        if (roundVar === 3) {
+            audioR3Var1.currentTime = 15.4;
+            setTimeout(function() {
+                audioR3Var1.currentTime = 15.7;
+            }, 100)
+        }
         startCountdown(round3Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     }
     if (roundNum === 4) {
-        const audioR4Var1 = document.getElementById("audioR4");
+        const audioR4 = document.getElementById("audioR4");
         startCountdown(round4Time, 500)
         document.getElementById('timerContainer').classList.add('appear')
     }
@@ -2323,8 +2566,6 @@ function sendToAI(image_path) {
     .catch(error => console.error('Error:', error));
 }
 
-
-
 let lastTime = performance.now();
 let fps = 0;
 let fpsArray = [];
@@ -2348,17 +2589,23 @@ function verifyQuality() {
 } 
 
 function autoSetQuality(performanceLevel) {
+    const animationSelect = document.getElementById('animationSelect')
+    const screenEffectSelect = document.getElementById('screenSelect')
+    const screenEffectContainer = document.getElementById('effectContainer')
     if (performanceLevel == 'high') {
         localStorage.setItem('pc-gm-qual', 'high')
+        animationSelect.value = 'Alto'
         showLoadingScreen(performanceLevel)
         return
     } else if (performanceLevel == 'medium'){
         localStorage.setItem('pc-gm-qual', 'medium')
+        animationSelect.value = 'Alto'
+        screenEffectSelect.value = 'Desativado'
+        screenEffectContainer.classList.toggle('ativo')
         showLoadingScreen(performanceLevel)
         return
     } else {
-        const screenEffectSelect = document.getElementById('screenSelect')
-        const screenEffectContainer = document.getElementById('effectContainer')
+        animationSelect.value = 'Baixo'
         screenEffectSelect.selectedIndex = 1;
         screenEffectContainer.classList.toggle('ativo')
         showLoadingScreen(performanceLevel)
@@ -2441,7 +2688,7 @@ function createRoom() {
             }
         } else {
             const roomId = data.room_id;
-            window.location.href = `/receptor/${roomId}`;
+            window.location.href = `/host/${roomId}`;
         }
     })
     .catch(error => {

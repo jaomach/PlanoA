@@ -8,6 +8,12 @@
 body {display: flex; align-items: center; justify-content: center; margin: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #2c2c2c; font-family: 'Inter', sans-serif;}
 canvas { display: block; position: absolute; }
 
+h1 {
+    color: white;
+    margin-top: 0;
+    margin-bottom: 20%;
+}
+
 #logo {
     width: 150px;
     position: absolute;
@@ -16,6 +22,34 @@ canvas { display: block; position: absolute; }
     z-index: 10000;
     padding: 1%;
 }
+
+label {
+    color: white;
+    opacity: 0.3;
+}
+
+form {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.input-container {
+    font-family: 'inter', sans-serif;
+    border-radius: 5px;
+    border-style: solid;
+    border-color: #3f3f3f;
+    color: #fff;
+    border-width: 1.8px;
+    cursor: pointer;
+    transition: all 500ms;
+    cursor: text;
+    padding: 4% 6%;
+    font-weight: 600;
+    background-color: #252525;
+    font-size: 20pt;
+    text-align: center;
+ }
 
 #errorContainer {
     width: 100%;
@@ -37,14 +71,16 @@ canvas { display: block; position: absolute; }
 
 .menu-inicial {
     display: flex;
-    width: 100%;
     justify-content: center;
-    position: absolute;
-    z-index: 1;
     align-items: center;
-    height: 100%;
     flex-direction: column;
-    gap: 7%;
+    z-index: 1;
+    padding: 2% 2%;
+    border-style: solid;
+    border-radius: 11px;
+    border-width: 1.8px;
+    border-color: #3f3f3f;
+    gap: 30%;
 }
 
 #btnElement {
@@ -103,10 +139,10 @@ canvas { display: block; position: absolute; }
 .primary-btn {
     font-family: 'inter', sans-serif;
     font-weight: 800;
-    font-size: 16pt;
+    font-size: 12pt;
     text-wrap: nowrap;
-    margin-top: 8%;
-    padding: 8% 12%;
+    padding: 4.6% 10%;
+    width: 100%;
     border-radius: 5px;
     border-style: solid;
     border-color: #3f3f3f;
@@ -115,6 +151,7 @@ canvas { display: block; position: absolute; }
     border-width: 1.8px;
     cursor: pointer;
     transition: all 500ms;
+    margin-top: 9%;
     display: flex;
     align-items: center;
     justify-content: center;

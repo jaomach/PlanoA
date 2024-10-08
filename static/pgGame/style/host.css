@@ -605,6 +605,7 @@ h1 {
 
    position: absolute;
    left: 0;
+   margin: 1%;
 
    width: 100px;
    height: 110px;
@@ -981,13 +982,21 @@ body.desligado {
    top: 50%;
    left: 50%;
    filter: brightness(0.7);
-
-   transform: translate(-50%, -320%);
-   transition: all 700ms;
+   opacity: 0;
+   transform: translate(-50%, -50%);
 }
 
 #playerListR2.appear {
-   transform: translate(-50%, -50%);
+   animation: up-player-list 700ms ease-in-out forwards;
+}
+
+@keyframes up-player-list {
+   from{transform: translate(-50%, -320%);}
+   to{transform: translate(-50%, -50%);}
+}
+
+#playerListR2.appearLow {
+   animation: fadeInLow 200ms ease-in-out forwards;
 }
 
 #skipRoundBtn {

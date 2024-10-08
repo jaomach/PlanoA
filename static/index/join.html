@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Caixa - Plano A</title>
+    <link rel="stylesheet" href="/static/index/style/join.css">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+</head>
+<body>
+    <img id="logo" src="/static/images/index/planoA.png" alt="">
+    <div class="menu-inicial">
+        <form id="formSala">
+            <label for="">Código da sala:</label>
+            <input autocorrect="off" autocapitalize="off" autocomplete="off" id="inputSala" pattern="[A-Z]+" placeholder="XXXX" maxlength="4" class="input-container" type="text">
+            <button type="submit" class="primary-btn">Entrar</button>
+        </form>
+    </div>
+    <div id="errorContainer">
+        <span id="errorMsg"></span>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        const inputSala = document.getElementById('inputSala');
+
+        inputSala.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+        });
+
+        document.getElementById("formSala").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            let codigoSala = document.getElementById("inputSala").value;
+
+            fetch("/find_room", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ roomId: codigoSala })
+            })
+            .then(response => {
+                if (!response) {
+                    throw new Error('Erro ao entrar na sala');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    window.location.href = `/player/${codigoSala}`;
+                } else {
+                    errorMsg.innerText = `Sala não encontrada :(`;
+                    errorContainer.classList.add('appear');
+                    setTimeout(function() {
+                        errorContainer.classList.remove('appear');
+                    }, 4000);
+                }
+            })
+            .catch(error => {
+                alert("Falha ao entrar na sala: " + error.message);
+            });
+        });
+
+    </script>
+</body>
+</html>
