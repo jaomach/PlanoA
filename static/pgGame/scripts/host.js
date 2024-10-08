@@ -1501,7 +1501,7 @@ function round2Var1() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 
 function round2Var2() {
@@ -1628,7 +1628,7 @@ function round2Var2() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 
 function round2Var3() {
@@ -1764,7 +1764,7 @@ function round2Var3() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 function round3Var1() {
     timeOuts.length = 0;
@@ -1890,7 +1890,7 @@ function round3Var1() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 
 function round3Var2() {
@@ -2018,7 +2018,7 @@ function round3Var2() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 
 function round3Var3() {
@@ -2147,7 +2147,7 @@ function round3Var3() {
                 }
             });
         });
-    }, 100)
+    }, 200)
 }
 
 function round4Var1() {
@@ -2194,7 +2194,7 @@ function round4Var1() {
     };
 
     if (quality === 'low') {
-        fetch('/static/pgGame/rounds/round3/r4Var1Low.json')
+        fetch('/static/pgGame/rounds/round4/r4Var1Low.json')
             .then(response => response.json())
             .then(data => {
                 audioData = data;
@@ -2214,7 +2214,7 @@ function round4Var1() {
             }, 1000));
         }, 500));
     } else {
-        fetch('/static/pgGame/rounds/round3/r4Var1.json')
+        fetch('/static/pgGame/rounds/round4/r4Var1.json')
         .then(response => response.json())
         .then(data => {
             audioData = data; // Agora audioData está acessível aqui
@@ -2232,52 +2232,53 @@ function round4Var1() {
             }, 1000));
         }, 500));
     }
-
-    audioR4.addEventListener('timeupdate', () => {
-        const currentTime = audioR4.currentTime;
-        audioData.forEach(item => {
-            if (Math.abs(currentTime - item.time) < 0.1) {
-                const targetElement = document.getElementById(item.elementId);
-                if (targetElement) {
-                    if (item.classlistRemove) {
-                        targetElement.classList.remove(item.classlistRemove);
-                    }
-                    if (item.classlistAdd) {
-                        targetElement.classList.add(item.classlistAdd);
-                    }
-                    if (item.play) {
-                        targetElement.play();
-                    }
-                    if(item.remove) {
-                        targetElement.remove()
-                    }
-                    if (item.startCountdown) {
-                        const args = item.startCountdown.split(', ');
-
-                        const param1 = roundTimes[args[0]]; 
-                        const param2 = parseInt(args[1], 10); 
-                        const param3 = parseInt(args[2], 10); 
-                        startCountdown(35, 0, 4);
-                        //startCountdown(param1, param2, param3);
-                    }
-                    if (item.startTournament) {
-                        startTournament(roomId);
-                    }
-                    if (item.src) {
-                        targetElement.src = item.src;
-                    }
-                    if (item.timeOut) {
-                        timeOuts.push(setTimeout(function() {
-                            fetchMatchups();
-                        }, 1000));
-                        timeOuts.push(setTimeout(function() {
-                            document.getElementById('papaleguas').classList.add('appear')
-                        }, 2000));
+    setTimeout(function() {
+        audioR4.addEventListener('timeupdate', () => {
+            const currentTime = audioR4.currentTime;
+            audioData.forEach(item => {
+                if (Math.abs(currentTime - item.time) < 0.1) {
+                    const targetElement = document.getElementById(item.elementId);
+                    if (targetElement) {
+                        if (item.classlistRemove) {
+                            targetElement.classList.remove(item.classlistRemove);
+                        }
+                        if (item.classlistAdd) {
+                            targetElement.classList.add(item.classlistAdd);
+                        }
+                        if (item.play) {
+                            targetElement.play();
+                        }
+                        if(item.remove) {
+                            targetElement.remove()
+                        }
+                        if (item.startCountdown) {
+                            const args = item.startCountdown.split(', ');
+    
+                            const param1 = roundTimes[args[0]]; 
+                            const param2 = parseInt(args[1], 10); 
+                            const param3 = parseInt(args[2], 10); 
+                            startCountdown(35, 0, 4);
+                            //startCountdown(param1, param2, param3);
+                        }
+                        if (item.startTournament) {
+                            startTournament(roomId);
+                        }
+                        if (item.src) {
+                            targetElement.src = item.src;
+                        }
+                        if (item.timeOut) {
+                            timeOuts.push(setTimeout(function() {
+                                fetchMatchups();
+                            }, 1000));
+                            timeOuts.push(setTimeout(function() {
+                                document.getElementById('papaleguas').classList.add('appear')
+                            }, 2000));
+                        }
                     }
                 }
-            }
+            });
         });
-    });
+    }, 200)
 }
 
 function roundFinal() {

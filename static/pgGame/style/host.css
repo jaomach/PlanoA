@@ -991,8 +991,10 @@ body.desligado {
 }
 
 @keyframes up-player-list {
-   from{transform: translate(-50%, -320%);}
-   to{transform: translate(-50%, -50%);}
+   from{transform: translate(-50%, -320%);
+   opacity: 0;}
+   to{transform: translate(-50%, -50%);
+   opacity: 1;}
 }
 
 #playerListR2.appearLow {
