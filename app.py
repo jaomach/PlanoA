@@ -11,6 +11,7 @@ from mysql.connector import Error
 import secrets
 import requests
 import traceback
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__, static_folder='static')
 socketio = SocketIO(app, async_mode='gevent')
@@ -87,26 +88,24 @@ def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
 
-def cleanup_inactive_rooms():
-    while True:
-        current_time = time.time()
-        inactive_rooms = [room_id for room_id, room in rooms.items() if current_time - room.get('last_activity', 0) > ROOM_TIMEOUT]
-        for room_id in inactive_rooms:
-            room = rooms.pop(room_id, None)
-            if not any(thread.name == 'queue_manager_thread' for thread in threading.enumerate()):
-                threading.Thread(target=queue_manager, name='queue_manager_thread', daemon=True).start()
-            if room:
-                for player_id in room.get('players', {}):
-                    player_images = room.get(player_id, [])
-                    for image_path in player_images:
-                        try:
-                            os.remove(image_path)
-                        except FileNotFoundError:
-                            pass
-        time.sleep(10)  # verifica a cada 10 segundos
+scheduler = BackgroundScheduler()
 
-cleanup_thread = threading.Thread(target=cleanup_inactive_rooms, daemon=True)
-cleanup_thread.start()
+def cleanup_inactive_rooms():
+    current_time = time.time()
+    inactive_rooms = [room_id for room_id, room in rooms.items() if current_time - room.get('last_activity', 0) > ROOM_TIMEOUT]
+    for room_id in inactive_rooms:
+        room = rooms.pop(room_id, None)
+        if room:
+            for player_id in room.get('players', {}):
+                player_images = room.get(player_id, [])
+                for image_path in player_images:
+                    try:
+                        os.remove(image_path)
+                    except FileNotFoundError:
+                        pass
+
+scheduler.add_job(cleanup_inactive_rooms, 'interval', seconds=60)
+scheduler.start()
 
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
