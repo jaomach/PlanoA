@@ -638,7 +638,12 @@ def admin_handle_message(data):
 
 @socketio.on('join')
 def on_join(data):
-    room_id = data['room_id']
+    room_id = data.get('room_id')  # Obtendo o room_id da data
+    
+    # Garantindo que room_id seja uma string ou número
+    if isinstance(room_id, dict):
+        room_id = room_id.get('id')  # Supondo que room_id seja um dicionário e você precise da chave 'id'
+
     user_type = data.get('user_type', 'player')  # Por padrão, considera que é um player
     join_room(room_id)
 
@@ -654,8 +659,6 @@ def on_join(data):
     else:
         print(f'Player {request.sid} joined room {room_id}')
         emit('message', {'msg': f'Player {request.sid} has joined the room {room_id}'}, room=room_id)
-
-
 
 @socketio.on('remove_player')
 def on_remove_player(data):
