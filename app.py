@@ -173,21 +173,20 @@ def find_room():
 
 def queue_manager():
     """Gerenciador de filas para criar novas salas se houver espaço disponível."""
-    while True:
-        if len(rooms) < max_rooms and queue:
-            socket_id = queue.pop(0)
-            room_id = generate_room_id()
-            rooms[room_id] = {
-                'players': {},
-                'started': False,
-                'start_time': None,
-                'duration': 10000, 
-                'current_round': 0,
-                'last_activity': time.time(),
-                'votes': {}
-            }
-            socketio.emit('room_created', {'socket_id': socket_id, 'room_id': room_id})
-            print(f"Jogador {socket_id} foi movido para uma sala.")
+    if len(rooms) < max_rooms and queue:
+        socket_id = queue.pop(0)
+        room_id = generate_room_id()
+        rooms[room_id] = {
+            'players': {},
+            'started': False,
+            'start_time': None,
+            'duration': 10000, 
+            'current_round': 0,
+            'last_activity': time.time(),
+            'votes': {}
+        }
+        socketio.emit('room_created', {'socket_id': socket_id, 'room_id': room_id})
+        print(f"Jogador {socket_id} foi movido para uma sala.")
 
 def generate_token(length=12):
     return secrets.token_urlsafe(length)[:length]
