@@ -46,6 +46,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         var socket = io({ query: { roomId: roomId } });
+        let reportsFetched = false
 
         socket.on('connect', function() {
             console.log('Connected to server');
@@ -63,6 +64,9 @@
                 element.classList.remove('active');
             });
             document.getElementById('reportSection').classList.add('active')
+            if (!reportsFetched) {
+                //fetchReports();
+            }
         })
 
         btnEMessage.addEventListener('click', function(){
@@ -112,6 +116,7 @@
                     const reports = await response.json();
 
                     displayReports(reports);
+                    reportsFetched = true
                 } else {
                     const errorData = await response.json();
                 }
@@ -147,7 +152,6 @@
         }
 
         window.onload = () => {
-            fetchReports();
             listRooms();
             setInterval(listRooms, 1000);
         };

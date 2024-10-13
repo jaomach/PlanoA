@@ -11,7 +11,6 @@ from mysql.connector import Error
 import secrets
 import requests
 import traceback
-from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__, static_folder='static')
 socketio = SocketIO(app, async_mode='gevent')
@@ -61,12 +60,12 @@ rooms = {
     }
 }
 clients = []
-ip_cooldowns = {}
 users = {}
 queue = []
+inactive_rooms = {}  # Dicionário para armazenar salas inativas
+room_timers = {}  # Dicionário para armazenar temporizadores para cada sala
+room_timeout = 60  # Tempo de espera em segundos antes de excluir a sala
 max_rooms = 2
-COOLDOWN_PERIOD = 60
-ROOM_TIMEOUT = 60  # 1 minuto de tempo limitea
 ADMIN_KEY = 'batata'
 db_config = {
     "host": "autorack.proxy.rlwy.net",
@@ -87,25 +86,6 @@ def connect_to_db():
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
-
-scheduler = BackgroundScheduler()
-
-def cleanup_inactive_rooms():
-    current_time = time.time()
-    inactive_rooms = [room_id for room_id, room in rooms.items() if current_time - room.get('last_activity', 0) > ROOM_TIMEOUT]
-    for room_id in inactive_rooms:
-        room = rooms.pop(room_id, None)
-        if room:
-            for player_id in room.get('players', {}):
-                player_images = room.get(player_id, [])
-                for image_path in player_images:
-                    try:
-                        os.remove(image_path)
-                    except FileNotFoundError:
-                        pass
-
-scheduler.add_job(cleanup_inactive_rooms, 'interval', seconds=60)
-scheduler.start()
 
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
@@ -192,6 +172,7 @@ def find_room():
         return jsonify({"success": False})
 
 def queue_manager():
+    """Gerenciador de filas para criar novas salas se houver espaço disponível."""
     while True:
         if len(rooms) < max_rooms and queue:
             socket_id = queue.pop(0)
@@ -207,8 +188,7 @@ def queue_manager():
             }
             socketio.emit('room_created', {'socket_id': socket_id, 'room_id': room_id})
             print(f"Jogador {socket_id} foi movido para uma sala.")
-        time.sleep(20)  # Adicione um tempo de espera para evitar uso excessivo de CPU
-        
+
 def generate_token(length=12):
     return secrets.token_urlsafe(length)[:length]
 
@@ -579,6 +559,26 @@ def drawing(room_id):
 def handle_connect():
     print('Client connected:', request.sid)
 
+def remove_room(room_id):
+    """Função que remove a sala após o timeout de inatividade."""
+    if room_id in inactive_rooms:
+        # Remover a sala de inactive_rooms
+        del inactive_rooms[room_id]
+        print(f'Sala {room_id} foi removida da lista de inatividade.')
+
+        # Remover a sala de rooms, se ela existir
+        if room_id in rooms:
+            del rooms[room_id]
+            print(f'Sala {room_id} foi deletada do dicionário principal de salas.')
+
+            # Emitir uma mensagem para todos na sala, informando que foi deletada
+            socketio.emit('message', {'msg': f'Sala {room_id} foi removida por inatividade.'}, room=room_id)
+        else:
+            print(f'Sala {room_id} não existe em rooms.')
+
+    # Chama o gerenciador de filas após remover a sala
+    queue_manager()
+
 @socketio.on('disconnect')
 def handle_disconnect():
     user_info = users.get(request.sid)  # Obtém as informações do usuário (incluindo o tipo e sala)
@@ -591,6 +591,16 @@ def handle_disconnect():
             if user_type == 'host':
                 print(f'Host disconnected: {request.sid}')
                 emit('message', {'msg': f'Host {request.sid} has left the room'}, room=room_id)
+                
+                # Marca a sala como inativa
+                inactive_rooms[room_id] = True
+                print(f'Sala {room_id} foi marcada como inativa.')
+                
+                # Inicia o temporizador para remover a sala após o timeout
+                timer = threading.Timer(room_timeout, remove_room, [room_id])
+                room_timers[room_id] = timer
+                timer.start()
+                
             elif user_type == 'player':
                 print(f'Player disconnected: {request.sid}')
                 emit('message', {'msg': f'Player {request.sid} has left the room'}, room=room_id)
@@ -655,6 +665,19 @@ def on_join(data):
     if user_type == 'host':
         print(f'Host {request.sid} joined room {room_id}')
         emit('message', {'msg': f'Host {request.sid} has joined the room {room_id}'}, room=room_id)
+        
+        # Verifica se a sala está marcada como inativa
+        if room_id in inactive_rooms:
+            # Cancela o temporizador se a sala ainda não foi removida
+            timer = room_timers.get(room_id)
+            if timer:
+                timer.cancel()
+                del room_timers[room_id]
+                print(f'Temporizador para a sala {room_id} foi cancelado.')
+            
+            # Remove a sala do dicionário de salas inativas
+            del inactive_rooms[room_id]
+            emit('message', {'msg': f'Host retornou à sala {room_id}'}, room=room_id)
     else:
         print(f'Player {request.sid} joined room {room_id}')
         emit('message', {'msg': f'Player {request.sid} has joined the room {room_id}'}, room=room_id)

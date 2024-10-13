@@ -50,14 +50,17 @@
         </div>
     </div>
     <div class="inside" id="inside">
-        <div class="menu-container" id="gameMenu">
+        <div id="lateralMenu">
             <div class="select-bar">
                 <span class="bar-element ativo">Jogo</span>
                 <span class="bar-element">Vídeo</span>
                 <span class="bar-element">Áudio</span>
+                <span class="bar-element">Acessibilidade</span>
             </div>
-            <section id="gameOption" class="menu-interactive">
-                <h2>Tempo de Jogo</h2>
+
+        <div id="gameOption" class="menu-part">
+            <div class="categories-element"><span>Tempo de Jogo</span></div>
+            <div class="categories-container">
                 <div class="element-container">
                     <span>Round 1:</span> <input id="roundtime1Input" class="input-container" type="number" value="240" max="360" min="10">
                 </div>
@@ -70,10 +73,11 @@
                 <div class="element-container">
                     <span>Votação:</span> <input id="roundtime4Input" class="input-container" type="number" value="30" max="90" min="10">
                 </div>
-                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
-            </section>
-            <section id="videoOption" class="menu-interactive">
-                <h2>Qualidade</h2>
+            </div>
+        </div>
+        <div id="videoOption" class="menu-part">
+            <div class="categories-element"><span>Qualidade</span></div>
+            <div class="categories-container">
                 <div class="element-container">
                     <span>Animações:</span>
                     <select class="select-container" id="animationSelect">
@@ -81,44 +85,73 @@
                         <option value="Baixo">Baixo</option>
                     </select>
                 </div>
-                <h2>Efeitos Visuais</h2>
+            </div>
+            <div class="categories-element"><span>Efeitos Visuais</span></div>
+            <div class="categories-container">
                 <div class="element-container">
-                    <span>Tela:</span> 
-                    <select class="select-container" id="screenSelect">
+                <span>Tela:</span> 
+                <select class="select-container" id="screenSelect">
+                    <option value="Ativado">Ativado</option>
+                    <option value="Desativado">Desativado</option>
+                </select>
+                </div>
+            </div>
+        </div>
+        <div id="audioOption" class="menu-part">
+            <div class="categories-element"><span>Volume Geral</span></div>
+            <div class="categories-container">
+                <div class="element-container">
+                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+                </div>
+            </div>
+        </div>
+        <div id="accessibilityOption" class="menu-part">
+            <div class="categories-element"><span>Legenda</span></div>
+            <div class="categories-container">
+                <div class="element-container">
+                    <span>Legendas:</span> 
+                    <select class="select-container" id="legendaActivationSelect">
                         <option value="Ativado">Ativado</option>
                         <option value="Desativado">Desativado</option>
                     </select>
                 </div>
-                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
-            </section>
-            <section id="audioOption" class="menu-interactive">
-                <h2>Áudio</h2>
-                <div class="volume-control">
-                    <label class="volume-slider-label" for="volume-slider">Volume Global:</label>
-                    <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1">
+                <div class="element-container">
+                    <span>Tamanho da Legenda:</span> 
+                    <select class="select-container" id="legendaSizeSelect">
+                        <option value="14pt">Normal</option>
+                        <option value="11pt">Pequena</option>
+                        <option value="18pt">Grande</option>
+                    </select>
                 </div>
-                <!--<button class="secondary-btn">Restaurar Padrão</button>-->
-            </section>
+            </div>
+            <div class="caption-container teste">Legenda de teste! Oi teste!</div>
+        </div>
         </div>
         <div class="menu-container" id="reportMenu">
             <section id="reportOption" class="menu-interactive">
-                <h2>Reportar</h2>
+                <div class="menu-part report">
+                    <div class="categories-element report"><span>Feedback</span></div>
+                </div>
                 <form id="reportForm">
-                    <div class="element-container report">
-                        <span>Motivo:</span>
-                        <input maxlength="32" placeholder="Digite aqui o motivo!" id="motivoInput" class="input-container" type="text" required>
+                    <div class="categories-container report">
+                        <div class="menu-part report">
+                            <div class="element-container report">
+                                <label>Motivo</label>
+                                <input maxlength="32" placeholder="Digite aqui o motivo!" id="motivoInput" class="input-container" type="text" required>
+                            </div>
+                            <div class="element-container report">
+                                <label>Descrição</label>
+                                <textarea maxlength="256" placeholder="Digite aqui a descrição" rows="3" class="input-container" id="descricaoInput" required></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" id="sendReportBtn" class="secondary-btn">Enviar</button>
                     </div>
-                    <div class="element-container report">
-                        <span>Descrição:</span>
-                        <textarea maxlength="256" placeholder="Digite aqui a descrição" rows="3" class="input-container" id="descricaoInput" required></textarea>
-                    </div>
-                    <button type="submit" id="sendReportBtn" class="secondary-btn">Enviar</button>
                 </form>
             </section>
         </div>
         <div id="playerList"></div>
         <div class="menu-inicial">
-            <button class="primary-btn" id="startButton" onclick="startGame()"><span>Iniciar Partida</span><img src="/static/1204.png" alt=""></button>
+            <button class="primary-btn" id="startButton" onclick="startGame()"><span>Iniciar Partida</span></button>
         </div>
         <div id="matchups">
             <div class="matchup" id="papaleguas"></div>
@@ -145,7 +178,7 @@
     <audio id="soundTrackR2" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR3" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR4" src="/static/pgGame/audios/r4/soundTrackR4.mp3" type="audio/mpeg"></audio>
-    <div id="subtitles"></div>
+    <div class="caption-container active" id="subtitles"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>

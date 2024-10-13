@@ -54,17 +54,19 @@ function gameMenuChange() {
     const gameOptionContainer = document.getElementById('gameOption')
     const videoOptionContainer = document.getElementById('videoOption')
     const audioOptionContainer = document.getElementById('audioOption')
+    const accessibilityOptionContainer = document.getElementById('accessibilityOption')
     const audioElements = document.querySelectorAll('audio');
     const audioSampleSlider = document.getElementById('sampleAudio');
     const volumeSlider = document.getElementById('volume-slider');
     const animationSelect = document.getElementById('animationSelect');
     const screenEffectSelect = document.getElementById('screenSelect')
+    const legendaActivationSelect = document.getElementById('legendaActivationSelect')
+    const legendaSizeSelect = document.getElementById('legendaSizeSelect')
     const screenEffectContainer = document.getElementById('effectContainer')
     const roundtime1Input = document.getElementById('roundtime1Input');
     const roundtime2Input = document.getElementById('roundtime2Input');
     const roundtime3Input = document.getElementById('roundtime3Input');
     const roundtime4Input = document.getElementById('roundtime4Input');
-    optionsActive = true
     gameMenuListening = true
 
     roundtime1Input.addEventListener('input', () => {
@@ -111,6 +113,19 @@ function gameMenuChange() {
         }
     });
 
+    legendaActivationSelect.addEventListener('change', () => {
+        document.getElementById('subtitles').classList.toggle('active')
+    });
+
+    legendaSizeSelect.addEventListener('change', () => {
+        const captions = document.querySelectorAll('.caption-container');
+        const fontSize = legendaSizeSelect.value;
+        
+        captions.forEach(caption => {
+            caption.style.fontSize = fontSize;
+        });
+    });
+
     // Volume control for all audio elements
     volumeSlider.addEventListener('input', () => {
         const volume = volumeSlider.value;
@@ -132,6 +147,7 @@ function gameMenuChange() {
                 element.classList.add('ativo');
                 gameOptionContainer.style.display = 'flex'
                 videoOptionContainer.style.display = 'none'
+                accessibilityOptionContainer.style.display = 'none'
                 audioOptionContainer.style.display = 'none'
             }
             if (index == 1) {
@@ -140,6 +156,7 @@ function gameMenuChange() {
                 element.classList.add('ativo');
                 gameOptionContainer.style.display = 'none'
                 videoOptionContainer.style.display = 'flex'
+                accessibilityOptionContainer.style.display = 'none'
                 audioOptionContainer.style.display = 'none'
             }
             if (index == 2) {
@@ -148,7 +165,17 @@ function gameMenuChange() {
                 element.classList.add('ativo');
                 gameOptionContainer.style.display = 'none'
                 videoOptionContainer.style.display = 'none'
+                accessibilityOptionContainer.style.display = 'none'
                 audioOptionContainer.style.display = 'flex'
+            }
+            if (index == 3) {
+                elements.forEach(el => el.classList.remove('ativo'));
+
+                element.classList.add('ativo');
+                gameOptionContainer.style.display = 'none'
+                videoOptionContainer.style.display = 'none'
+                audioOptionContainer.style.display = 'none'
+                accessibilityOptionContainer.style.display = 'flex'
             }
         });
     });
@@ -626,37 +653,41 @@ socket.on('remove_success', (data) => {
 });
 
 function showOptions(){
-    const menu = document.getElementById('gameMenu')
-    const inactive = document.createElement('div')
-    const body = document.body
-    const allAudios = document.querySelectorAll('audio');
-
-    menu.classList.add('ativo')
-
-    inactive.classList.add('inativo')
-    body.appendChild(inactive)
-    optionsActive = true
-    inactive.id = 'bgInactive'
-
-    inactive.addEventListener("click", function(){
-        hideOptions()
-    })
+    if (!reportActive) {
+        const menu = document.getElementById('lateralMenu')
+        const inactive = document.createElement('div')
+        const body = document.body
+        const allAudios = document.querySelectorAll('audio');
     
-    allAudios.forEach(audio => {
-        audio.pause()
-    });
-    togglePauseResumeCountdown()
+        menu.classList.add('active')
+    
+        inactive.classList.add('inativo')
+        body.appendChild(inactive)
+        optionsActive = true
+        inactive.id = 'bgInactive'
+    
+        inactive.addEventListener("click", function(){
+            hideOptions()
+        })
+        allAudios.forEach(audio => {
+            audio.pause()
+        });
+        togglePauseResumeCountdown()
+    } else {
+        hideReport()
+        showOptions()
+    }
 }
 
 function hideOptions(){
-    const menu = document.getElementById('gameMenu')
+    const menu = document.getElementById('lateralMenu')
     const inactive = document.getElementById('bgInactive')
     const body = document.body
     const allAudios = document.querySelectorAll('audio');
     const playingAudios = Array.from(allAudios).filter(audio => audio.currentTime > 0);
 
 
-    menu.classList.remove('ativo')
+    menu.classList.remove('active')
 
     playingAudios.forEach(audio => {
         if (audio.currentTime < audio.duration) {
@@ -672,25 +703,30 @@ function hideOptions(){
 let reportActive = false
 
 function showReport(){
-    const menu = document.getElementById('reportMenu')
-    const inactive = document.createElement('div')
-    const body = document.body
-    const allAudios = document.querySelectorAll('audio');
-
-    menu.classList.add('ativo')
-
-    inactive.classList.add('inativo')
-    body.appendChild(inactive)
-    inactive.id = 'bgInactive'
-    reportActive = true
-    togglePauseResumeCountdown()
-
-    inactive.addEventListener("click", function(){
-        hideReport()
-    })
-    allAudios.forEach(audio => {
-        audio.pause()
-    });
+    if (!optionsActive) {
+        const menu = document.getElementById('reportMenu')
+        const inactive = document.createElement('div')
+        const body = document.body
+        const allAudios = document.querySelectorAll('audio');
+    
+        menu.classList.add('ativo')
+    
+        inactive.classList.add('inativo')
+        body.appendChild(inactive)
+        inactive.id = 'bgInactive'
+        reportActive = true
+    
+        inactive.addEventListener("click", function(){
+            hideReport()
+        })
+        allAudios.forEach(audio => {
+            audio.pause()
+        });
+        togglePauseResumeCountdown()
+    } else {
+        hideOptions()
+        showReport()
+    }
 }
 
 function hideReport(){
@@ -1334,7 +1370,7 @@ function round1Var1() {
     audioRodada1.addEventListener('timeupdate', () => {
         const currentTime = audioRodada1.currentTime;
         audioData.forEach(item => {
-        if (Math.abs(currentTime - item.time) < 0.25) {
+        if (Math.abs(currentTime - item.time) < 0.5) {
           const targetElement = document.getElementById(item.elementId);
           if (targetElement) {
             if(item.classlistRemove) {
