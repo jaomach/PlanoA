@@ -17,7 +17,6 @@
   { "time": 17, "elementId": "circleLow", "classlistAdd": "open" },
   { "time": 17, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
   { "time": 17, "elementId": "timerContainer", "classlistAdd": "appear" },
-  { "time": 17, "elementId": "whistleUp", "play": "null" },
 
   { "time": 17, "elementId": "playerListR2", "remove": "null" },
   { "time": 17, "elementId": "rounds", "remove": "null" },

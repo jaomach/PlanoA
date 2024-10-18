@@ -254,22 +254,24 @@ function joinRoom(playerId, username, character) {
 
 function initializeCanvas() {
     canvas.addEventListener('mousedown', (e) => {
-        if (!fillMode) startDrawing();
+        if (!fillMode) startDrawing(e);
         fill(e);
     });
-   canvas.addEventListener('mousemove', draw);
-   canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
 
-   canvas.addEventListener('touchstart', (e) => {
-        if (!fillMode) startDrawing();
+    canvas.addEventListener('touchstart', (e) => {
+        if (!fillMode) startDrawing(e);
         fill(e);
     });
-   canvas.addEventListener('touchmove', draw);
-   canvas.addEventListener('touchend', stopDrawing);
-   canvas.addEventListener('touchcancel', stopDrawing);
+    canvas.addEventListener('touchmove', (e) => {
+        draw(e, true); // Passa true para indicar que é um toque
+    });
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchcancel', stopDrawing);
 
-   fillCanvasWithWhite();
-   saveState();
+    fillCanvasWithWhite();
+    saveState();
 }
 
 function fillCanvasWithWhite() {
@@ -333,18 +335,36 @@ function setEraser(element) {
 }
 
 function startDrawing(event) {
-   drawing = true;
-   draw(event);
+    drawing = true;
+    draw(event); // Começa a desenhar imediatamente
 }
 
-function draw(e) {
+function draw(e, isTouch = false) {
     if (!drawing) return;
+
     ctx.lineWidth = currentSize;
     ctx.lineCap = 'round';
     ctx.strokeStyle = currentColor;
-    ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+
+    let rect = canvas.getBoundingClientRect(); // Pega as dimensões reais do canvas
+
+    let x, y;
+
+    let scaleX = canvas.width / rect.width;   // Proporção no eixo X
+    let scaleY = canvas.height / rect.height; // Proporção no eixo Y
+
+    if (isTouch) {
+        x = (e.touches[0].clientX - rect.left) * scaleX;
+        y = (e.touches[0].clientY - rect.top) * scaleY;
+    } else {
+        x = (e.clientX - rect.left) * scaleX;
+        y = (e.clientY - rect.top) * scaleY;
+    }
+
+    ctx.lineTo(x, y);
     ctx.stroke();
 }
+
 
 function fill(e) {
     if (fillMode) {

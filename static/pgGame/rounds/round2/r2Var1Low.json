@@ -15,7 +15,6 @@
     
     { "time": 10.6, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
     { "time": 10.6, "elementId": "timerContainer", "classlistAdd": "appear" },
-    { "time": 10.6, "elementId": "whistleUp", "play": "null" },
     { "time": 10.6, "elementId": "iluminacao", "startCountdown": "round2Time, 0" },
     
     { "time": 11, "elementId": "iluminacao", "remove": "null" }

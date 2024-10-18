@@ -7,7 +7,6 @@
     { "time": 14, "elementId": "circleLow", "classlistAdd": "open" },
     { "time": 14, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
     { "time": 14, "elementId": "timerContainer", "classlistAdd": "appear" },
-    { "time": 14, "elementId": "whistleUp", "play": "null" },
     { "time": 14, "elementId": "null", "socketEmit": "Game Started" },
     { "time": 14, "elementId": "iluminacao", "startCountdown": "round1Time, 0.8" }
 ]

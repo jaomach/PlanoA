@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, render_template_string, url_for, Response
+from flask import Flask, request, redirect, jsonify, send_from_directory, render_template_string, url_for, Response
 import os
 import base64
 import time
@@ -613,6 +613,7 @@ def handle_disconnect():
         print(f'Usuário com SID {request.sid} não encontrado em `users`.')
         if request.sid in queue:
             queue.remove(request.sid)  # Remove o jogador da fila
+            emit('queue_update', {'msg': 'Client disconnected from queue'}, broadcast=True)
             print(f'Player {request.sid} foi removido da fila devido à desconexão.')
 
 @socketio.on('message')
@@ -623,20 +624,22 @@ def handle_message(data):
         emit('message', {'msg': message}, room=room_id)
         print(f'Message sent to room {room_id}: {message}')
 
+@socketio.on('queue_update')
+def handle_queue_update(data):
+    message = data.get('msg')
+    emit('queue_update', {'msg': message})
+
 @socketio.on('admin_message')
 def admin_handle_message(data):
-    # Pegue a admin_key dos dados
     admin_key = data.get('admin_key')
     room_id = data.get('room_id')
     message = data.get('message')
 
-    # Verifique se a admin_key está correta
     if admin_key != ADMIN_KEY:
         emit('error', {'msg': 'Invalid admin key'})
         print('Failed admin key check')
         return
 
-    # Se a admin_key for válida, enviar a mensagem para a sala
     if room_id and message:
         emit('admin_message', {'msg': message}, room=room_id)
         print(f'Message sent to room {room_id}: {message}')
@@ -648,14 +651,12 @@ def admin_handle_message(data):
 def on_join(data):
     room_id = data.get('room_id')  # Obtendo o room_id da data
     
-    # Garantindo que room_id seja uma string ou número
     if isinstance(room_id, dict):
         room_id = room_id.get('id')  # Supondo que room_id seja um dicionário e você precise da chave 'id'
 
     user_type = data.get('user_type', 'player')  # Por padrão, considera que é um player
     join_room(room_id)
 
-    # Armazenando o tipo de usuário e o room_id no dicionário
     users[request.sid] = {
         'type': user_type,
         'room_id': room_id
@@ -694,20 +695,28 @@ def on_remove_player(data):
     else:
         emit('remove_error', {'msg': response['message']}, room=request.sid)
 
-
-
 @app.route('/host/<room_id>')
 def receptor(room_id):
+    room_id = room_id.upper()
+
+    if len(room_id) != 4:
+        return redirect(url_for('index'))
+    
+    if room_id not in rooms:
+        return redirect(url_for('index'))
+
     with open('static/pgGame/host.html', encoding='utf-8') as f:
         html_content = f.read()
     return render_template_string(html_content, room_id=room_id)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect(url_for('index'))
 
 def generate_room_id():
     import random
     import string
     return ''.join(random.choices(string.ascii_uppercase, k=4))
-
 
 @app.route('/start_tournament/<room_id>', methods=['POST'])
 def start_tournament(room_id):

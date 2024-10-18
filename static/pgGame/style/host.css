@@ -76,7 +76,7 @@ textarea {
 .categories-container {
    border-width: var(--default-border-width);
    border-color: var(--primary-border-color);
-   border-style: dotted;
+   border-style: dashed;
    color: white;
    font-size: 9pt;
    gap: 12px;

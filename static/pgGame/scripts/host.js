@@ -372,13 +372,18 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('keydown', function(event) {
     if (event.key === '1' && !gameStarted) {
-        round3Var3()
+        round2Var1()
     }
 });
 
 document.addEventListener('keydown', function(event) {
     if (event.key === '2' && !gameStarted) {
-        round4Var1()
+        round2Var2()
+    }
+});
+document.addEventListener('keydown', function(event) {
+    if (event.key === '4' && !gameStarted) {
+        round2Var3()
     }
 });
 document.addEventListener('keydown', function(event) {
@@ -1338,6 +1343,7 @@ function round1Var1() {
         .then(data => {
         audioData = data;
         });
+        audioRodada1.src = '/static/pgGame/audios/r1/audioR1Low.mp3'
 
         setTimeout(function() {
             document.getElementById('startButton').classList.add('desappear')
@@ -1471,6 +1477,7 @@ function round2Var1() {
             .then(data => {
                 audioData = data; // Agora audioData está acessível aqui
             });
+        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var1Low.mp3'
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1506,7 +1513,7 @@ function round2Var1() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -1599,6 +1606,7 @@ function round2Var2() {
             .then(data => {
                 audioData = data; // Agora audioData está acessível aqui
             });
+        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var2Low.mp3'
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1634,7 +1642,7 @@ function round2Var2() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -1753,6 +1761,7 @@ function round2Var3() {
         .then(data => {
             audioData = data; // Agora audioData está acessível aqui
         });
+        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var3Low.mp3'
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1770,7 +1779,7 @@ function round2Var3() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -1860,6 +1869,7 @@ function round3Var1() {
             .then(data => {
                 audioData = data; // Agora audioData está acessível aqui
             });
+        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var1Low.mp3'
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1896,7 +1906,7 @@ function round3Var1() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -1987,6 +1997,7 @@ function round3Var2() {
             .then(data => {
                 audioData = data; // Agora audioData está acessível aqui
             });
+        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var2Low.mp3'
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -2024,7 +2035,7 @@ function round3Var2() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -2116,6 +2127,7 @@ function round3Var3() {
                 audioData = data;
             });
 
+        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var3Low.mp3'
         console.log(audioData)
 
         timeOuts.push(setTimeout(function() {
@@ -2153,7 +2165,7 @@ function round3Var3() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {
@@ -2234,6 +2246,7 @@ function round4Var1() {
             .then(data => {
                 audioData = data;
             });
+        audioR4.src = '/static/pgGame/audios/r4/audioR4Low.mp3'
 
         console.log(audioData)
 
@@ -2271,7 +2284,7 @@ function round4Var1() {
         audioR4.addEventListener('timeupdate', () => {
             const currentTime = audioR4.currentTime;
             audioData.forEach(item => {
-                if (Math.abs(currentTime - item.time) < 0.1) {
+                if (Math.abs(currentTime - item.time) < 0.5) {
                     const targetElement = document.getElementById(item.elementId);
                     if (targetElement) {
                         if (item.classlistRemove) {

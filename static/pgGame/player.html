@@ -74,7 +74,7 @@
     <div id="messages"></div>
     <div id="round1">
         <div id="drawingArea" style="display: none;">
-            <div class="toolbar">
+            <div class="toolbar color">
                 <div class="tool-colors">
                     <button id="black" class="colors no-style-btn" onclick="setColor('black')"></button>
                     <button id="white" class="colors no-style-btn" onclick="setColor('white')"></button>
@@ -93,20 +93,36 @@
                 </div>
             </div>
             <div class="drawing-section">
-                <div id="drawingCounter">0/4</div>
+                <div class="categories-element counter" id="drawingCounter">0/4</div>
                 <canvas id="canvas" width="400" height="500"></canvas>
                 <button class="primary-btn" id="exportDrawingBtn" onclick="exportDrawing()">Enviar Pintura</button> 
             </div>
             <div class="toolbar">
                 <div class="tool-other">
-                    <button class="primary-btn" id="bucketBtn"><img src="/static/images/player/bucket.svg" alt=""></button>
+                    <button class="primary-btn" id="bucketBtn"><?xml version="1.0" encoding="iso-8859-1"?>
+                        <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+                        <svg fill="#fff" height="800px" width="800px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+                             viewBox="0 0 512 512" xml:space="preserve">
+                        <g>
+                            <g>
+                                <path class="icon-btn" d="M322.954,35.446c-104.407,0-189.046,28.214-189.046,63.015v206.672c-15.043-2.437-29.063-5.578-41.595-9.383
+                                    c-32.829-9.963-43.339-20.83-44.927-24.015c2.215-4.904,18.095-17.153,55.014-26.804v-48.632C36.925,210.875,0,237.74,0,271.754
+                                    C0,331.286,110.245,358.4,212.677,358.4c33.393,0,65.709-2.773,94.745-8.066c4.589,2.614,9.882,4.128,15.532,4.128
+                                    c16.52,0,30.082-12.786,31.38-28.976c1.314,1.223,2.305,2.804,2.747,4.647l2.024,8.441c4.058,16.921-6.369,33.927-23.29,37.986
+                                    c-36.415,8.732-78.996,13.348-123.138,13.348c-27.325,0-53.913-1.794-78.769-5.188v28.818c0,34.802,84.639,63.015,189.046,63.015
+                                    S511.998,448.342,512,413.538V98.462C512,63.66,427.361,35.446,322.954,35.446z M322.954,161.477
+                                    c-78.306,0-141.785-17.633-141.785-39.385c0-21.751,63.479-39.385,141.785-39.385s141.785,17.633,141.785,39.385
+                                    C464.738,143.844,401.26,161.477,322.954,161.477z"/>
+                            </g>
+                        </g>
+                        </svg></button>
                     <button class="primary-btn" id="eraserBtn" onclick="setEraser(this)"><img src="/static/images/player/eraser.png" alt=""></button>
-                    <button class="primary-btn brush-btn active" onclick="setBrushSize(5, this)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(10, this)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(20, this)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn brush-btn" onclick="setBrushSize(30, this)"><img src="/static/images/player/bSize.png" alt=""></button>
-                    <button class="primary-btn" onclick="undo()"><img src="/static/images/undo.svg" alt=""></button>
-                    <button class="primary-btn" onclick="redo()"><img style="transform: scale(-1,1)" src="/static/images/undo.svg" alt=""></button>
+                    <button class="primary-btn brush-btn active" onclick="setBrushSize(5, this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"><defs><style>.cls-1{fill:#fff;}</style></defs><g id="Camada_2" data-name="Camada 2"><g id="Camada_1-2" data-name="Camada 1"><circle class="cls-1 icon-btn" cx="125" cy="125" r="125"/></g></g></svg></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(10, this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"><defs><style>.cls-1{fill:#fff;}</style></defs><g id="Camada_2" data-name="Camada 2"><g id="Camada_1-2" data-name="Camada 1"><circle class="cls-1 icon-btn" cx="125" cy="125" r="125"/></g></g></svg></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(20, this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"><defs><style>.cls-1{fill:#fff;}</style></defs><g id="Camada_2" data-name="Camada 2"><g id="Camada_1-2" data-name="Camada 1"><circle class="cls-1 icon-btn" cx="125" cy="125" r="125"/></g></g></svg></button>
+                    <button class="primary-btn brush-btn" onclick="setBrushSize(30, this)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250"><defs><style>.cls-1{fill:#fff;}</style></defs><g id="Camada_2" data-name="Camada 2"><g id="Camada_1-2" data-name="Camada 1"><circle class="cls-1 icon-btn" cx="125" cy="125" r="125"/></g></g></svg></button>
+                    <button class="primary-btn" onclick="undo()"><svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" class="icon-btn" d="m6.85355 2.14645c.19527.19526.19527.51184 0 .7071l-2.14644 2.14645h3.79289c1.933 0 3.5 1.567 3.5 3.5s-1.567 3.5-3.5 3.5h-4c-.27614 0-.5-.2239-.5-.5s.22386-.5.5-.5h4c1.38071 0 2.5-1.11929 2.5-2.5s-1.11929-2.5-2.5-2.5h-3.79289l2.14644 2.14645c.19527.19526.19527.51184 0 .7071-.19526.19527-.51184.19527-.7071 0l-3-3c-.19527-.19526-.19527-.51184 0-.7071l3-3c.19526-.19527.51184-.19527.7071 0z" fill="#fff" fill-rule="evenodd"/></svg></button>
+                    <button class="primary-btn" style="transform: scale(-1, 1);" onclick="redo()"><svg fill="none" height="15" viewBox="0 0 15 15" width="15" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" class="icon-btn" d="m6.85355 2.14645c.19527.19526.19527.51184 0 .7071l-2.14644 2.14645h3.79289c1.933 0 3.5 1.567 3.5 3.5s-1.567 3.5-3.5 3.5h-4c-.27614 0-.5-.2239-.5-.5s.22386-.5.5-.5h4c1.38071 0 2.5-1.11929 2.5-2.5s-1.11929-2.5-2.5-2.5h-3.79289l2.14644 2.14645c.19527.19526.19527.51184 0 .7071-.19526.19527-.51184.19527-.7071 0l-3-3c-.19527-.19526-.19527-.51184 0-.7071l3-3c.19526-.19527.51184-.19527.7071 0z" fill="#fff" fill-rule="evenodd"/></svg></button>
                 </div>
             </div>
         </div>
@@ -114,14 +130,21 @@
 
     <div id="round2">
         <div id="phraseInput" style="display: none;">
-            <span>Escreva uma frase!</span>
-            <input placeholder="Escreva sua frase aqui" type="text" class="primary-btn" id="phrase" name="phrase">
-            <button id="submitPhraseBtn" class="primary-btn" onclick="submitPhrase()">Enviar Frase</button>
+            <div class="menu-part">
+                <div class="categories-element phrases"><span>Escreva Frases</span></div>
+            </div>
+            <form id="phraseForm">
+                <div class="categories-container phrases">
+                    <div class="menu-part">
+                        <input class="input-container" placeholder="Escreva sua frase aqui" type="text" class="primary-btn" id="phrase" name="phrase">
+                    </div>
+                    <button id="submitPhraseBtn" class="secondary-btn" onclick="submitPhrase()">Enviar Frase</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <div id="round3" style="display: none;">
-        <div id="drawingList"></div>
         <div class="selection-container" id="combinationArea" style="display: flex;">
             <span class="primary-title">Combine um título com uma pintura:</span>
             <swiper-container id="swiperCombine" class="swiper-container" navigation="true">
@@ -134,7 +157,7 @@
                     <span id="character">Berro</span>
                 </swiper-slide> -->
             </swiper-container>
-            <select class="primary-select" id="phraseSelect">
+            <select class="input-container" id="phraseSelect">
                 <option value=""></option>
             </select>
             <button class="primary-btn" onclick="combineSelection()">Combinar</button>
