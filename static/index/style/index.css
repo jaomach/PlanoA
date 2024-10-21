@@ -50,8 +50,9 @@ footer {
 
 .ad-right {
     position: absolute;
+    width: 100%;
+    height: 100%;
     right: 0;
-    background-color: #fe5423;
     align-self: center;
     z-index: 1000000000;
 }
