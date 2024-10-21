@@ -48,6 +48,13 @@ footer {
     height: 94vh;
 }
 
+.ad-right {
+    position: absolute;
+    right: 0;
+    background-color: #fe5423;
+    align-self: center;
+    z-index: 1000000000;
+}
 
 a {
     font-weight: 200;
