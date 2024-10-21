@@ -10,16 +10,18 @@
 <body>
     <img id="logo" src="/static/images/index/planoA.png" alt="">
     <div class="menu-inicial">
+        <div class="menu-part">
+            <div class="categories-element phrases"><span>Entrar em Sala</span></div>
+        </div>
         <form id="formSala">
             <label for="">Código da sala:</label>
-            <input autocorrect="off" autocapitalize="off" autocomplete="off" id="inputSala" pattern="[A-Z]+" placeholder="XXXX" maxlength="4" class="input-container" type="text">
+            <input autocorrect="off" autocapitalize="off" autocomplete="off" id="inputSala" pattern="[A-Z]+" placeholder="ABCD" maxlength="4" class="input-container" type="text">
             <button type="submit" class="primary-btn">Entrar</button>
         </form>
+        <div id="errorContainer">
+            <span id="errorMsg"></span>
+        </div>
     </div>
-    <div id="errorContainer">
-        <span id="errorMsg"></span>
-    </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         const inputSala = document.getElementById('inputSala');
 

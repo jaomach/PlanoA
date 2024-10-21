@@ -5,7 +5,7 @@
    --primary-bg-color: #292929;
    --primary-border-color: #6b6b6b;
    --default-border-width: 1.8px;
-   --lateral-menu-width:  30vw;
+   --lateral-menu-width:  32vw;
    --contrast-color: #fe5423;
    --secondary-contrast-color: #f1f1f1;
    --terciary-contrast-color: #1e1e1e;
@@ -17,6 +17,7 @@ body {
    margin: 0;
    padding: 0;
    display: flex;
+   overflow: clip;
    overflow: hidden;
    height: 100vh;
    background-color: #f0f0f0;
@@ -44,7 +45,7 @@ textarea {
 
 #lateralMenu {
    position: absolute;
-   width: 29.3rem;
+   width: 29.3vw;
    transform: translateX(calc(-1 * var(--lateral-menu-width)));
    height: 100vh;
    border-style: solid;
@@ -101,6 +102,15 @@ textarea {
    margin: 0% 0% 2% 0;
 }
 
+.element-container.warning {
+   text-wrap: wrap;
+}
+
+.element-container.warning span {
+   font-size: 12pt;
+}
+
+
 .input-container {
    font-family: 'inter', sans-serif;
    border-style: solid;
@@ -152,7 +162,6 @@ form {
 }
 .message-screen img {
    width: 30%;
-   margin-bottom: 6%;
 }
 
 .message-screen-span {
@@ -177,11 +186,29 @@ form {
 #loadingScreen.show {
    animation: showFinalScreen 500ms forwards
 }
-#loadingScreen span {
+.loading-span {
    color: #fff;
    font-weight: 500;
    font-size: 16pt;
 }
+
+#loadingScreen.warning button {
+   padding: 0.7% 1%;
+   width: min-content;
+}
+
+#loadingScreen.warning img {
+   width: 90px;
+}
+
+.categories-container.warning {
+   border-width: 1px;
+}
+
+.menu-part.warning {
+   width: 90%;
+}
+
 .loading-screen-img {
    width: 400px;
    animation: bounceLoading 2000ms ease-in-out infinite;
@@ -1505,21 +1532,25 @@ input[type="range"] {
 #errorContainer {
    width: 100%;
    height: 30px;
-   background-color: #252525;
+   background-color: var(--contrast-color);
    display: flex;
    align-items: center;
-   justify-content: center;
    position: absolute;
    opacity: 0;
    bottom: 0;
    font-size: 10pt;
+   z-index: 199;
 }
 
 #errorContainer.appear {
    animation: errorAppear 9000ms ease-in-out forwards;
 }
 #errorMsg {
-   color: white;
+   margin-left: 12px;
+   color: #f1f1f1;
+   font-size: 10pt;
+   font-weight: 200;
+   font-family: 'inter', sans-serif;
 }
 
 @keyframes errorAppear {
@@ -1536,4 +1567,18 @@ input[type="range"] {
    100% {
        opacity: 0;
    }
+}
+
+#newGameBtn {
+   padding: 0.5% 1%;
+}
+
+@media (max-width: 1216px) {
+   :root {
+      --lateral-menu-width:  50vw;
+   }
+   #lateralMenu {
+      width: 42.3vw;
+   }
+   
 }

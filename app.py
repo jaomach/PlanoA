@@ -245,10 +245,15 @@ def leave_room(room_id, player_id):
 @app.route('/start_game/<room_id>', methods=['POST'])
 def start_game(room_id):
     if room_id in rooms:
+        players = rooms[room_id].get('players', [])
+        if len(players) < 2:
+            return jsonify({'message': 'É recomendado no mínimo 2 jogadores para iniciar o jogo.'}), 400
+        
         rooms[room_id]['started'] = True
         rooms[room_id]['start_time'] = time.time()
         rooms[room_id]['last_activity'] = time.time()
         return jsonify({'message': 'Game started'})
+    
     return jsonify({'message': 'Room not found'}), 404
 
 @app.route('/room_status/<room_id>', methods=['GET'])

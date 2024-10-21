@@ -40,14 +40,44 @@ let isPaused = false; // Controle se o temporizador está pausado
 //console.log(auxGameStarted)
 let finalScreenDisable = false
 let actualIsSolo = false
+let mobileUser = false
 const fullscreenBtn = document.getElementById('fullscreen');
 
-function callRound4Test() {
-    timeLeft = 0;
-    handleRound3 = true;
-    roundCallRandom(round4Var1, round4Var1, round4Var1)
-    socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
-}
+(function() {
+  const userAgent = navigator.userAgent;
+
+  if (/Mobi|Android|iPhone|iPad|iPod/i.test(userAgent)) {
+    const finalScreen = document.createElement('div');
+    finalScreen.id = "loadingScreen";
+    finalScreen.classList.add('message-screen');
+    finalScreen.classList.add('show');
+    finalScreen.classList.add('warning');
+
+    finalScreen.innerHTML = `
+    <div class="menu-part warning">
+        <div class="categories-element"><span>Aviso</span></div>
+        <div class="categories-container warning">
+            <div class="element-container warning">
+                <span>Ainda estamos trabalhando no suporte para mobile.</span> 
+            </div>
+            <button class="primary-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
+        </div>
+    </div>
+    <img id="finalLogo" src="/static/images/index/planoA.png" alt="">
+    `;
+    document.body.appendChild(finalScreen);
+
+    mobileUser = true
+
+    return;
+  }
+
+  function runDesktopCode() {
+
+  }
+
+  runDesktopCode();
+})();
 
 function gameMenuChange() {
     const elements = document.querySelectorAll('.bar-element');
@@ -423,37 +453,44 @@ document.addEventListener('keydown', function(event) {
 });
 
 
-console.log('Connecting to server with roomId:', roomId);
-var socket = io({
-    query: { roomId: roomId },
-    transports: ['websocket', 'polling']
-});
-
-socket.on('connect', function() {
-    console.log('Connected to server');
-    socket.emit('join', { room_id: roomId, user_type: 'host' });
-});
-
-socket.on('admin_message', function(data) {
-    const errorMsg = document.getElementById('errorMsg')
-    const errorContainer = document.getElementById('errorContainer')
-    errorMsg.innerText = `${data.msg}`
-    errorContainer.classList.add('appear')
-    setTimeout(function(){
-        errorContainer.classList.remove('appear')
-    }, 9000)
-})
-
-socket.on('message', function(data) {
-    if (data.msg) {
-        const playerId = data.msg;
-        const container = document.getElementById(`container-${playerId}`);
-
-        if (container) {
-            container.classList.remove('in-game');
+if (mobileUser === false) {
+    console.log('Connecting to server with roomId:', roomId);
+    var socket = io({
+        query: { roomId: roomId },
+        transports: ['websocket', 'polling']
+    });
+    
+    socket.on('connect', function() {
+        console.log('Connected to server');
+        socket.emit('join', { room_id: roomId, user_type: 'host' });
+    });
+    
+    socket.on('admin_message', function(data) {
+        const errorMsg = document.getElementById('errorMsg')
+        const errorContainer = document.getElementById('errorContainer')
+        errorMsg.innerText = `${data.msg}`
+        errorContainer.classList.add('appear')
+        setTimeout(function(){
+            errorContainer.classList.remove('appear')
+        }, 9000)
+    })
+    
+    socket.on('message', function(data) {
+        if (data.msg) {
+            const playerId = data.msg;
+            const container = document.getElementById(`container-${playerId}`);
+    
+            if (container) {
+                container.classList.remove('in-game');
+            }
         }
-    }
-});
+    });
+
+    socket.on('remove_success', (data) => {
+        const containerToRemove = document.getElementById(`container-${data.msg}`)
+        containerToRemove.remove()
+    });
+}
 
 let previousImageSrc = {};
 
@@ -652,11 +689,6 @@ function removePlayer(playerId) {
     socket.emit('remove_player', { room_id: roomId, player_id: playerId });
 }
 
-socket.on('remove_success', (data) => {
-    const containerToRemove = document.getElementById(`container-${data.msg}`)
-    containerToRemove.remove()
-});
-
 function showOptions(){
     if (!reportActive) {
         const menu = document.getElementById('lateralMenu')
@@ -822,6 +854,14 @@ function startGame() {
                 element.classList.add('in-game');
             });
             document.getElementById('idContainer').remove()
+        } else {
+            const errorMsg = document.getElementById('errorMsg')
+            const errorContainer = document.getElementById('errorContainer')
+            errorMsg.innerText = `${data.message}`
+            errorContainer.classList.add('appear')
+            setTimeout(function(){
+                errorContainer.classList.remove('appear')
+            }, 9000)
         }
     })
     .catch(error => {
@@ -2497,8 +2537,6 @@ function roundFinal() {
         finalScreen.classList.add('show')
 
         finalScreen.innerHTML = `
-        <img src="/static/images/LOGO.png" class="loading-screen-img"></img>
-        <button class="final-btn" onclick="createRoom()" id="newGameBtn">Jogar Novamente</button>
         <button class="final-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
         <img id="finalLogo" src="/static/images/index/planoA.png" alt="">
         `
