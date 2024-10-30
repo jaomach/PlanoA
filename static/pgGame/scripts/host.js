@@ -78,6 +78,32 @@ const fullscreenBtn = document.getElementById('fullscreen');
 
   runDesktopCode();
 })();
+function alterarNum(numero, posicao, novoDigito) {
+    // Verifica se a posição é válida
+    if (posicao < 0 || posicao >= numero.length) {
+        console.log("Posição inválida.");
+        return numero; // Retorna o número original se a posição for inválida
+    }
+
+    // Atualiza o dígito na posição especificada
+    quality = numero.substring(0, posicao) + novoDigito + numero.substring(posicao + 1);
+}
+function obterDigito(numero, posicao) {
+    // Verifica se a posição é válida
+    if (posicao < 0 || posicao >= numero.length) {
+        console.log("Posição inválida.");
+        return null; // Retorna null se a posição for inválida
+    }
+  
+    // Retorna o dígito na posição especificada
+    return numero[posicao];
+}
+
+// Exemplo de uso
+const numeroOriginal = "101010";
+const novoNumero = alterarNum(quality, 0, "2"); // Altera o segundo dígito para "2"
+console.log(novoNumero); // Saída: "121010"
+
 
 function gameMenuChange() {
     const elements = document.querySelectorAll('.bar-element');
@@ -118,28 +144,26 @@ function gameMenuChange() {
 
     // Log the selected value to the console
     animationSelect.addEventListener('change', () => {
-        if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Ativado') {
-            localStorage.setItem('pc-gm-qual', 'high')
-            quality = 'high'
-        } else if (animationSelect.value === 'Baixo' && screenEffectSelect.value === 'Desativado') {
-            localStorage.setItem('pc-gm-qual', 'low')
-            quality = 'low'
-        } else if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Desativado') {
-            localStorage.setItem('pc-gm-qual', 'medium')
-            quality = 'medium'
+        if (animationSelect.value === 'Alto') {
+            alterarNum(quality, 0, '1')
+            console.log(quality)
+            localStorage.setItem('pc-gm-qual', quality)
+        } else {
+            alterarNum(quality, 0, '0')
+            console.log(quality)
+            localStorage.setItem('pc-gm-qual', quality)
         }
     });
     screenEffectSelect.addEventListener('change', () => {
         screenEffectContainer.classList.toggle('ativo')
-        if (screenEffectSelect.value === 'Desativado' && animationSelect.value === 'Alto') {
-            localStorage.setItem('pc-gm-qual', 'medium')
-            quality = 'medium'
-        } else if (animationSelect.value === 'Baixo' && screenEffectSelect.value === 'Desativado') {
-            localStorage.setItem('pc-gm-qual', 'low')
-            quality = 'low'
-        } else if (animationSelect.value === 'Alto' && screenEffectSelect.value === 'Ativado') {
-            localStorage.setItem('pc-gm-qual', 'high')
-            quality = 'high'
+        if (screenEffectSelect.value === 'Desativado') {
+            alterarNum(quality, 1, '0')
+            console.log(quality)
+            localStorage.setItem('pc-gm-qual', quality)
+        } else {
+            alterarNum(quality, 1, '1')
+            console.log(quality)
+            localStorage.setItem('pc-gm-qual', quality)
         }
     });
 
@@ -2679,25 +2703,25 @@ function autoSetQuality(performanceLevel) {
     const animationSelect = document.getElementById('animationSelect')
     const screenEffectSelect = document.getElementById('screenSelect')
     const screenEffectContainer = document.getElementById('effectContainer')
-    if (performanceLevel == 'high') {
-        localStorage.setItem('pc-gm-qual', 'high')
+    if (obterDigito(performanceLevel, 0) == 1) {
+        alterarNum(quality, 0, "1")
         animationSelect.value = 'Alto'
         showLoadingScreen(performanceLevel)
-        return
-    } else if (performanceLevel == 'medium'){
-        localStorage.setItem('pc-gm-qual', 'medium')
-        animationSelect.value = 'Alto'
-        screenEffectSelect.value = 'Desativado'
-        screenEffectContainer.classList.toggle('ativo')
-        showLoadingScreen(performanceLevel)
-        return
     } else {
+        alterarNum(quality, 0, "0")
         animationSelect.value = 'Baixo'
-        screenEffectSelect.selectedIndex = 1;
+        showLoadingScreen(performanceLevel)
+    }
+
+    if (obterDigito(performanceLevel, 1) == 1) {
+        alterarNum(quality, 1, "1")
+        screenEffectSelect.value = 'Ativado'
+        showLoadingScreen(performanceLevel)
+    } else {
+        alterarNum(quality, 1, "0")
+        screenEffectSelect.value = 'Ativado'
         screenEffectContainer.classList.toggle('ativo')
         showLoadingScreen(performanceLevel)
-
-        localStorage.setItem('pc-gm-qual', 'low')
     }
 }
 
@@ -2715,13 +2739,13 @@ function calculateFPS() {
             const averageFPS = fpsArray.reduce((sum, value) => sum + value, 0) / fpsArray.length;
             console.log(averageFPS)
             
-            let performanceLevel;
+            let performanceLevel = 0;
             if (averageFPS < 10) {
-                performanceLevel = 'low';
+                performanceLevel = '00';
             } else if (averageFPS < 30) {
-                performanceLevel = 'medium';
+                performanceLevel = '10';
             } else {
-                performanceLevel = 'high';
+                performanceLevel = '11';
             }
             
             autoSetQuality(performanceLevel)
