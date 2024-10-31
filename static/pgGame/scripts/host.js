@@ -2387,6 +2387,7 @@ function round4Var1() {
             });
         });
     }, 200)
+    startTournament(roomId)
 }
 
 function roundFinal() {
@@ -2465,67 +2466,59 @@ function roundFinal() {
         perdedorAuxContainer.appendChild(perdedorSign);
         perdedorSign.appendChild(perdedorSpan);
 
-        const creditos = document.createElement('div')
-        creditos.id = 'creditosContainer'
-        creditos.innerHTML = `
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Desenvolvimento</h1>
-            <ul class="list-creditos">
-                <li class="list-element-creditos">
-                    <span class="span-creditos"><b>Geral</b></span>
-                    <span class="span-creditos">JOÃO MACHADO</span>
-                </li>
-            </ul>
-        </div>
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Design</h1>
-            <ul class="list-creditos">
-                <li class="list-element-creditos">
-                    <span class="span-creditos"><b>Game Design</b></span>
-                    <span class="span-creditos">JOÃO MACHADO</span>
-                </li>
-                <li class="list-element-creditos">
-                    <span class="span-creditos"><b>Personagens</b></span>
-                    <span class="span-creditos">GABRIEL SILVEIRA</span>
-                </li>
-            </ul>
-        </div>
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Vozes</h1>
-            <ul class="list-creditos">
-                <li class="list-element-creditos">
-                    <span class="span-creditos"><b>Narrador</b></span>
-                    <span class="span-creditos">GABRIEL SILVEIRA</span>
-                </li>
-            </ul>
-        </div>
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Musica</h1>
-            <ul class="list-creditos">
-                <li class="list-element-creditos">
-                    <span class="span-creditos">Rodada 1 e 2</span>
-                    <span class="span-creditos"><b>Shady Business - Ave Coo</b></span>
-                </li>
-            </ul>
-        </div>
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Participantes</h1>
-            <ul id="participantesCreditos" class="list-creditos">
-            </ul>
-        </div>
-        <div class="creditos-element">
-            <h1 class="h1-creditos">Apoio</h1>
-            <ul class="list-creditos">
-                <li class="list-element-creditos">
-                    <span class="span-creditos">Eduardo Bruno</span>
-                    <span class="span-creditos"><b>CATARSE</b></span>
-                </li>
-            </ul>
-        </div>
-        <span class="span-creditos">Inspirado por jogos no estilo Jackbox Party Pack.</span>
-        <img class="logo-creditos" src="/static/images/index/planoA.png"></img>
-        `
-        matchupContainer.appendChild(creditos)
+        fetch('/static/pgGame/rounds/round4/creditos.json')
+        .then(response => response.json())
+        .then(data => {
+          const creditos = document.createElement('div');
+          creditos.id = 'creditosContainer';
+      
+          data.creditos.forEach(section => {
+            const sectionDiv = document.createElement('div');
+            sectionDiv.classList.add('creditos-element');
+      
+            const sectionTitle = document.createElement('h1');
+            sectionTitle.classList.add('h1-creditos');
+            sectionTitle.textContent = section.categoria;
+            sectionDiv.appendChild(sectionTitle);
+      
+            const ul = document.createElement('ul');
+            ul.classList.add('list-creditos');
+            
+            section.items.forEach(item => {
+              const li = document.createElement('li');
+              li.classList.add('list-element-creditos');
+      
+              const spanTitulo = document.createElement('span');
+              spanTitulo.classList.add('span-creditos');
+              spanTitulo.innerHTML = `<b>${item.titulo}</b>`;
+              
+              const spanNome = document.createElement('span');
+              spanNome.classList.add('span-creditos');
+              spanNome.textContent = item.nome;
+      
+              li.appendChild(spanTitulo);
+              li.appendChild(spanNome);
+              ul.appendChild(li);
+            });
+      
+            sectionDiv.appendChild(ul);
+            creditos.appendChild(sectionDiv);
+          });
+      
+          const inspiracao = document.createElement('span');
+          inspiracao.classList.add('span-creditos');
+          inspiracao.textContent = data.inspiracao;
+          creditos.appendChild(inspiracao);
+      
+          const logo = document.createElement('img');
+          logo.classList.add('logo-creditos');
+          logo.src = data.logoSrc;
+          creditos.appendChild(logo);
+      
+          matchupContainer.appendChild(creditos);
+        })
+        .catch(error => console.error('Erro ao carregar os créditos:', error));
+      
         function fetchPlayersCreditos() {
             fetch(`/room_status/${roomId}`)
             .then(response => response.json())

@@ -1,0 +1,38 @@
+{
+    "creditos": [
+      {
+        "categoria": "Desenvolvimento",
+        "items": [
+          { "titulo": "Geral", "nome": "JOÃO MACHADO" }
+        ]
+      },
+      {
+        "categoria": "Design",
+        "items": [
+          { "titulo": "Game Design", "nome": "JOÃO MACHADO" },
+          { "titulo": "Personagens", "nome": "GABRIEL SILVEIRA" }
+        ]
+      },
+      {
+        "categoria": "Vozes",
+        "items": [
+          { "titulo": "Narrador", "nome": "GABRIEL SILVEIRA" }
+        ]
+      },
+      {
+        "categoria": "Musica",
+        "items": [
+          { "titulo": "Rodada 1 e 2", "nome": "Shady Business - Ave Coo" }
+        ]
+      },
+      {
+        "categoria": "Apoio",
+        "items": [
+          { "titulo": "Eduardo Bruno", "nome": "CATARSE" }
+        ]
+      }
+    ],
+    "inspiracao": "Inspirado por jogos no estilo Jackbox Party Pack.",
+    "logoSrc": "/static/images/index/planoA.png"
+  }
+  

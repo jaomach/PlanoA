@@ -10,7 +10,6 @@
   { "time": 17.2, "elementId": "body", "classlistAdd": "desligado" },
   { "time": 17.2, "elementId": "playerList", "classlistAdd": "desappear" },
   { "time": 17.2, "elementId": "skipRoundBtn", "classlistRemove": "aparecendo" },
-  { "time": 17.2, "elementId": "iluminacao", "startTournament": " " },
   { "time": 17.2, "elementId": "iluminacao", "timeOut": "null" },
   { "time": 17.2, "elementId": "iluminacao", "startCountdown": "round4Time, 0, 4" }
 ]
