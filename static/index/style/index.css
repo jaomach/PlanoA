@@ -96,14 +96,20 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     border-color: var(--primary-border-color);
     background-color: var(--primary-bg-color);
     display: flex;
-    transition: all 500ms;
+    opacity: 0;
+    transition: transform 500ms, border-width 400ms, opacity 500ms;
     flex-direction: column;
     padding: 0.7rem;
 
     left: 0;
     z-index: 100;
 }
-#lateralMenu.active {transform: translateX(0); border-width: 0 var(--default-border-width) 0 0;}
+#lateralMenu.active {
+    transform: translateX(0);
+    border-width: 0 var(--default-border-width) 0 0;
+    opacity: 1;
+    transition: transform 500ms, border-width 400ms, opacity 0ms;
+}
 
 #inside {
     width: 100%;
@@ -364,8 +370,8 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 800px;
-    height: 800px;
+    width: 80vh;
+    height: 80vh;
     position: relative;
     top: 1000px;
     transition: all 750ms ease-out;
@@ -447,8 +453,7 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #PCGame {
         margin: 0 3vw;
-        width: 22vw;
-        max-width: 220px;
+        width: 22vh;
     }
   }
 
@@ -459,8 +464,7 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #PCGame {
         margin: 0 5vw;
-        width: 22vw;
-        max-width: 220px;
+        width: 22vh;
     }
     .game-btn:last-child {
         background-color: var(--secondary-contrast-color);
@@ -487,8 +491,7 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #PCGame {
         margin: 0 3vw;
-        width: 22vw;
-        max-width: 220px;
+        width: 22vh;
     }
   }
 
@@ -502,8 +505,7 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #PCGame {
         margin: 0 5vw;
-        width: 22vw;
-        max-width: 220px;
+        width: 22vh;
     }
     .game-btn:last-child {
         background-color: var(--secondary-contrast-color);
@@ -537,8 +539,8 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #PCGame {
         margin: 0 3vw;
-        width: 22vw;
-        max-width: 220px;
+        width: 22vh;
+        height: auto;
     }
 }
 
@@ -549,6 +551,9 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     #cardboardOpen {
         width: 80vw;
         height: 80vw;
+    }
+    #cardboard {
+        width: 30%;
     }
     #PCGame {
         margin: 0 5vw;

@@ -99,11 +99,6 @@ function obterDigito(numero, posicao) {
     return numero[posicao];
 }
 
-// Exemplo de uso
-const numeroOriginal = "101010";
-const novoNumero = alterarNum(quality, 0, "2"); // Altera o segundo dígito para "2"
-console.log(novoNumero); // Saída: "121010"
-
 
 function gameMenuChange() {
     const elements = document.querySelectorAll('.bar-element');
@@ -146,11 +141,9 @@ function gameMenuChange() {
     animationSelect.addEventListener('change', () => {
         if (animationSelect.value === 'Alto') {
             alterarNum(quality, 0, '1')
-            console.log(quality)
             localStorage.setItem('pc-gm-qual', quality)
         } else {
             alterarNum(quality, 0, '0')
-            console.log(quality)
             localStorage.setItem('pc-gm-qual', quality)
         }
     });
@@ -158,17 +151,20 @@ function gameMenuChange() {
         screenEffectContainer.classList.toggle('ativo')
         if (screenEffectSelect.value === 'Desativado') {
             alterarNum(quality, 1, '0')
-            console.log(quality)
             localStorage.setItem('pc-gm-qual', quality)
         } else {
             alterarNum(quality, 1, '1')
-            console.log(quality)
             localStorage.setItem('pc-gm-qual', quality)
         }
     });
 
     legendaActivationSelect.addEventListener('change', () => {
         document.getElementById('subtitles').classList.toggle('active')
+
+        const isActive = document.getElementById('subtitles').classList.contains('active') ? '1' : '0';
+
+        alterarNum(quality, 2, isActive)
+        localStorage.setItem('pc-gm-qual', quality)
     });
 
     legendaSizeSelect.addEventListener('change', () => {
@@ -176,7 +172,7 @@ function gameMenuChange() {
         const fontSize = legendaSizeSelect.value;
         
         captions.forEach(caption => {
-            caption.style.fontSize = fontSize;
+            caption.style.fontSize = fontSize+'pt';
         });
     });
 
@@ -579,7 +575,7 @@ if (data.remaining_time === 0 && round1 === true) {
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.remove('in-game');
     });
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         roundCallRandom(round2Var1, round2Var1, round2Var1)
     } else {
         roundCallRandom(round2Var1, round2Var2, round2Var3)
@@ -598,7 +594,7 @@ if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === fa
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.remove('in-game');
     });
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         roundCallRandom(round3Var1, round3Var2, round3Var3)
     } else {
         roundCallRandom(round3Var1, round3Var2, round3Var3)
@@ -863,7 +859,7 @@ function startGame() {
     .then(response => response.json())
     .then(data => {
         if (data.message === 'Game started') {
-            if (quality === 'low') {
+            if (obterDigito(quality, 0) === '0') {
                 roundCallRandom(round1Var1, round1Var1, round1Var1)
             } else {
                 roundCallRandom(round1Var1, round1Var1, round1Var1)
@@ -1401,7 +1397,7 @@ function round1Var1() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round1/r1Var1Low.json')
         .then(response => response.json())
         .then(data => {
@@ -1535,7 +1531,7 @@ function round2Var1() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round2/r2Var1Low.json')
             .then(response => response.json())
             .then(data => {
@@ -1664,7 +1660,7 @@ function round2Var2() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round2/r2Var2Low.json')
             .then(response => response.json())
             .then(data => {
@@ -1801,7 +1797,7 @@ function round2Var3() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round2/r2Var3Low.json')
             .then(response => response.json())
             .then(data => {
@@ -1927,7 +1923,7 @@ function round3Var1() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round3/r3Var1Low.json')
             .then(response => response.json())
             .then(data => {
@@ -2055,7 +2051,7 @@ function round3Var2() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round3/r3Var2Low.json')
             .then(response => response.json())
             .then(data => {
@@ -2184,7 +2180,7 @@ function round3Var3() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round3/r3Var3Low.json')
             .then(response => response.json())
             .then(data => {
@@ -2304,7 +2300,7 @@ function round4Var1() {
         }
     };
 
-    if (quality === 'low') {
+    if (obterDigito(quality, 0) === '0') {
         fetch('/static/pgGame/rounds/round4/r4Var1Low.json')
             .then(response => response.json())
             .then(data => {
@@ -2703,6 +2699,9 @@ function autoSetQuality(performanceLevel) {
     const animationSelect = document.getElementById('animationSelect')
     const screenEffectSelect = document.getElementById('screenSelect')
     const screenEffectContainer = document.getElementById('effectContainer')
+    const legendaActivationSelect = document.getElementById('legendaActivationSelect')
+    quality = performanceLevel
+    localStorage.setItem('pc-gm-qual', quality)
     if (obterDigito(performanceLevel, 0) == 1) {
         alterarNum(quality, 0, "1")
         animationSelect.value = 'Alto'
@@ -2719,8 +2718,19 @@ function autoSetQuality(performanceLevel) {
         showLoadingScreen(performanceLevel)
     } else {
         alterarNum(quality, 1, "0")
-        screenEffectSelect.value = 'Ativado'
+        screenEffectSelect.value = 'Desativado'
         screenEffectContainer.classList.toggle('ativo')
+        showLoadingScreen(performanceLevel)
+    }
+
+    if (obterDigito(performanceLevel, 2) == 1) {
+        alterarNum(quality, 2, "1")
+        legendaActivationSelect.value = 'Ativado'
+        showLoadingScreen(performanceLevel)
+    } else {
+        alterarNum(quality, 2, "0")
+        legendaActivationSelect.value = 'Desativado'
+        document.getElementById('subtitles').classList.toggle('active')
         showLoadingScreen(performanceLevel)
     }
 }
@@ -2741,11 +2751,11 @@ function calculateFPS() {
             
             let performanceLevel = 0;
             if (averageFPS < 10) {
-                performanceLevel = '00';
+                performanceLevel = '00111111';
             } else if (averageFPS < 30) {
-                performanceLevel = '10';
+                performanceLevel = '10111111';
             } else {
-                performanceLevel = '11';
+                performanceLevel = '11111111';
             }
             
             autoSetQuality(performanceLevel)
