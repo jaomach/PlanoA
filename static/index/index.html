@@ -83,7 +83,7 @@
     </section>
 
     <img id="fullscreen" src="fullscreen.svg" alt="">
-    <div class="menu-inicial">
+    <div class="menu-inicial" id="menuInicial">
         <img draggable="false" id="cardboard" class="cardboard" src="/static/images/index/box.png" alt="">
         <div id="btnElement">
             <button onclick="abrirCaixa()" class="primary-btn">Abrir Caixa</button>
@@ -201,11 +201,13 @@
             const cardboard = document.getElementById('cardboard')
             const cardboardContainer = document.getElementById('cardboardContainer')
             const btn = document.getElementById('btnElement')
+            const menuInicial = document.getElementById('menuInicial')
 
             cardboard.classList.add('caindo')
             btn.classList.add('desappear')
             setTimeout(() => {
-            cardboardContainer.classList.add('aparecendo')
+                cardboardContainer.classList.add('aparecendo')
+                menuInicial.style.display = 'none'
             }, 2000);
         }
 
