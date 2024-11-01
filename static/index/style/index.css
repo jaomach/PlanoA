@@ -57,6 +57,7 @@ a {
     padding: 0.2rem 0.4rem;
     display: flex;
     user-select: none;
+    gap: 1px;
 }
 
 a svg {
@@ -549,16 +550,15 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
         --default-border-width: 1px
     }
     #cardboardOpen {
-        width: 80vw;
-        height: 80vw;
+        width: 80vh;
+        height: 80vh;
     }
     #cardboard {
         width: 30%;
     }
     #PCGame {
-        margin: 0 5vw;
-        width: 22vw;
-        max-width: 220px;
+        margin: 0 3vw;
+        width: 22vh;
     }
     .game-btn:last-child {
         background-color: var(--secondary-contrast-color);
@@ -568,8 +568,10 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     .menu-part:last-child {
         padding-bottom: 24px;
     }
+    .menu-part:first-child {
+        height: 100%;
+    }
     #lateralMenu {
-        width: 80vw;
         height: 100%;
         overflow: scroll;
     }
