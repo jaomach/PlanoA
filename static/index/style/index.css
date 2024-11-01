@@ -550,15 +550,15 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
         --default-border-width: 1px
     }
     #cardboardOpen {
-        width: 80vh;
-        height: 80vh;
+        width: 80vw;
+        height: 80vw;
     }
     #cardboard {
         width: 30%;
     }
     #PCGame {
-        margin: 0 3vw;
-        width: 22vh;
+        margin: 0 6vw;
+        width: 22vw;
     }
     .game-btn:last-child {
         background-color: var(--secondary-contrast-color);
