@@ -249,7 +249,7 @@ fullscreenBtn.addEventListener('click', function() {
     } else if (document.fullscreenElement && fullscreenBtn.src.includes('collapse.svg')) {
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) 
+        } else if (document.mozCancelFullScreen) {
             document.mozCancelFullScreen();
         } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
