@@ -62,9 +62,9 @@ rooms = {
 clients = []
 users = {}
 queue = []
-inactive_rooms = {}  # Dicionário para armazenar salas inativas
-room_timers = {}  # Dicionário para armazenar temporizadores para cada sala
-room_timeout = 60  # Tempo de espera em segundos antes de excluir a sala
+inactive_rooms = {}
+room_timers = {}
+room_timeout = 60
 max_rooms = 2
 ADMIN_KEY = 'batata'
 db_config = {
@@ -90,18 +90,14 @@ def encode_image(image_path):
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
     data = request.json
-    image_url = data['image_path']  # Este é o URL enviado pelo frontend
+    image_url = data['image_path']
 
-    # Extraia o caminho relativo do URL
-    relative_path = image_url.replace("http://awdawd-y1xl.onrender.com", "")  # Ajuste para o domínio correto
+    relative_path = image_url.replace("http://awdawd-y1xl.onrender.com", "") 
 
-    # Combine com o caminho base no servidor
     local_image_path = os.path.join(os.getcwd(), relative_path.lstrip('/'))
 
-    # Agora, encode a imagem para base64
     base64_image = encode_image(local_image_path)
 
-    # Configurando a requisição para a API da OpenAI
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -121,24 +117,19 @@ def call_ai():
         "max_tokens": 300
     }
 
-    # Enviando a requisição para a API
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     
-    # Verificar o status da resposta
     if response.status_code != 200:
         return jsonify({"error": f"API request failed with status code {response.status_code} and response: {response.text}"}), response.status_code
 
-    # Tente capturar e processar a resposta
     try:
         response_json = response.json()
         if 'choices' in response_json and len(response_json['choices']) > 0:
             ai_response = response_json['choices'][0]['message']['content']
             return jsonify({"response": ai_response})
         else:
-            # Resposta inesperada, sem a chave 'choices'
             return jsonify({"error": f"Unexpected API response format: {response_json}"}), 500
     except Exception as e:
-        # Erro ao processar a resposta
         return jsonify({"error": f"Exception: {str(e)}, response: {response.text}"}), 500
 
 @app.route('/create_room', methods=['POST'])
@@ -233,7 +224,7 @@ def leave_room(room_id, player_id):
         room = rooms[room_id]
 
         if player_id in room['players']:
-            del room['players'][player_id]  # Remove o jogador
+            del room['players'][player_id] 
             room['last_activity'] = time.time()
 
             return {'message': 'Player removed from room'}, 200
@@ -277,13 +268,13 @@ def room_status(room_id):
 def start_round(room_id):
     if room_id in rooms:
         data = request.get_json()
-        duration = data.get('duration', 30)  # Padrão 30 segundos se não informado
-        round_number = data.get('round')  # O round pode ser fornecido ou não
+        duration = data.get('duration', 30) 
+        round_number = data.get('round')
 
         if isinstance(duration, int) and duration > 0:
-            if round_number is None:  # Se não foi passado um round, avança para o próximo
+            if round_number is None: 
                 rooms[room_id]['current_round'] += 1
-            else:  # Caso contrário, seta o round fornecido
+            else: 
                 rooms[room_id]['current_round'] = round_number
 
             rooms[room_id]['duration'] = duration
@@ -300,7 +291,7 @@ def start_round(room_id):
 def change_duration(room_id):
     if room_id in rooms:
         data = request.get_json()
-        new_remaining_time = data.get('new_remaining_time')  # Tempo restante fornecido no corpo da requisição
+        new_remaining_time = data.get('new_remaining_time')
 
         if isinstance(new_remaining_time, int) and new_remaining_time > 0:
             elapsed_time = time.time() - rooms[room_id]['start_time']
@@ -308,9 +299,8 @@ def change_duration(room_id):
             if elapsed_time >= rooms[room_id]['duration']:
                 return jsonify({'message': 'Round already finished, cannot change remaining time'}), 400
 
-            # Atualizar a duração e definir o novo tempo restante
             rooms[room_id]['duration'] = elapsed_time + new_remaining_time
-            rooms[room_id]['start_time'] = time.time()  # Resetar o tempo de início
+            rooms[room_id]['start_time'] = time.time()
 
             return jsonify({
                 'message': 'Remaining time updated',
@@ -365,7 +355,6 @@ def distribute_drawing(room_id):
     players = list(rooms[room_id]['players'].keys())
     drawings = []
 
-    # Coleta todos os desenhos de todos os jogadores
     for player_id in players:
         if player_id in rooms[room_id]:
             for image_path in rooms[room_id][player_id]:
@@ -374,11 +363,9 @@ def distribute_drawing(room_id):
     random.shuffle(drawings)
     assignments = {player_id: [] for player_id in players}
 
-    # Distribuir os desenhos para os jogadores
     remaining_drawings = drawings[:]
     min_assignments = len(drawings) // len(players)
     
-    # Primeiro, distribuir igualmente o número mínimo de desenhos por jogador
     for player_id in players:
         available_drawings = [drawing for drawing in remaining_drawings if drawing['player_id'] != player_id]
         random.shuffle(available_drawings)
@@ -388,7 +375,6 @@ def distribute_drawing(room_id):
             assignments[player_id].append(drawing['image_path'])
             remaining_drawings.remove(drawing)
 
-    # Redistribuir os desenhos restantes
     for player_id in players:
         available_drawings = [drawing for drawing in remaining_drawings if drawing['player_id'] != player_id]
         random.shuffle(available_drawings)
@@ -398,7 +384,6 @@ def distribute_drawing(room_id):
             assignments[player_id].append(drawing['image_path'])
             remaining_drawings.remove(drawing)
     
-    # Gera URLs para acessar as imagens distribuídas
     for player_id in assignments:
         assignments[player_id] = [url_for('get_image', filename=os.path.basename(path), _external=True) for path in assignments[player_id]]
     
@@ -418,10 +403,8 @@ def distribute_phrases(room_id):
     assignments = {player_id: [] for player_id in players}
     remaining_phrases = phrases[:]
     
-    # Primeiro, garante que todos recebem o número mínimo de frases
     min_assignments = len(phrases) // len(players)
     
-    # Distribuir o mínimo de frases para cada jogador
     for player_id in players:
         available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
         random.shuffle(available_phrases)
@@ -431,7 +414,6 @@ def distribute_phrases(room_id):
             assignments[player_id].append(phrase['phrase'])
             remaining_phrases.remove(phrase)
 
-    # Redistribuir as frases restantes
     for player_id in players:
         available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
         random.shuffle(available_phrases)
@@ -566,41 +548,35 @@ def handle_connect():
 def remove_room(room_id):
     """Função que remove a sala após o timeout de inatividade."""
     if room_id in inactive_rooms:
-        # Remover a sala de inactive_rooms
         del inactive_rooms[room_id]
         print(f'Sala {room_id} foi removida da lista de inatividade.')
 
-        # Remover a sala de rooms, se ela existir
         if room_id in rooms:
             del rooms[room_id]
             print(f'Sala {room_id} foi deletada do dicionário principal de salas.')
 
-            # Emitir uma mensagem para todos na sala, informando que foi deletada
             socketio.emit('message', {'msg': f'Sala {room_id} foi removida por inatividade.'}, room=room_id)
         else:
             print(f'Sala {room_id} não existe em rooms.')
 
-    # Chama o gerenciador de filas após remover a sala
     queue_manager()
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    user_info = users.get(request.sid)  # Obtém as informações do usuário (incluindo o tipo e sala)
+    user_info = users.get(request.sid)
     
     if user_info:
-        user_type = user_info.get('type', 'client')  # Se não for player nem host, será client
-        room_id = user_info.get('room_id')  # Obtém o ID da sala
+        user_type = user_info.get('type', 'client')
+        room_id = user_info.get('room_id')
         
         if room_id:
             if user_type == 'host':
                 print(f'Host disconnected: {request.sid}')
                 emit('message', {'msg': f'Host {request.sid} has left the room'}, room=room_id)
                 
-                # Marca a sala como inativa
                 inactive_rooms[room_id] = True
                 print(f'Sala {room_id} foi marcada como inativa.')
                 
-                # Inicia o temporizador para remover a sala após o timeout
                 timer = threading.Timer(room_timeout, remove_room, [room_id])
                 room_timers[room_id] = timer
                 timer.start()
@@ -612,12 +588,11 @@ def handle_disconnect():
                 print(f'Client disconnected: {request.sid}')
                 emit('message', {'msg': f'Client {request.sid} has left the room'}, room=room_id)
 
-        # Removendo o usuário do dicionário
         users.pop(request.sid, None)
     else:
         print(f'Usuário com SID {request.sid} não encontrado em `users`.')
         if request.sid in queue:
-            queue.remove(request.sid)  # Remove o jogador da fila
+            queue.remove(request.sid)
             emit('queue_update', {'msg': 'Client disconnected from queue'}, broadcast=True)
             print(f'Player {request.sid} foi removido da fila devido à desconexão.')
 
@@ -654,12 +629,12 @@ def admin_handle_message(data):
 
 @socketio.on('join')
 def on_join(data):
-    room_id = data.get('room_id')  # Obtendo o room_id da data
+    room_id = data.get('room_id')
     
     if isinstance(room_id, dict):
-        room_id = room_id.get('id')  # Supondo que room_id seja um dicionário e você precise da chave 'id'
+        room_id = room_id.get('id')
 
-    user_type = data.get('user_type', 'player')  # Por padrão, considera que é um player
+    user_type = data.get('user_type', 'player')
     join_room(room_id)
 
     users[request.sid] = {
@@ -671,16 +646,13 @@ def on_join(data):
         print(f'Host {request.sid} joined room {room_id}')
         emit('message', {'msg': f'Host {request.sid} has joined the room {room_id}'}, room=room_id)
         
-        # Verifica se a sala está marcada como inativa
         if room_id in inactive_rooms:
-            # Cancela o temporizador se a sala ainda não foi removida
             timer = room_timers.get(room_id)
             if timer:
                 timer.cancel()
                 del room_timers[room_id]
                 print(f'Temporizador para a sala {room_id} foi cancelado.')
             
-            # Remove a sala do dicionário de salas inativas
             del inactive_rooms[room_id]
             emit('message', {'msg': f'Host retornou à sala {room_id}'}, room=room_id)
     else:
@@ -852,21 +824,18 @@ def vote():
 
 @app.route('/list_rooms', methods=['GET'])
 def list_rooms():
-    # Pegue a chave de administrador da query string
     adm_key = request.args.get('adm_key')
     
-    # Verifique se a chave está correta
     if adm_key == ADMIN_KEY:
         room_titles = list(rooms.keys())
         return jsonify({"rooms": room_titles})
     else:
-        # Retorne uma mensagem de erro se a chave estiver incorreta
         return jsonify({"error": "Invalid admin key"}), 403
 
 @app.route("/send_report", methods=["POST"])
 def send_report():
     if request.method == "POST":
-        connection = None  # Inicializa a variável para uso no finally
+        connection = None 
         try:
             connection = connect_to_db()
             if connection is not None:
@@ -885,11 +854,10 @@ def send_report():
                 )
                 connection.commit()
 
-                # Retorno em caso de sucesso
                 return jsonify({"message": "Report enviado com sucesso"}), 200
 
         except Exception as e:
-            traceback.print_exc()  # Log da exceção completa
+            traceback.print_exc()
             return jsonify({"message": f"Erro ao mandar o report: {e}"}), 500
         finally:
             if connection:
@@ -899,22 +867,18 @@ def send_report():
     
 @app.route("/call_reports", methods=["GET"])
 def call_reports():
-    # Pegue a chave de administrador da query string
     adm_key = request.args.get('adm_key')
 
-    # Verifique se a chave está correta
-    if adm_key == ADMIN_KEY:  # Supondo que ADMIN_KEY esteja definido em outro lugar
-        connection = None  # Inicializa a variável para uso no finally
+    if adm_key == ADMIN_KEY:
+        connection = None
         try:
             connection = connect_to_db()
             if connection is not None:
                 cursor = connection.cursor()
 
-                # Consulta todos os reports do banco de dados
                 cursor.execute("SELECT browser, motive, description, platform, user_agent FROM reports")
                 reports = cursor.fetchall()
 
-                # Formata os reports em uma lista de dicionários para retorno JSON
                 reports_list = [
                     {
                         "browser": report[0],
@@ -926,17 +890,15 @@ def call_reports():
                     for report in reports
                 ]
 
-                # Retorno dos reports
                 return jsonify(reports_list), 200
 
         except Exception as e:
-            traceback.print_exc()  # Log da exceção completa
+            traceback.print_exc()
             return jsonify({"message": f"Erro ao buscar os reports: {e}"}), 500
         finally:
             if connection:
                 connection.close()
     else:
-        # Retorne uma mensagem de erro se a chave estiver incorreta
         return jsonify({"error": "Invalid admin key"}), 403
 
 if __name__ == '__main__':

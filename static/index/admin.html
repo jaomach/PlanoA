@@ -77,7 +77,6 @@
         })
         
         function listRooms() {
-            // Fazendo a requisição GET para o servidor com a chave de administrador
             fetch(`/list_rooms?adm_key=${admKey}`)
             .then(response => response.json())
             .then(data => {
@@ -126,14 +125,13 @@
 
         function displayReports(reports) {
             const resultDiv = document.getElementById('reportsList');
-            resultDiv.innerHTML = ''; // Limpa o conteúdo anterior
+            resultDiv.innerHTML = '';
 
             if (reports.length === 0) {
                 resultDiv.innerText = 'Nenhum report encontrado.';
                 return;
             }
 
-            // Cria uma lista de reports
             const ul = document.createElement('ul');
             let actualCount = 0
             reports.forEach(report => {

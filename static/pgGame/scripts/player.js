@@ -124,8 +124,6 @@ function checkGameStatus() {
     fetch(`/room_status/${roomId}`)
     .then(response => response.json())
     .then(data => {
-        // Verifica se o playerId está presente na resposta
-
         if (data.started && !gameStarted) {
             const playerId = localStorage.getItem('playerId');
 
@@ -175,13 +173,10 @@ function checkGameStatus() {
 
 
 window.addEventListener('beforeunload', function (event) {
-    // Define a mensagem a ser exibida no alerta
     const message = 'Tem certeza de que deseja sair da página? As alterações não salvas serão perdidas.';
     
-    // Alguns navegadores modernos ignoram a customização da mensagem,
-    // mas ainda assim exibem um alerta padrão de confirmação
-    event.returnValue = message; // Definido para compatibilidade com alguns navegadores
-    return message; // Para outros navegadores que utilizam essa forma
+    event.returnValue = message;
+    return message;
 });
 
 window.onload = () => {
@@ -230,7 +225,7 @@ function joinRoom(playerId, username, character) {
     .then(response => response.json())
     .then(data => {
         if (data.message === 'Player added' || data.message === 'Rejoining...') {
-            console.log('Token:', data.token); // O token é o próprio playerId
+            console.log('Token:', data.token);
             console.log(data.message);
 
             localStorage.setItem('playerId', data.token);
@@ -266,7 +261,7 @@ function initializeCanvas() {
         fill(e);
     });
     canvas.addEventListener('touchmove', (e) => {
-        draw(e, true); // Passa true para indicar que é um toque
+        draw(e, true);
     });
     canvas.addEventListener('touchend', stopDrawing);
     canvas.addEventListener('touchcancel', stopDrawing);
@@ -331,7 +326,7 @@ function setBrushSize(size, element) {
             element.classList.remove('active-other');
         }
     });
-    element.classList.add('active'); // Add 'active' to the clicked element
+    element.classList.add('active');
 }
 
 
@@ -349,7 +344,7 @@ function setEraser(element) {
 
 function startDrawing(event) {
     drawing = true;
-    draw(event); // Começa a desenhar imediatamente
+    draw(event);
 }
 
 function draw(e, isTouch = false) {
@@ -359,12 +354,12 @@ function draw(e, isTouch = false) {
     ctx.lineCap = 'round';
     ctx.strokeStyle = currentColor;
 
-    let rect = canvas.getBoundingClientRect(); // Pega as dimensões reais do canvas
+    let rect = canvas.getBoundingClientRect();
 
     let x, y;
 
-    let scaleX = canvas.width / rect.width;   // Proporção no eixo X
-    let scaleY = canvas.height / rect.height; // Proporção no eixo Y
+    let scaleX = canvas.width / rect.width;
+    let scaleY = canvas.height / rect.height;
 
     if (isTouch) {
         x = (e.touches[0].clientX - rect.left) * scaleX;
@@ -458,7 +453,7 @@ function saveState() {
    }
    history.push(ctx.getImageData(0, 0, canvas.width, canvas.height));
    historyStep++;
-   redoHistory = []; // Limpa o histórico de redo sempre que uma nova ação é feita
+   redoHistory = [];
 }
 
 function undo() {
@@ -475,7 +470,7 @@ function redo() {
        historyStep++;
        let imageData = redoHistory.pop();
        ctx.putImageData(imageData, 0, 0);
-       history.push(imageData); // Adiciona novamente ao histórico de undo
+       history.push(imageData);
    }
 }
 
@@ -782,7 +777,7 @@ function sendVote() {
        });
    } else {
        alert('Please select a winner before proceeding.');
-       return; // Adicione um retorno aqui para evitar continuar a função sem um vencedor selecionado.
+       return;
    }
 }
 
