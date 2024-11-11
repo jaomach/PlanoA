@@ -35,12 +35,18 @@ let optionsActive = false
 let gameWinner
 gameMenuListening = false
 let audioData
-let isCountdownActive = false; // Variável de controle para o temporizador ativo
-let isPaused = false; // Controle se o temporizador está pausado
-//console.log(auxGameStarted)
+let isCountdownActive = false;
+let isPaused = false;
+let isPausedContainer = false;
 let finalScreenDisable = false
 let actualIsSolo = false
 let mobileUser = false
+let tournamentStarted = false
+let audioPlaybackSupport
+let actualRoundAudio
+if (quality) {
+    audioPlaybackSupport = obterDigito(quality, 3)
+}
 const fullscreenBtn = document.getElementById('fullscreen');
 
 (function() {
@@ -79,23 +85,19 @@ const fullscreenBtn = document.getElementById('fullscreen');
   runDesktopCode();
 })();
 function alterarNum(numero, posicao, novoDigito) {
-    // Verifica se a posição é válida
     if (posicao < 0 || posicao >= numero.length) {
         console.log("Posição inválida.");
-        return numero; // Retorna o número original se a posição for inválida
+        return numero;
     }
 
-    // Atualiza o dígito na posição especificada
     quality = numero.substring(0, posicao) + novoDigito + numero.substring(posicao + 1);
 }
 function obterDigito(numero, posicao) {
-    // Verifica se a posição é válida
     if (posicao < 0 || posicao >= numero.length) {
         console.log("Posição inválida.");
-        return null; // Retorna null se a posição for inválida
+        return null;
     }
   
-    // Retorna o dígito na posição especificada
     return numero[posicao];
 }
 
@@ -137,7 +139,6 @@ function gameMenuChange() {
         roundTimes.round4Time = roundtime4Input.value
     });
 
-    // Log the selected value to the console
     animationSelect.addEventListener('change', () => {
         if (animationSelect.value === 'Alto') {
             alterarNum(quality, 0, '1')
@@ -176,7 +177,6 @@ function gameMenuChange() {
         });
     });
 
-    // Volume control for all audio elements
     volumeSlider.addEventListener('input', () => {
         const volume = volumeSlider.value;
         audioElements.forEach(audio => {
@@ -188,7 +188,6 @@ function gameMenuChange() {
         audioSampleSlider.play();
     });
 
-    // Adiciona um event listener a cada elemento
     elements.forEach((element, index) => {
         element.addEventListener('click', () => {
             if (index == 0) {
@@ -235,11 +234,11 @@ fullscreenBtn.addEventListener('click', function() {
     if (!document.fullscreenElement && fullscreenBtn.src.includes('fullscreen.svg')) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) { // Firefox
+        } else if (document.documentElement.mozRequestFullScreen) {
             document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { // Chrome, Safari, Opera
+        } else if (document.documentElement.webkitRequestFullscreen) {
             document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { // IE/Edge
+        } else if (document.documentElement.msRequestFullscreen) {
             document.documentElement.msRequestFullscreen();
         }
         fullscreenBtn.src = '/static/images/collapse.svg';
@@ -250,11 +249,11 @@ fullscreenBtn.addEventListener('click', function() {
     } else if (document.fullscreenElement && fullscreenBtn.src.includes('collapse.svg')) {
         if (document.exitFullscreen) {
             document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) { // Firefox
+        } else if (document.mozCancelFullScreen) 
             document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) { // Chrome, Safari, Opera
+        } else if (document.webkitExitFullscreen) {
             document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) { // IE/Edge
+        } else if (document.msExitFullscreen) {
             document.msExitFullscreen();
         }
         fullscreenBtn.src = '/static/images/fullscreen.svg';
@@ -318,27 +317,6 @@ reportBtn.addEventListener('click', function() {
         }, 1000)
     }
 });
-
-//const muteBtn = document.getElementById('volume');
-//muteBtn.addEventListener('click', function() {
-//    const audioElements = document.querySelectorAll('audio, video');
-//
-//    if (audioElements.length > 0) {
-//        // Verifica se o primeiro elemento de áudio/vídeo está mutado
-//        const isMuted = audioElements[0].muted;
-//
-//        // Alterna o estado de mutação de todos os elementos de áudio/vídeo
-//        audioElements.forEach(function(element) {
-//            element.muted = !isMuted;
-//        });
-
-//        if (isMuted) {
-//            muteBtn.src = '/static/images/volume-up.svg';
-//        } else {
-//            muteBtn.src = '/static/images/volume-off.svg';
-//        }
-//    }
-//});
 
 const eyeBtn = document.getElementById('eyeBtn');
 eyeBtn.addEventListener('click', function() {
@@ -422,7 +400,9 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener('keydown', function(event) {
     if (event.key === '1' && !gameStarted) {
-        round2Var1()
+        alterarNum(quality, 3, '0')
+        localStorage.setItem('pc-gm-qual', quality)
+        audioPlaybackSupport = obterDigito(quality, 3)
     }
 });
 
@@ -452,6 +432,7 @@ document.addEventListener('keydown', function(event) {
 document.addEventListener('keydown', function(event) {
     if (!finalScreenDisable) {
         if (event.key === 'Escape' && !optionsActive && !gameMenuListening) {
+            isPausedContainer = true
             showOptions()
             gameMenuChange()
             configBtn.classList.add('roll')
@@ -460,9 +441,11 @@ document.addEventListener('keydown', function(event) {
             }, 1000)
         }
         else if (event.key === 'Escape' && optionsActive) {
+            isPausedContainer = false
             hideOptions()
         }
         else if (event.key === 'Escape' && !optionsActive) {
+            isPausedContainer = true
             showOptions()
             configBtn.classList.add('roll')
             setTimeout(function() {
@@ -472,6 +455,14 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
+document.addEventListener("visibilitychange", function() {
+    if (document.hidden && isPausedContainer == false) {
+        console.log(isPaused)
+        const escEvent = new KeyboardEvent("keydown", { key: "Escape" });
+        
+        document.dispatchEvent(escEvent);
+    }
+});
 
 if (mobileUser === false) {
     console.log('Connecting to server with roomId:', roomId);
@@ -554,19 +545,16 @@ for (const [playerId, playerData] of Object.entries(data.players)) {
         playerItem = document.getElementById(playerId);
     }
 
-    // verificação e atualização da imagem
     const newImageSrc = `/static/images/${playerData.character}.png`;
     if (!previousPlayers[playerId] || previousPlayers[playerId].character !== playerData.character) {
         playerImage.src = newImageSrc;
     }
 
-    // texto do jogador
     if (!previousPlayers[playerId] || previousPlayers[playerId].username !== playerData.username) {
         playerItem.textContent = `${playerData.username}`;
     }
 }
 
-//funciona filho da puta funcionou
 previousPlayers = { ...data.players };
 
 if (data.remaining_time === 0 && round1 === true) {
@@ -668,7 +656,6 @@ if (data.remaining_time === 0 && data.current_round === 5 && handleRound5 === fa
     socket.emit('message', { message: 'Round 5 finished', room_id: roomId });
 }
 
-//round infinito pra quem não conhece
 if (data.current_round >= 6) {
     if (data.remaining_time === 0 && roundsHandled[data.current_round] === false) {
         roundsHandled[data.current_round] = true;
@@ -892,14 +879,13 @@ function startGame() {
 function startCountdown(duration, intervalo, roundNumber) {
     duration = Number(duration);
 
-    // Se o temporizador já estiver ativo e não pausado, ignorar
     if (isCountdownActive && !isPaused) {
         return;
     }
 
     clearInterval(countdown);
     const timerElement = document.getElementById('timer');
-    timeLeft = isPaused ? timeLeft : duration; // Se estiver pausado, continua de onde parou
+    timeLeft = isPaused ? timeLeft : duration;
 
     if (auxGameStarted === true) {
         timeOuts.push(setTimeout(function () {
@@ -925,7 +911,6 @@ function startCountdown(duration, intervalo, roundNumber) {
                 clearInterval(countdown);
                 timerElement.style.display = 'none';
 
-                // Quando o temporizador acabar, ele é desativado
                 isCountdownActive = false;
             }
         }, 1000);
@@ -935,14 +920,14 @@ function startCountdown(duration, intervalo, roundNumber) {
 function togglePauseResumeCountdown() {
     if (isCountdownActive) {
         if (!isPaused) {
-            clearInterval(countdown); // Interrompe o intervalo
-            isPaused = true; // Marca como pausado
+            clearInterval(countdown);
+            isPaused = true;
             console.log('Temporizador pausado');
         } else {
             console.log('Retomando temporizador');
-            isPaused = false; // Marca como não pausado
+            isPaused = false;
             countdown = setInterval(() => {
-                timeLeft--; // Decrementa o tempo restante
+                timeLeft--;
                 const timerElement = document.getElementById('timer');
                 timerElement.textContent = timeLeft;
                 if (timeLeft <= 0) {
@@ -988,12 +973,14 @@ window.onload = () => {
 };
 
 function startTournament(roomId) {
-    fetch(`/start_tournament/${roomId}`, { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Tournament started:', data.rounds);
-
-        });
+    if (tournamentStarted === false) {
+        fetch(`/start_tournament/${roomId}`, { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Tournament started:', data.rounds);
+                tournamentStarted = true
+            });
+    }
 }
 
 async function fetchMatchups() {
@@ -1068,22 +1055,18 @@ function displayMatchup() {
                     }, 2000)
                 }
                 function gerarUsername() {
-                    // Listas de nomes, comidas e números
                     const criterios1 = ["Pedro", "Goku", "Sasuke", "OcultDay", "PaulaNoku", player1, player2];
                     const criterios2 = ["SocaFofo", "FC", "OFC", "Implacavel", "Amostradinho", "Pensador"];
                     const criterios3 = [12, 34, 56, 78, 90];
                 
-                    // Função para escolher um elemento aleatório de uma lista
                     function escolherAleatorio(lista) {
                         return lista[Math.floor(Math.random() * lista.length)];
                     }
                 
-                    // Gerando as partes do username
                     const criterio1 = escolherAleatorio(criterios1);
                     const criterio2 = escolherAleatorio(criterios2);
                     const criterio3 = escolherAleatorio(criterios3);
                 
-                    // Combinando as partes para formar o username
                     const username = `${criterio1}${criterio2}${criterio3}`;
                     return username;
                 }
@@ -1213,12 +1196,11 @@ function showWinner(winner) {
     }, 8000);
 }
 
-let globalMostVotedInfo = null; // variável global para salvar todas as informações do mostVoted
+let globalMostVotedInfo = null;
 
 function processVotes(data) {
     console.log('Room Status:', data);
 
-    // Mostrar quem votou em quem
     for (const [user, vote] of Object.entries(data.votes)) {
         const characterName = data.players[user].character;
         console.log(`${user} votou em ${vote}`);
@@ -1257,7 +1239,6 @@ function processVotes(data) {
         mostVoted = mostVoted[0];
     }
 
-    // Guardar todas as informações do mostVoted
     globalMostVotedInfo = {
         username: data.players[mostVoted].username,
         character: data.players[mostVoted].character,
@@ -1265,7 +1246,7 @@ function processVotes(data) {
         playerId: mostVoted
     };
 
-    console.log('Most Voted Info:', globalMostVotedInfo); // Verificar as informações no console
+    console.log('Most Voted Info:', globalMostVotedInfo);
 
     const leastVoted = mostVoted === actualPlayer1 ? actualPlayer2 : actualPlayer1;
 
@@ -1299,9 +1280,8 @@ function playRandomAudio() {
     const randomIndex = Math.floor(Math.random() * audioIds.length);
     const selectedAudio = document.getElementById(audioIds[randomIndex]);
     
-    // Pausa todos os áudios antes de reproduzir o novo
     audioIds.forEach(id => document.getElementById(id).pause());
-    selectedAudio.currentTime = 0; // Reseta o tempo do áudio
+    selectedAudio.currentTime = 0;
     selectedAudio.play();
 }
 
@@ -1351,7 +1331,6 @@ function roundCallRandom(variavel1, variavel2, variavel3) {
     selectVar();
 }
 
-// rounds normais
 function round1Var1() {
     timeOuts.length = 0;
     document.getElementById('skipRoundBtn').disabled = true;
@@ -1403,7 +1382,7 @@ function round1Var1() {
         .then(data => {
         audioData = data;
         });
-        audioRodada1.src = '/static/pgGame/audios/r1/audioR1Low.mp3'
+        audioRodada1.src = `/static/pgGame/audios/r1/audioR1Q${audioPlaybackSupport}.mp3`
 
         setTimeout(function() {
             document.getElementById('startButton').classList.add('desappear')
@@ -1411,7 +1390,9 @@ function round1Var1() {
             document.getElementById('circleLow').classList.add('close')
             whistleDown.play();
             setTimeout(function() {
-                soundTrackR1.play();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR1.play();
+                }
                 audioRodada1.play();
             }, 1000);
         }, 500);
@@ -1421,6 +1402,7 @@ function round1Var1() {
         .then(data => {
         audioData = data;
         });
+        audioRodada1.src = `/static/pgGame/audios/r1/audioR1Q${audioPlaybackSupport}.mp3`
 
         setTimeout(function() {
             document.getElementById('startButton').classList.add('desappear')
@@ -1428,7 +1410,9 @@ function round1Var1() {
             document.getElementById('circle').classList.add('close')
             whistleDown.play();
             setTimeout(function() {
-                soundTrackR1.play();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR1.play();
+                }
                 audioRodada1.play();
             }, 1000);
         }, 500);
@@ -1532,12 +1516,12 @@ function round2Var1() {
     };
 
     if (obterDigito(quality, 0) === '0') {
-        fetch('/static/pgGame/rounds/round2/r2Var1Low.json')
+        fetch(`/static/pgGame/rounds/round2/r2Var1Low.json`)
             .then(response => response.json())
             .then(data => {
-                audioData = data; // Agora audioData está acessível aqui
+                audioData = data;
             });
-        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var1Low.mp3'
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var1Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1546,16 +1530,20 @@ function round2Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
     } else {
-        fetch('/static/pgGame/rounds/round2/r2Var1.json')
+        fetch(`/static/pgGame/rounds/round2/r2Var1.json`)
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var1Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1564,11 +1552,15 @@ function round2Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
     }
+    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1626,7 +1618,6 @@ function round2Var2() {
             
     const clonedPlayerList = playerList.cloneNode(true);
 
-    // Adiciona a div clonada ao DOM
     clonedPlayerList.id = 'playerListR2'
     document.getElementById('roundContainer').innerHTML = `
     <img id="iluminacao" src="/static/images/iluminacao.png" alt="">
@@ -1661,12 +1652,12 @@ function round2Var2() {
     };
 
     if (obterDigito(quality, 0) === '0') {
-        fetch('/static/pgGame/rounds/round2/r2Var2Low.json')
+        fetch(`/static/pgGame/rounds/round2/r2Var2Low.json`)
             .then(response => response.json())
             .then(data => {
-                audioData = data; // Agora audioData está acessível aqui
+                audioData = data;
             });
-        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var2Low.mp3'
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var2Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1675,7 +1666,10 @@ function round2Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
@@ -1683,8 +1677,9 @@ function round2Var2() {
         fetch('/static/pgGame/rounds/round2/r2Var2.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var2Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1693,11 +1688,15 @@ function round2Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
     }
+    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1749,7 +1748,6 @@ function round2Var3() {
     var soundTrackR2 = document.getElementById("soundTrackR2");
     var audioR2Var1 = document.getElementById("audioR2");
     soundTrackR2.src = '/static/pgGame/audios/r2/soundTrackR2.mp3'
-    audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var3.mp3'
 
     const playerList = document.getElementById('playerList');
             
@@ -1801,8 +1799,9 @@ function round2Var3() {
         fetch('/static/pgGame/rounds/round2/r2Var3Low.json')
             .then(response => response.json())
             .then(data => {
-                audioData = data; // Agora audioData está acessível aqui
+                audioData = data;
             });
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var3Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1811,7 +1810,10 @@ function round2Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
@@ -1819,9 +1821,9 @@ function round2Var3() {
         fetch('/static/pgGame/rounds/round2/r2Var3.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
-        audioR2Var1.src = '/static/pgGame/audios/r2/audioR2Var3Low.mp3'
+        audioR2Var1.src = `/static/pgGame/audios/r2/audioR2Var3Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1830,11 +1832,15 @@ function round2Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                soundTrackR2.play();
+                audioRodada1.remove();
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR2.play();
+                }
                 audioR2Var1.play();
             }, 1000));
         }, 500));
     }
+    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1927,9 +1933,9 @@ function round3Var1() {
         fetch('/static/pgGame/rounds/round3/r3Var1Low.json')
             .then(response => response.json())
             .then(data => {
-                audioData = data; // Agora audioData está acessível aqui
+                audioData = data;
             });
-        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var1Low.mp3'
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var1Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1938,7 +1944,10 @@ function round3Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove()
+                if (audioPlaybackSupport === '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
@@ -1946,8 +1955,9 @@ function round3Var1() {
         fetch('/static/pgGame/rounds/round3/r3Var1.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var1Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -1956,12 +1966,15 @@ function round3Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
     }
-
+    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2055,9 +2068,9 @@ function round3Var2() {
         fetch('/static/pgGame/rounds/round3/r3Var2Low.json')
             .then(response => response.json())
             .then(data => {
-                audioData = data; // Agora audioData está acessível aqui
+                audioData = data;
             });
-        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var2Low.mp3'
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var2Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -2066,7 +2079,10 @@ function round3Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
@@ -2074,8 +2090,9 @@ function round3Var2() {
         fetch('/static/pgGame/rounds/round3/r3Var2.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var2Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -2084,13 +2101,16 @@ function round3Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
     }
 
-
+    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2187,7 +2207,7 @@ function round3Var3() {
                 audioData = data;
             });
 
-        audioR3Var1.src = '/static/pgGame/audios/r3/audioR3var3Low.mp3'
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var3Q${audioPlaybackSupport}.mp3`
         console.log(audioData)
 
         timeOuts.push(setTimeout(function() {
@@ -2197,7 +2217,10 @@ function round3Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
@@ -2205,8 +2228,9 @@ function round3Var3() {
         fetch('/static/pgGame/rounds/round3/r3Var3.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR3Var1.src = `/static/pgGame/audios/r3/audioR3var3Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -2215,12 +2239,16 @@ function round3Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
-                soundTrackR3.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR3.play();
+                }
                 audioR3Var1.play();
             }, 1000));
         }, 500));
     }
 
+    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2279,7 +2307,7 @@ function round4Var1() {
     <img src="/static/images/Round4.png" id="rounds">
     <audio id="whistleUp" src="/static/pgGame/audios/WhistleUp.mp3" type="audio/mpeg"></audio>
     <audio id="whistleDown" src="/static/pgGame/audios/WhistleDown.mp3" type="audio/mpeg"></audio>
-    `    
+    `
     
     var subtitleDiv = document.getElementById("subtitles");
     var subtitles = [];
@@ -2306,7 +2334,7 @@ function round4Var1() {
             .then(data => {
                 audioData = data;
             });
-        audioR4.src = '/static/pgGame/audios/r4/audioR4Low.mp3'
+        audioR4.src = `/static/pgGame/audios/r4/audioR4Q${audioPlaybackSupport}.mp3`
 
         console.log(audioData)
 
@@ -2317,7 +2345,10 @@ function round4Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR3.remove();
-                soundTrackR4.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR4.play();
+                }
                 audioR4.play();
             }, 1000));
         }, 500));
@@ -2325,8 +2356,9 @@ function round4Var1() {
         fetch('/static/pgGame/rounds/round4/r4Var1.json')
         .then(response => response.json())
         .then(data => {
-            audioData = data; // Agora audioData está acessível aqui
+            audioData = data;
         });
+        audioR4.src = `/static/pgGame/audios/r4/audioR4Q${audioPlaybackSupport}.mp3`
 
         timeOuts.push(setTimeout(function() {
             document.getElementById('timerContainer').classList.remove('appear')
@@ -2335,11 +2367,15 @@ function round4Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR3.remove();
-                soundTrackR4.play();
+                actualRoundAudio.remove();
+                if (audioPlaybackSupport == '1') {
+                    soundTrackR4.play();
+                }
                 audioR4.play();
             }, 1000));
         }, 500));
     }
+    actualRoundAudio = audioR4
     setTimeout(function() {
         audioR4.addEventListener('timeupdate', () => {
             const currentTime = audioR4.currentTime;
@@ -2366,7 +2402,6 @@ function round4Var1() {
                             const param2 = parseInt(args[1], 10); 
                             const param3 = parseInt(args[2], 10); 
                             startCountdown(35, 0, 4);
-                            //startCountdown(param1, param2, param3);
                         }
                         if (item.startTournament) {
                             startTournament(roomId);
@@ -2432,6 +2467,8 @@ function roundFinal() {
         document.getElementById('circle').classList.add('close')
         whistleDown.play();
         setTimeout(function() {
+            soundTrackR4.remove()
+            actualRoundAudio.remove()
             audioRodadaFinal.play();
             document.getElementById('timerContainer').classList.remove('appear')
         }, 1000);
@@ -2557,7 +2594,6 @@ function roundFinal() {
     }, 90000));
 }
 
-//skipar rounds
 function skipRound(roundNum) {
     document.getElementById('skipRoundBtn').disabled = true;
     document.getElementById('skipRoundBtn').classList.remove('aparecendo')
@@ -2670,7 +2706,7 @@ let lastTime = performance.now();
 let fps = 0;
 let fpsArray = [];
 let testStartTime = performance.now();
-let testDuration = 5000; // 5 seconds
+let testDuration = 5000;
 let isTesting = true;
 
 function verifyQuality() {
@@ -2695,6 +2731,19 @@ function autoSetQuality(performanceLevel) {
     const legendaActivationSelect = document.getElementById('legendaActivationSelect')
     quality = performanceLevel
     localStorage.setItem('pc-gm-qual', quality)
+
+    checkAudioPlaybackSupport().then(support => {
+        if (support) {
+            alterarNum(quality, 3, "1")
+            localStorage.setItem('pc-gm-qual', quality)
+            audioPlaybackSupport = obterDigito(quality, 3)
+        } else {
+            alterarNum(quality, 3, "0")
+            localStorage.setItem('pc-gm-qual', quality)
+            audioPlaybackSupport = obterDigito(quality, 3)
+        }
+    });
+
     if (obterDigito(performanceLevel, 0) == 1) {
         alterarNum(quality, 0, "1")
         animationSelect.value = 'Alto'
@@ -2740,7 +2789,6 @@ function calculateFPS() {
         if (now - testStartTime >= testDuration) {
             isTesting = false;
             const averageFPS = fpsArray.reduce((sum, value) => sum + value, 0) / fpsArray.length;
-            console.log(averageFPS)
             
             let performanceLevel = 0;
             if (averageFPS < 10) {
@@ -2750,14 +2798,49 @@ function calculateFPS() {
             } else {
                 performanceLevel = '11111111';
             }
-            
+
             autoSetQuality(performanceLevel)
         }
     }
 
     document.getElementById('fps').textContent = `FPS: ${fps.toFixed(2)}`;
+    document.getElementById('fps').style.display = 'none'
     requestAnimationFrame(calculateFPS);
 }
+
+async function checkAudioPlaybackSupport() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        const gainNode = audioContext.createGain();
+        gainNode.gain.value = 0.0001;
+
+        const oscillator1 = audioContext.createOscillator();
+        const oscillator2 = audioContext.createOscillator();
+        
+        oscillator1.frequency.setValueAtTime(440, audioContext.currentTime); 
+        oscillator2.frequency.setValueAtTime(660, audioContext.currentTime);
+
+        oscillator1.connect(gainNode);
+        oscillator2.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator1.start();
+        oscillator2.start();
+
+        setTimeout(() => {
+            oscillator1.stop();
+            oscillator2.stop();
+            audioContext.close();
+        }, 1000);
+
+        return true;
+
+    } catch (error) {
+        return false;
+    }
+}
+
 
 function showLoadingScreen(interval) {
     const loadingScreen = document.getElementById('loadingScreen')

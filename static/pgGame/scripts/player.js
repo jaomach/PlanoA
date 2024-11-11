@@ -2,7 +2,7 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', { willReadFrequently: true });
 let drawing = false;
 let currentColor = 'black';
-let currentSize = 2;
+let currentSize = 5;
 let countdown;
 let gameStarted = false;
 let phrasesFetched = false;
@@ -54,7 +54,7 @@ socket.on('message', function(data) {
         fetchDistributedPhrases()
         fetchDistributedDrawings()
         document.getElementById('combinationArea').style.display = 'flex';
-        document.getElementById('round3').style.display = 'block'
+        document.getElementById('round3').style.display = 'flex'
         document.getElementById('waitingMessage').style.display = 'none';
     }
     if (data.msg === 'Round 3 finished') {
@@ -252,6 +252,7 @@ function joinRoom(playerId, username, character) {
     });
 }
 
+canvas.addEventListener('mouseleave', stopDrawing);
 function initializeCanvas() {
     canvas.addEventListener('mousedown', (e) => {
         if (!fillMode) startDrawing(e);
@@ -282,9 +283,13 @@ function fillCanvasWithWhite() {
 
 document.getElementById('bucketBtn').addEventListener('click', () => {
     fillMode = !fillMode;
+    document.querySelectorAll('.active').forEach(function(element) {
+        element.classList.remove('active');
+    });
     document.querySelectorAll('.active-other').forEach(function(element) {
         element.classList.remove('active-other');
     });
+
     document.getElementById('bucketBtn').classList.add('active-other')
 });
 
@@ -305,6 +310,12 @@ function setColor(color) {
         document.getElementById(color).style.borderColor = 'white';
     }
 
+    document.querySelectorAll('.active-other').forEach(function(element) {
+        if (element.id == 'eraserBtn') {
+            element.classList.remove('active-other');
+        }
+    });
+
     firstIteration = true
     lastColor = color;
 }
@@ -316,7 +327,7 @@ function setBrushSize(size, element) {
         element.classList.remove('active');
     });
     document.querySelectorAll('.active-other').forEach(function(element) {
-        if (element.id == 'bucketBtn') { // Verifica se o ID é diferente de 'bucketBtn'
+        if (element.id == 'bucketBtn') {
             element.classList.remove('active-other');
         }
     });
@@ -325,8 +336,10 @@ function setBrushSize(size, element) {
 
 
 function setEraser(element) {
+    document.getElementById(currentColor).style.borderColor = '#3f3f3f';
     currentColor = 'white';
     fillMode = false
+
     document.querySelectorAll('.active-other').forEach(function(element) {
         element.classList.remove('active-other');
     });
@@ -547,7 +560,7 @@ function submitPhrase() {
                 } else {
                     document.getElementById('round2').style.display = 'none';
                     document.getElementById('waitingMessage').style.display = 'flex';
-                    socket.emit(playerId);
+                    socket.emit('message', {message: playerId, room_id: roomId });
                 }
                 document.getElementById('phrase').value = '';
             }
@@ -589,6 +602,7 @@ function fetchDistributedDrawings() {
         .then(response => response.json())
         .then(data => {
             const drawingList = document.getElementById('swiperCombine');
+            const combinationArea = document.getElementById('combinationArea');
             const playerId = localStorage.getItem('playerId')
             const round3 = document.getElementById('round3')
             drawingList.innerHTML = '';
@@ -604,11 +618,12 @@ function fetchDistributedDrawings() {
                     option.textContent = url;
                     option.style.display = 'none';
                     newSwiper.appendChild(option);
-                    round3.appendChild(drawingList);
+                    combinationArea.appendChild(drawingList);
                 });
             } else {
                 drawingList.textContent = 'Nenhum desenho atribuído.';
             }
+
         })
         .catch(error => {
             console.error('Error:', error);
@@ -662,12 +677,18 @@ async function fetchMatchups() {
 
 function displayMatchup() {
     const matchupsDiv = document.getElementById('matchups');
-    matchupsDiv.innerHTML = '';
+    matchupsDiv.innerHTML = `
+    <div class="menu-part">
+        <div class="categories-element phrases"><span>Qual o melhor?</span></div>
+    </div>
+    <button class="primary-btn" id="sendVote" onclick="sendVote()">Enviar Voto</button>
+    `;
 
     if (currentMatchupIndex < matchups.length) {
         const matchup = matchups[currentMatchupIndex];
         const matchupDiv = document.createElement('div');
         matchupDiv.classList.add('matchup');
+        matchupDiv.classList.add('selection-container');
         const combinations = matchup.combinations;
         const player1Comb = combinations[0][0];
         const player1 = matchup.players[0];
@@ -699,6 +720,7 @@ function displayMatchup() {
 
         matchupsDiv.appendChild(matchupDiv);
         document.getElementById('sendVote').style.display = 'flex';
+        cancelVote()
         selectedVote();
     } else {
         document.getElementById('sendVote').style.display = 'none';

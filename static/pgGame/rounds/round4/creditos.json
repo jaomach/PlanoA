@@ -20,9 +20,11 @@
         ]
       },
       {
-        "categoria": "Musica",
+        "categoria": "Música",
         "items": [
-          { "titulo": "Rodada 1 e 2", "nome": "Shady Business - Ave Coo" }
+          { "titulo": "Rodada 1 e 2", "nome": "Shady Business - Ave Coo" },
+          { "titulo": "Rodada 3", "nome": "Denis Pavlov - Brazilian Summer" },
+          { "titulo": "Rodada 4", "nome": "Happy Housework - Morkovkasound" }
         ]
       },
       {

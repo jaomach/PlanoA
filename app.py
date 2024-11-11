@@ -18,7 +18,7 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-api_key = os.environ["GPT_KEY"]
+#api_key = os.environ["GPT_KEY"]
 available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
 
 rooms = {
@@ -37,11 +37,11 @@ rooms = {
         'current_round': 0,
         'last_activity': time.time(),
         'votes': {},
-        'player1': [os.path.join(UPLOAD_FOLDER, 'TEST_player1_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player1_2.png')],
-        'player2': [os.path.join(UPLOAD_FOLDER, 'TEST_player2_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player2_2.png')],
-        'player3': [os.path.join(UPLOAD_FOLDER, 'TEST_player3_1.png'), os.path.join(UPLOAD_FOLDER, 'TEST_player3_2.png')],
+        #'player1': [os.path.join(UPLOAD_FOLDER, 'transferir.png'), os.path.join(UPLOAD_FOLDER, 'transferir.png')],
+        'player2': [os.path.join(UPLOAD_FOLDER, 'transferir.png'), os.path.join(UPLOAD_FOLDER, 'transferir.png')],
+        'player3': [os.path.join(UPLOAD_FOLDER, 'transferir.png'), os.path.join(UPLOAD_FOLDER, 'transferir.png')],
         'combinations': {
-            'player1': [{'image_path': '/uploads/transferir.png', 'phrase': 'A funny caption'}],
+            #'player1': [{'image_path': '/uploads/transferir.png', 'phrase': 'A funny caption'}],
             'player2': [{'image_path': '/uploads/transferir.png', 'phrase': 'Another funny caption'}],
             'player3': [{'image_path': '/uploads/transferir.png', 'phrase': 'Yet another funny caption'}],
             'player4': [{'image_path': '/uploads/transferir.png', 'phrase': 'Yet another funny caption'}],
@@ -49,11 +49,11 @@ rooms = {
             'playerControl': [{'image_path': '/uploads/transferir.png', 'phrase': 'Yet another funny caption'}],
         },
         'phrases': [
-            {'player_id': 'player1', 'phrase': 'Phrase 1 from player 1', 'timestamp': time.time()},
+            #{'player_id': 'player1', 'phrase': 'Phrase 1 from player 1', 'timestamp': time.time()},
             {'player_id': 'player2', 'phrase': 'Phrase 1 from player 2', 'timestamp': time.time()},
             {'player_id': 'player3', 'phrase': 'Phrase 1 from player 3', 'timestamp': time.time()},
             {'player_id': 'player4', 'phrase': 'Phrase 1 from player 4', 'timestamp': time.time()},
-            {'player_id': 'player1', 'phrase': 'Phrase 2 from player 1', 'timestamp': time.time()},
+            #{'player_id': 'player1', 'phrase': 'Phrase 2 from player 1', 'timestamp': time.time()},
             {'player_id': 'player2', 'phrase': 'Phrase 2 from player 2', 'timestamp': time.time()},
             {'player_id': 'player3', 'phrase': 'Phrase 2 from player 3', 'timestamp': time.time()},
         ]

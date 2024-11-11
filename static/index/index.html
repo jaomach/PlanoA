@@ -12,7 +12,7 @@
 <body>
     <div id="lateralMenu">
         <div class="menu-part">
-            <section class="menu-container1">
+            <section id="gameCard" class="menu-container1">
                 <img draggable="false" src="/static/images/LOGO.png" alt="">
             </section>
             <div class="a-list-menu">
@@ -213,6 +213,7 @@
 
         function showGame(){
             const PCGame = document.getElementById('PCGame')
+            const gameCard = document.getElementById('gameCard')
             const cardboardContainer = document.getElementById('cardboardContainer')
             const menu = document.getElementById('lateralMenu')
             const inactive = document.createElement('div')
@@ -221,6 +222,7 @@
             PCGame.addEventListener("click", function(){
                 PCGame.classList.add('ativo')
                 menu.classList.add('active')
+                gameCard.classList.add('flip-horizontal-fwd')
                 cardboardContainer.classList.add('menu-active')
 
                 inactive.classList.add('inativo')
@@ -230,6 +232,7 @@
             inactive.addEventListener("click", function(){
                 PCGame.classList.remove('ativo')
                 menu.classList.remove('active')
+                gameCard.classList.remove('flip-horizontal-fwd')
                 cardboardContainer.classList.remove('menu-active')
 
                 body.removeChild(inactive)

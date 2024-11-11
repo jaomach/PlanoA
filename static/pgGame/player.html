@@ -147,28 +147,27 @@
     </div>
 
     <div id="round3" style="display: none;">
-        <div class="selection-container" id="combinationArea" style="display: flex;">
-            <span class="primary-title">Combine um título com uma pintura:</span>
-            <swiper-container id="swiperCombine" class="swiper-container" navigation="true">
- <!--               <swiper-slide>
-                    <img src="/uploads/KCTB_534EZe8YXMKM_1722528836.png" alt="">
-                    <span id="character">Berro</span>
-                </swiper-slide>
-                <swiper-slide>
-                    <img src="/static/images/Berro.png " alt="">
-                    <span id="character">Berro</span>
-                </swiper-slide> -->
-            </swiper-container>
-            <select class="input-container" id="phraseSelect">
-                <option value=""></option>
-            </select>
-            <button class="primary-btn" onclick="combineSelection()">Combinar</button>
+        <div id="selectionInput">
+            <div class="menu-part">
+                <div class="categories-element phrases"><span>Combine</span></div>
+            </div>
+            <div class="selection-container" id="combinationArea" style="display: flex;">
+                <swiper-container id="swiperCombine" class="swiper-container" navigation="true"></swiper-container>
+                <select class="input-container" id="phraseSelect">
+                    <option value=""></option>
+                </select>
+                <button class="primary-btn" onclick="combineSelection()">Combinar</button>
+            </div>
         </div>
     </div>
 
     <div id="round4">
-        <div id="matchups"></div>
-        <button class="primary-btn" id="sendVote" onclick="sendVote()">Enviar Voto</button>
+        <div id="matchups">
+            <div class="menu-part">
+                <div class="categories-element phrases"><span>Qual o melhor?</span></div>
+            </div>
+            <button class="primary-btn" id="sendVote" onclick="sendVote()">Enviar Voto</button>
+        </div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
