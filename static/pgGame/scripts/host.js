@@ -50,7 +50,7 @@ var K = 90;
 var Z = 35;
 var $ = false;
 var ee;
-gameMenuListening = false;
+let gameMenuListening = false;
 var te;
 var ae = false;
 var se = false;
