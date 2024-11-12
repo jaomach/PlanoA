@@ -491,16 +491,16 @@ function fe() {
         d.id = "image-".concat(i);
         o.appendChild(d);
         l = document.createElement('div');
-        playerSign = document.createElement('div');
-        playerDel = document.createElement('button');
+        let sig = document.createElement('div');
+        let del = document.createElement('button');
         l.classList.add('fodao');
-        playerSign.classList.add('sign');
-        playerDel.classList.add('player-del-btn');
-        playerDel.setAttribute('onclick', "removePlayer('".concat(i, "')"));
+        sig.classList.add('sign');
+        del.classList.add('player-del-btn');
+        del.setAttribute('onclick', "removePlayer('".concat(i, "')"));
         l.id = i;
-        playerSign.appendChild(l);
-        o.appendChild(playerSign);
-        o.appendChild(playerDel);
+        sig.appendChild(l);
+        o.appendChild(sig);
+        o.appendChild(del);
         t.appendChild(o);
       } else {
         d = document.getElementById("image-".concat(i));
