@@ -21,6 +21,9 @@ let actualPlayer1 = ''
 let actualPlayer2 = ''
 let quality = localStorage.getItem('pc-gm-qual')
 let timeOuts = []
+let timeoutPause;
+let startTime;
+let remainingTime; // Inicia com o valor total do intervalo
 let roundTimes = {
     round1Time: 240,
     round2Time: 120,
@@ -457,7 +460,6 @@ document.addEventListener('keydown', function(event) {
 
 document.addEventListener("visibilitychange", function() {
     if (document.hidden && isPausedContainer == false) {
-        console.log(isPaused)
         const escEvent = new KeyboardEvent("keydown", { key: "Escape" });
         
         document.dispatchEvent(escEvent);
@@ -518,7 +520,7 @@ for (const [playerId, playerData] of Object.entries(data.players)) {
     let playerImage, playerItem;
 
     if (!playerContainer) {
-        playerContainer = document.createElement('div');
+        let playerContainer = document.createElement('div');
         playerContainer.classList.add('player-container');
         playerContainer.id = `container-${playerId}`;
 
@@ -528,8 +530,8 @@ for (const [playerId, playerData] of Object.entries(data.players)) {
         playerContainer.appendChild(playerImage);
 
         playerItem = document.createElement('div');
-        playerSign = document.createElement('div');
-        playerDel = document.createElement('button');
+        const playerSign = document.createElement('div');
+        const playerDel = document.createElement('button');
         playerItem.classList.add('fodao');
         playerSign.classList.add('sign');
         playerDel.classList.add('player-del-btn');
@@ -557,17 +559,13 @@ for (const [playerId, playerData] of Object.entries(data.players)) {
 
 previousPlayers = { ...data.players };
 
-if (data.remaining_time === 0 && round1 === true) {
+if (timeLeft === 0 && round1 === true) {
     round1 = false;
     timeLeft = 0;
     document.querySelectorAll('.player-container').forEach(function(element) {
         element.classList.remove('in-game');
     });
-    if (obterDigito(quality, 0) === '0') {
-        roundCallRandom(round2Var1, round2Var1, round2Var1)
-    } else {
-        roundCallRandom(round2Var1, round2Var2, round2Var3)
-    }
+    roundCallRandom(round2Var1, round2Var2, round2Var3)
 }
 if (data.current_round === 2 && round2 === false) {
     round2 = true;
@@ -576,7 +574,7 @@ if (data.current_round === 2 && round2 === false) {
     });
     socket.emit('message', { message: 'Round 2 started', room_id: roomId });
 }
-if (data.remaining_time === 0 && data.current_round === 2 && handleRound2 === false) {
+if (timeLeft === 0 && data.current_round === 2 && handleRound2 === false) {
     timeLeft = 0;
     handleRound2 = true;
     document.querySelectorAll('.player-container').forEach(function(element) {
@@ -595,7 +593,7 @@ if (data.current_round === 3 && round3 === false) {
     });
     socket.emit('message', { message: 'Round 3 started', room_id: roomId });
 }
-if (data.remaining_time === 0 && data.current_round === 3 && handleRound3 === false) {
+if (timeLeft === 0 && data.current_round === 3 && handleRound3 === false) {
     timeLeft = 0;
     handleRound3 = true;
     document.querySelectorAll('.player-container').forEach(function(element) {
@@ -611,7 +609,7 @@ if (data.current_round === 4 && round4 === false) {
     });
     socket.emit('message', { message: 'Round 4 started', room_id: roomId });
 }
-if (data.remaining_time === 0 && data.current_round === 4 && handleRound4 === false) {
+if (timeLeft === 0 && data.current_round === 4 && handleRound4 === false) {
     handleRound4 = true;
     timeLeft = 0;
     processVotes(data);
@@ -634,7 +632,7 @@ if (data.current_round === 5 && round5 === false) {
     round5 = true;
     socket.emit('message', { message: 'Round 5 started', room_id: roomId });
 }
-if (data.remaining_time === 0 && data.current_round === 5 && handleRound5 === false) {
+if (timeLeft === 0 && data.current_round === 5 && handleRound5 === false) {
     handleRound5 = true;
     timeLeft = 0;
     if (!gameWinner) {
@@ -657,7 +655,7 @@ if (data.remaining_time === 0 && data.current_round === 5 && handleRound5 === fa
 }
 
 if (data.current_round >= 6) {
-    if (data.remaining_time === 0 && roundsHandled[data.current_round] === false) {
+    if (timeLeft === 0 && roundsHandled[data.current_round] === false) {
         roundsHandled[data.current_round] = true;
         timeLeft = 0;
         if (!gameWinner) {
@@ -741,6 +739,7 @@ function hideOptions(){
 
     body.removeChild(inactive)
     optionsActive = false
+    isPausedContainer = false
     togglePauseResumeCountdown()
 }
 
@@ -877,75 +876,81 @@ function startGame() {
 }
 
 function startCountdown(duration, intervalo, roundNumber) {
-    duration = Number(duration);
-
     if (isCountdownActive && !isPaused) {
+        console.log('paizao')
         return;
     }
+    startNextRound(Number(duration))
+    isCountdownActive = true;
+    remainingTime = intervalo
 
-    clearInterval(countdown);
+    console.log('paizinho')
+    duration = Number(duration);
     const timerElement = document.getElementById('timer');
+    timerElement.style.display = 'block'
     timeLeft = isPaused ? timeLeft : duration;
 
-    if (auxGameStarted === true) {
-        timeOuts.push(setTimeout(function () {
-            console.log(auxGameStarted);
-            startNextRound(duration, roundNumber);
-            timeLeft = duration;
-            timerElement.textContent = timeLeft;
-        }, intervalo));
-    } else {
-        timeLeft = duration;
-        auxGameStarted = true;
-        timerElement.textContent = timeLeft;
-    }
+    //console.log(countdown)
+    //console.log(remainingTime)
 
-    isCountdownActive = true;
     isPaused = false;
 
-    timeOuts.push(setTimeout(function () {
+    startTime = Date.now(); // Registra o momento de início
+    timeoutPause = setTimeout(function() {
+        clearInterval(countdown);
         countdown = setInterval(() => {
-            timeLeft--;
-            timerElement.textContent = timeLeft;
-            if (timeLeft <= 0) {
-                clearInterval(countdown);
+            if (timeLeft > 0) {
+                console.log(countdown);
+                console.log(timeLeft);
+                console.log(isCountdownActive);
+                timeLeft--;
+                timerElement.textContent = timeLeft;
+            } else {
                 timerElement.style.display = 'none';
-
                 isCountdownActive = false;
+                console.log(isCountdownActive)
             }
         }, 1000);
-    }, intervalo));
+    }, intervalo);    
 }
+
 
 function togglePauseResumeCountdown() {
     if (isCountdownActive) {
         if (!isPaused) {
             clearInterval(countdown);
+            clearTimeout(timeoutPause);
+            const elapsed = Date.now() - startTime;
+            remainingTime -= elapsed;
             isPaused = true;
-            console.log('Temporizador pausado');
+            isPausedContainer = true;
+            //console.log('Temporizador pausado');
         } else {
-            console.log('Retomando temporizador');
+            //console.log('Retomando temporizador');
             isPaused = false;
-            countdown = setInterval(() => {
-                timeLeft--;
-                const timerElement = document.getElementById('timer');
-                timerElement.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(countdown);
-                    timerElement.style.display = 'none';
-                    isCountdownActive = false;
-                }
-            }, 1000);
+            isPausedContainer = false;
+        
+            startTime = Date.now();
+            timeoutPause = setTimeout(() => {
+                clearInterval(countdown);
+                countdown = setInterval(() => {
+                    //console.log(countdown);
+                    //console.log(timeLeft);
+                    //console.log(isCountdownActive);
+                    timeLeft--;
+                    const timerElement = document.getElementById('timer');
+                    timerElement.textContent = timeLeft;
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        timerElement.style.display = 'none';
+                        isCountdownActive = false;
+                        console.log(isCountdownActive)
+                    }
+                }, 1000);
+            }, remainingTime);
         }
     }
 }
-
-function modifyTimer(seconds) {
-    timeLeft += seconds;
-    const timerElement = document.getElementById('timer');
-    timerElement.textContent = timeLeft;
-}
-
 function startNextRound(duration, roundNumber) {
     fetch(`/start_round/${roomId}`, {
         method: 'POST',
@@ -971,7 +976,6 @@ window.onload = () => {
     fetchPlayers();
     setInterval(fetchPlayers, 3000);
 };
-
 function startTournament(roomId) {
     if (tournamentStarted === false) {
         fetch(`/start_tournament/${roomId}`, { method: 'POST' })
@@ -1417,6 +1421,7 @@ function round1Var1() {
             }, 1000);
         }, 500);
     }
+    actualRoundAudio = audioRodada1
     audioRodada1.addEventListener('timeupdate', () => {
         const currentTime = audioRodada1.currentTime;
         audioData.forEach(item => {
@@ -1530,11 +1535,12 @@ function round2Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
+                actualRoundAudio = audioR2Var1
             }, 1000));
         }, 500));
     } else {
@@ -1552,15 +1558,15 @@ function round2Var1() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
+                actualRoundAudio = audioR2Var1
             }, 1000));
         }, 500));
     }
-    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1666,11 +1672,12 @@ function round2Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
+                actualRoundAudio = audioR2Var1
             }, 1000));
         }, 500));
     } else {
@@ -1688,15 +1695,15 @@ function round2Var2() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
-            }, 1000));
+                    actualRoundAudio = audioR2Var1
+                }, 1000));
         }, 500));
     }
-    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1810,11 +1817,12 @@ function round2Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
+                actualRoundAudio = audioR2Var1
             }, 1000));
         }, 500));
     } else {
@@ -1832,15 +1840,15 @@ function round2Var3() {
             whistleDown.play();
             timeOuts.push(setTimeout(function() {
                 soundTrackR1.remove();
-                audioRodada1.remove();
+                actualRoundAudio.remove();
                 if (audioPlaybackSupport === '1') {
                     soundTrackR2.play();
                 }
                 audioR2Var1.play();
+                actualRoundAudio = audioR2Var1
             }, 1000));
         }, 500));
     }
-    actualRoundAudio = audioR2Var1
     setTimeout(function() {
         audioR2Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR2Var1.currentTime;
@@ -1949,6 +1957,7 @@ function round3Var1() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     } else {
@@ -1971,10 +1980,10 @@ function round3Var1() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     }
-    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2084,6 +2093,7 @@ function round3Var2() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     } else {
@@ -2106,11 +2116,10 @@ function round3Var2() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     }
-
-    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2222,6 +2231,7 @@ function round3Var3() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     } else {
@@ -2244,11 +2254,10 @@ function round3Var3() {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
+                actualRoundAudio = audioR3Var1
             }, 1000));
         }, 500));
     }
-
-    actualRoundAudio = audioR3Var1
     setTimeout(function() {
         audioR3Var1.addEventListener('timeupdate', () => {
             const currentTime = audioR3Var1.currentTime;
@@ -2350,6 +2359,7 @@ function round4Var1() {
                     soundTrackR4.play();
                 }
                 audioR4.play();
+                actualRoundAudio = audioR4
             }, 1000));
         }, 500));
     } else {
@@ -2372,10 +2382,10 @@ function round4Var1() {
                     soundTrackR4.play();
                 }
                 audioR4.play();
+                actualRoundAudio = audioR4
             }, 1000));
         }, 500));
     }
-    actualRoundAudio = audioR4
     setTimeout(function() {
         audioR4.addEventListener('timeupdate', () => {
             const currentTime = audioR4.currentTime;

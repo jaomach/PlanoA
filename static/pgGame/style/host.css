@@ -951,8 +951,9 @@ h1 {
    background-position: bottom;
    filter: blur(2px);
    opacity: 0.92;
-   height: 151px;
+   height: 100%;
    width: 100%;
+   pointer-events: none;
    bottom: 0;
    z-index: 1;
 }
