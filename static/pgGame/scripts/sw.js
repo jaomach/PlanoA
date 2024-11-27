@@ -5,6 +5,7 @@ self.addEventListener('install', (event) => {
           '/static/images/plaquinha.png',
           '/static/images/LOGO.png',
           '/static/pgGame/style/host.css',
+          '/static/images/logoAnimada.webm ',
         ]);
       })
     );
@@ -14,7 +15,6 @@ self.addEventListener('install', (event) => {
     event.respondWith(
       caches.match(event.request).then((response) => {
         return response || fetch(event.request).then((response) => {
-          // Cache the fetched resource if it's not already cached
           return caches.open('video-cache').then((cache) => {
             cache.put(event.request, response.clone());
             return response;

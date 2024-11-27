@@ -105,6 +105,27 @@
             socketId = socket.id;
         });
 
+        function checkPlayedRecently() {
+            const jaJogou = new URLSearchParams(window.location.search).get('played');
+    
+            if (jaJogou === '1') {
+                document.body.style.display = 'flex';
+                const transitionScreen = document.createElement('div')
+                transitionScreen.classList.add('message-screen-reverse')
+                document.body.appendChild(transitionScreen)
+                setTimeout(function() {
+                    transitionScreen.remove()
+                },800)
+                return
+            } else {
+                document.body.style.display = 'flex';
+                return
+            }
+    
+        }
+        
+        checkPlayedRecently()
+
         function joinRoom() {
             window.location.href = '/join'
         }
@@ -138,7 +159,14 @@
                 else if (data.room_id !== undefined) {
                     const roomId = data.room_id;
                     socket.disconnect()
-                    window.location.href = `/host/${roomId}`;
+                    setTimeout(function() {
+                        window.location.reload();
+                        window.location.href = `/host/${roomId}`;
+                    }, 1000)
+                    const transitionScreen = document.createElement('div')
+                    transitionScreen.classList.add('message-screen')
+                    transitionScreen.innerHTML = `<video class="loading-screen-img" src="/static/images/logoAnimada.webm" alt="">`
+                    document.body.appendChild(transitionScreen)
                 } 
                 else {
                     console.error('Erro: Não foi possível criar a sala ou adicionar à fila');
@@ -156,7 +184,14 @@
             socket.on('room_created', function(data) {
                 if (data.socket_id === socketId) {
                     const roomId = data.room_id;
-                    window.location.href = `/host/${roomId}`; // Redireciona para a sala
+                    setTimeout(function() {
+                        window.location.reload();
+                        window.location.href = `/host/${roomId}`;
+                    }, 1000)
+                    const transitionScreen = document.createElement('div')
+                    transitionScreen.classList.add('message-screen')
+                    transitionScreen.innerHTML = `<video class="loading-screen-img" src="/static/images/logoAnimada.webm" alt="">`
+                    document.body.appendChild(transitionScreen)                
                 } else {
                     createRoom()
                 }

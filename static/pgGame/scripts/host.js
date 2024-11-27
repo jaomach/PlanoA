@@ -1,29 +1,30 @@
-let countdown;
-let timeLeft;
+let countdown
+let timeLeft
 let roundVar
-let round1 = true;
-let round2 = false;
-let round3 = false;
-let round4 = false;
-let round5 = false;
-let handleRound2 = false;
-let handleRound3 = false;
-let handleRound4 = false;
-let handleRound5 = false;
-let currentMatchupIndex = 0;
-let gameStarted = false;
-let auxGameStarted = false;
-let matchups = [];
-let winners = [];
-let roundsHandled = {};
-let currentRound = 6;
+let round1 = true
+let round2 = false
+let round3 = false
+let round4 = false
+let round5 = false
+let handleRound2 = false
+let handleRound3 = false
+let handleRound4 = false
+let handleRound5 = false
+let actualRoundDuration
+let currentMatchupIndex = 0
+let gameStarted = false
+let auxGameStarted = false
+let matchups = []
+let winners = []
+let roundsHandled = {}
+let currentRound = 6
 let actualPlayer1 = ''
 let actualPlayer2 = ''
 let quality = localStorage.getItem('pc-gm-qual')
 let timeOuts = []
-let timeoutPause;
-let startTime;
-let remainingTime; // Inicia com o valor total do intervalo
+let timeoutPause
+let startTime
+let remainingTime
 let roundTimes = {
     round1Time: 240,
     round2Time: 120,
@@ -38,9 +39,9 @@ let optionsActive = false
 let gameWinner
 gameMenuListening = false
 let audioData
-let isCountdownActive = false;
-let isPaused = false;
-let isPausedContainer = false;
+let isCountdownActive = false
+let isPaused = false
+let isPausedContainer = false
 let finalScreenDisable = false
 let actualIsSolo = false
 let mobileUser = false
@@ -421,12 +422,11 @@ document.addEventListener('keydown', function(event) {
 });
 document.addEventListener('keydown', function(event) {
     if (event.key === '3' && !gameStarted) {
+        actualRoundAudio = document.getElementById('soundTrackR2')
         round1 = false;
         round2 = true;
-        timeLeft = 0;
         handleRound2 = true;
         round3 = true;
-        timeLeft = 0;
         handleRound3 = true;
         roundCallRandom(round4Var1, round4Var1, round4Var1)
         socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
@@ -534,7 +534,9 @@ for (const [playerId, playerData] of Object.entries(data.players)) {
         const playerDel = document.createElement('button');
         playerItem.classList.add('fodao');
         playerSign.classList.add('sign');
+        playerDel.classList.add('primary-btn');
         playerDel.classList.add('player-del-btn');
+        playerDel.innerHTML = 'Remover Jogador'
         playerDel.setAttribute('onclick', `removePlayer('${playerId}')`)
         playerItem.id = playerId;
         playerSign.appendChild(playerItem);
@@ -614,13 +616,16 @@ if (timeLeft === 0 && data.current_round === 4 && handleRound4 === false) {
     timeLeft = 0;
     processVotes(data);
     if (actualIsSolo===true) {
-        startCountdown(30, 1000);
+        isCountdownActive = false
+        startCountdown(30, 2000);
         console.log('piroquinha')
     } else {
-        startCountdown(30, 8000);
+        isCountdownActive = false
+        startCountdown(30, 12000);
         setTimeout(function() {
             document.getElementById('papaleguas').classList.remove('appear')
         }, 5000)
+        console.log('proximo round')
     }
     document.getElementById('timerContainer').classList.remove('appear')
     actualIsSolo = false
@@ -638,16 +643,20 @@ if (timeLeft === 0 && data.current_round === 5 && handleRound5 === false) {
     if (!gameWinner) {
         processVotes(data);
         if (actualIsSolo===true) {
-            startCountdown(30, 1000);
+            isCountdownActive = false
+            startCountdown(30, 2000);
             console.log('piroquinha')
         } else {
-            startCountdown(30, 8000);
+            isCountdownActive = false
+            startCountdown(30, 12000);
             setTimeout(function() {
                 document.getElementById('papaleguas').classList.remove('appear')
             }, 5000)
         }
     } else {
+        isCountdownActive = true;
         startCountdown(90, 8000);
+        document.getElementById('timerContainer').remove()
     }
     document.getElementById('timerContainer').classList.remove('appear')
     actualIsSolo = false
@@ -661,16 +670,20 @@ if (data.current_round >= 6) {
         if (!gameWinner) {
             processVotes(data);
             if (actualIsSolo===true) {
-                startCountdown(30, 1000);
+                isCountdownActive = false
+                startCountdown(30, 2000);
                 console.log('piroquinha')
             } else {
-                startCountdown(30, 8000);
+                isCountdownActive = false
+                startCountdown(30, 12000);
                 setTimeout(function() {
                     document.getElementById('papaleguas').classList.remove('appear')
                 }, 5000)
             }
         } else {
+            isCountdownActive = true;
             startCountdown(90, 8000);
+            document.getElementById('timerContainer').remove()
         }
         document.getElementById('timerContainer').classList.remove('appear')
         actualIsSolo = false
@@ -875,43 +888,52 @@ function startGame() {
     });
 }
 
-function startCountdown(duration, intervalo, roundNumber) {
-    if (isCountdownActive && !isPaused) {
+function startCountdown(duration, intervalo, roundNum) {
+    if (!roundNum) {
+        roundNum = null
+    }
+    if (isCountdownActive === true) {
         console.log('paizao')
         return;
     }
-    startNextRound(Number(duration))
+    clearTimeout(timeoutPause);
+    clearInterval(countdown);
     isCountdownActive = true;
     remainingTime = intervalo
+    actualRoundDuration = duration
 
     console.log('paizinho')
     duration = Number(duration);
+    intervalo = Number(intervalo);
     const timerElement = document.getElementById('timer');
-    timerElement.style.display = 'block'
     timeLeft = isPaused ? timeLeft : duration;
-
+    
     //console.log(countdown)
     //console.log(remainingTime)
-
+    
     isPaused = false;
-
+    
     startTime = Date.now(); // Registra o momento de início
     timeoutPause = setTimeout(function() {
-        clearInterval(countdown);
+        startNextRound(Number(duration), roundNum)
+        console.log('intervalo excedido')
+        timerElement.style.display = 'block'
         countdown = setInterval(() => {
             if (timeLeft > 0) {
-                console.log(countdown);
                 console.log(timeLeft);
                 console.log(isCountdownActive);
                 timeLeft--;
                 timerElement.textContent = timeLeft;
             } else {
+                clearInterval(countdown);
                 timerElement.style.display = 'none';
                 isCountdownActive = false;
-                console.log(isCountdownActive)
+                return
             }
         }, 1000);
-    }, intervalo);    
+    }, intervalo);
+    console.log(intervalo)
+    console.log(timeoutPause)
 }
 
 
@@ -932,11 +954,12 @@ function togglePauseResumeCountdown() {
         
             startTime = Date.now();
             timeoutPause = setTimeout(() => {
+                startNextRound(Number(actualRoundDuration))
                 clearInterval(countdown);
                 countdown = setInterval(() => {
-                    //console.log(countdown);
-                    //console.log(timeLeft);
-                    //console.log(isCountdownActive);
+                    /*console.log(countdown);
+                    console.log(timeLeft);
+                    console.log(isCountdownActive);*/
                     timeLeft--;
                     const timerElement = document.getElementById('timer');
                     timerElement.textContent = timeLeft;
@@ -1976,7 +1999,7 @@ function round3Var1() {
             timeOuts.push(setTimeout(function() {
                 soundTrackR2.remove();
                 actualRoundAudio.remove();
-                if (audioPlaybackSupport == '1') {
+                if (audioPlaybackSupport === '1') {
                     soundTrackR3.play();
                 }
                 audioR3Var1.play();
@@ -2296,6 +2319,7 @@ function round3Var3() {
 }
 
 function round4Var1() {
+    let timeOutOcorrendo = false
     timeOuts.length = 0;
     roundVar = 1
     socket.emit('message', { message: 'Round 3 finished', room_id: roomId });
@@ -2419,13 +2443,18 @@ function round4Var1() {
                         if (item.src) {
                             targetElement.src = item.src;
                         }
-                        if (item.timeOut) {
-                            timeOuts.push(setTimeout(function() {
-                                fetchMatchups();
-                            }, 1000));
-                            timeOuts.push(setTimeout(function() {
-                                document.getElementById('papaleguas').classList.add('appear')
-                            }, 2000));
+                        if (item.timeOut) {                            
+                            if (timeOutOcorrendo === false) {
+                                timeOuts.push(setTimeout(function() {
+                                    fetchMatchups();
+                                }, 1000));
+                                timeOuts.push(setTimeout(function() {
+                                    document.getElementById('papaleguas').classList.add('appear')
+                                }, 2000));
+                                timeOutOcorrendo = true
+                            } else {
+                                console.log('multiplos timeouts ocorrendo, apenas um ficará')
+                            }
                         }
                     }
                 }
@@ -2597,8 +2626,7 @@ function roundFinal() {
         finalScreen.classList.add('show')
 
         finalScreen.innerHTML = `
-        <button class="final-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
-        <img id="finalLogo" src="/static/images/index/planoA.png" alt="">
+        <button class="primary-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
         `
         document.body.appendChild(finalScreen)
     }, 90000));
@@ -2678,7 +2706,7 @@ function skipRound(roundNum) {
         finalScreen.classList.add('show')
 
         finalScreen.innerHTML = `
-        <img src="/static/images/LOGO.png" class="loading-screen-img"></img>
+        <img src="/static/images/logoAnimado.png" class="loading-screen-img"></img>
         <button class="final-btn" onclick="createRoom()" id="newGameBtn">Jogar Novamente</button>
         <button class="final-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
         <img id="finalLogo" src="/static/images/index/planoA.png" alt="">
@@ -2852,12 +2880,12 @@ async function checkAudioPlaybackSupport() {
 }
 
 
-function showLoadingScreen(interval) {
+function showLoadingScreen() {
     const loadingScreen = document.getElementById('loadingScreen')
     loadingScreen.classList.add('skip')
     setTimeout(function(){
         loadingScreen.remove()
-    }, 1000)
+    }, 4000)
 }
 
 verifyQuality()
@@ -2904,5 +2932,5 @@ function createRoom() {
 }
 
 function backToBox() {
-    window.location.href = `/`;
+    window.location.href = `/box?played=1`;
 }
