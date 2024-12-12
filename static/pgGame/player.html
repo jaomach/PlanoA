@@ -24,27 +24,6 @@
             <span class="message-screen-span">De olho!</span>
             <p class="message-screen-p">Fique de olho na tela do host para receber as informações necessárias dos rounds.</p>
         </div>
-        <div class="message-screen" id="oopsMessage" style="display: none;">
-            <span class="message-screen-span">Oops!</span>
-            <p class="message-screen-p">Parece que você perdeu o fio da meada, a partida já está rolando...</p>
-            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
-        </div>
-        <div class="message-screen" id="oopsHostMessage" style="display: none;">
-            <span class="message-screen-span">Oops!</span>
-            <p class="message-screen-p">Parece que o host se desconectou, aguarde um host se conectar novamente...</p>
-            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
-        </div>
-        <div class="message-screen" id="roundErrorMessage" style="display: none;">
-            <span class="message-screen-span">Perdão...</span>
-            <p class="message-screen-p">Infelizmente não foi possivel reconectar ao jogo.</p>
-            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
-        </div>
-        <div class="message-screen" id="kickMessage" style="display: none;">
-            <span class="message-screen-span">Vish...</span>
-            <p class="message-screen-p">O host da sala optou por te expulsar, você será redirecionado à caixa em instantes.</p>
-            <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
-            
-        </div>
         <div id="userSelect" style="display: flex;">
             <swiper-container class="swiper-container" navigation="true">
                 <swiper-slide>
@@ -133,7 +112,7 @@
     <div id="round2">
         <div id="phraseInput" style="display: none;">
             <div class="menu-part">
-                <div class="categories-element phrases"><span>Escreva Frases</span></div>
+                <div class="categories-element phrases"><span id="phraseLegenda">Escreva Frases 0/4</span></div>
             </div>
             <form id="phraseForm">
                 <div class="categories-container phrases">

@@ -14,6 +14,7 @@ let selectedWinnerId = null;
 let actualUsername
 let fillMode = false;
 let soloAux = 10
+let errored = false
 
 console.log('Connecting to server with roomId:', roomId);
 var socket = io({ query: { roomId: roomId } });
@@ -81,6 +82,10 @@ socket.on('message', function(data) {
     if (data.msg === 'Tournament advanced') {
         fetchMatchups()
     }
+    if (data.msg === 'Tournament finished') {
+        document.getElementById('round4').style.display = 'none'
+        socket.disconnect()
+    }
     if (data.msg === 'Last round finished') {
         document.getElementById('round4').style.display = 'none'
     }
@@ -102,7 +107,7 @@ socket.on('message', function(data) {
     const contemHostEJoined = data.msg.includes('Host') && data.msg.includes('joined');
 
     if (contemHostELeft) {
-        document.getElementById('oopsHostMessage').style.display = 'flex'
+        showMessage('Oops!', 'Parece que o host se desconectou, aguarde um host se conectar novamente...')
     } else if (contemHostEJoined) {
         document.getElementById('oopsHostMessage').style.display = 'none'
     }
@@ -113,12 +118,30 @@ socket.on('update_players', function(data) {
     if (!usernameExists) {
         socket.disconnect()
         localStorage.setItem('room', '')
-        document.getElementById('kickMessage').style.display = 'flex'
+        showMessage('Vish...', 'O host da sala optou por te expulsar, você será redirecionado à caixa em instantes.')
         setTimeout(function() {
             backToBox()
         }, 5000)
     }
 })
+
+function showMessage(titulo, mensagem, botao) {
+    errored = true
+    const messageScreen = document.createElement('div')
+    const body = document.body
+    messageScreen.style.display = 'flex'
+    messageScreen.style.order = '-1'
+    messageScreen.classList.add('message-screen')
+    if (!botao) {
+        botao = 'Voltar à Caixa'
+    }
+    messageScreen.innerHTML = `
+            <span class="message-screen-span">${titulo}</span>
+            <p class="message-screen-p">${mensagem}</p>
+            <button onclick="backToBox()" class="primary-btn">${botao}</button>
+            `
+    body.appendChild(messageScreen)
+}
 
 function checkGameStatus() {
     fetch(`/room_status/${roomId}`)
@@ -131,14 +154,14 @@ function checkGameStatus() {
 
             if (!data.players[playerId]) {
                 document.getElementById('userSelect').style.display = 'none'
-                document.getElementById('oopsMessage').style.display = 'flex'
+                showMessage('Oops...', 'Parece que você perdedu o fio da meada, a partida já está rolando.')
                 socket.disconnect()
                 return
             }
             gameStarted = true;
         }
         if (data.current_round === 1 && data.remaining_time > 0) {
-            document.getElementById('userSelect').style.display = 'none'
+            document.getElementById('userSelect').remove()
             document.getElementById('waitingMessage').style.display = 'none';
             document.getElementById('drawingArea').style.display = 'flex';
             const drawingCheck = localStorage.getItem('drawings')
@@ -149,7 +172,7 @@ function checkGameStatus() {
             initializeCanvas();
         }
         if (data.current_round === 1 && data.remaining_time === 0) {
-            document.getElementById('drawingArea').style.display = 'none';
+            document.getElementById('drawingArea').remove()
             document.getElementById('waitingMessage').style.display = 'flex';
         }
         if (data.current_round === 2 && data.remaining_time > 0) {
@@ -158,13 +181,13 @@ function checkGameStatus() {
             document.getElementById('phraseInput').style.display = 'flex';
         }
         if (data.current_round === 2 && data.remaining_time === 0) {
-            document.getElementById('phraseInput').style.display = 'none';
+            document.getElementById('phraseInput').remove();
             document.getElementById('waitingMessage').style.display = 'flex';
         }
         if (data.current_round > 2) {
             document.getElementById('userSelect').style.display = 'none'
             document.getElementById('waitingMessage').style.display = 'none';
-            document.getElementById('roundErrorMessage').style.display = 'flex';
+            showMessage('Perdão...', 'Infelizmente não foi possível reconectar ao jogo.')
             socket.disconnect()
         }
     })
@@ -175,11 +198,11 @@ function checkGameStatus() {
 
 
 window.addEventListener('beforeunload', function (event) {
-    // Define a mensagem a ser exibida no alerta
+    if (errored) {
+        return
+    }
     const message = 'Tem certeza de que deseja sair da página? As alterações não salvas serão perdidas.';
     
-    // Alguns navegadores modernos ignoram a customização da mensagem,
-    // mas ainda assim exibem um alerta padrão de confirmação
     event.returnValue = message; // Definido para compatibilidade com alguns navegadores
     return message; // Para outros navegadores que utilizam essa forma
 });
@@ -197,9 +220,10 @@ window.onload = () => {
 
     if (savedRoom === roomId) {
         if (playerId && username) {
-        joinRoom(playerId, username, character)
+            joinRoom(playerId, username, character)
     } else {
         if (!playerId) {
+            return
         }
     }
     }
@@ -212,7 +236,6 @@ function saveUsername(){
     const character = document.querySelector('.swiper-slide-active').querySelectorAll('span').forEach(element => {
         characterNew = element.innerHTML
     });
-
 
     localStorage.setItem('username', username);
     localStorage.setItem('room', roomId);
@@ -231,7 +254,6 @@ function joinRoom(playerId, username, character) {
     .then(data => {
         if (data.message === 'Player added' || data.message === 'Rejoining...') {
             console.log('Token:', data.token); // O token é o próprio playerId
-            console.log(data.message);
 
             localStorage.setItem('playerId', data.token);
             localStorage.setItem('username', username);
@@ -556,13 +578,17 @@ function submitPhrase() {
 
                 if (phraseCounter < 3) {
                     phraseCounter += 1
-                    console.log(phraseCounter)
+                    document.getElementById('phraseLegenda').innerHTML = `Escreva Frases ${phraseCounter}/4`
                 } else {
                     document.getElementById('round2').style.display = 'none';
                     document.getElementById('waitingMessage').style.display = 'flex';
                     socket.emit('message', {message: playerId, room_id: roomId });
                 }
                 document.getElementById('phrase').value = '';
+            } else {
+                document.getElementById('round2').style.display = 'none';
+                document.getElementById('waitingMessage').style.display = 'flex';
+                socket.emit('message', {message: playerId, room_id: roomId });
             }
         })
         .catch(error => {
@@ -650,6 +676,7 @@ function combineSelection() {
         })
         .then(response => response.json())
         .then(data => {
+            socket.emit('message', {message: playerId, room_id: roomId });
             if (data.message === 'Combination saved successfully') {
                 alert('Combinação enviada com sucesso!');
             }
@@ -765,7 +792,6 @@ function sendVote() {
            vote: vote
        };
     
-       // enviar os dados para o servidor usando fetch
        fetch('/vote', {
            method: 'POST',
            body: JSON.stringify(data),
@@ -782,7 +808,7 @@ function sendVote() {
        });
    } else {
        alert('Please select a winner before proceeding.');
-       return; // Adicione um retorno aqui para evitar continuar a função sem um vencedor selecionado.
+       return;
    }
 }
 

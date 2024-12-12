@@ -607,6 +607,7 @@ a:hover .icon-a {fill: var(--primary-bg-color);}
     }
     #lateralMenu {
         height: 100%;
+        width: 80vw;
         overflow: scroll;
     }
     #logo {

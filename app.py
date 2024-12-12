@@ -50,12 +50,20 @@ rooms = {
         },
         'phrases': [
             {'player_id': 'player1', 'phrase': 'Phrase 1 from player 1', 'timestamp': time.time()},
-            {'player_id': 'player2', 'phrase': 'Phrase 1 from player 2', 'timestamp': time.time()},
-            {'player_id': 'player3', 'phrase': 'Phrase 1 from player 3', 'timestamp': time.time()},
-            {'player_id': 'player4', 'phrase': 'Phrase 1 from player 4', 'timestamp': time.time()},
+            {'player_id': 'player1', 'phrase': 'Phrase 1 from player 1', 'timestamp': time.time()},
             {'player_id': 'player1', 'phrase': 'Phrase 2 from player 1', 'timestamp': time.time()},
+            {'player_id': 'player1', 'phrase': 'Phrase 2 from player 1', 'timestamp': time.time()},
+            {'player_id': 'player2', 'phrase': 'Phrase 1 from player 2', 'timestamp': time.time()},
+            {'player_id': 'player2', 'phrase': 'Phrase 1 from player 2', 'timestamp': time.time()},
             {'player_id': 'player2', 'phrase': 'Phrase 2 from player 2', 'timestamp': time.time()},
+            {'player_id': 'player2', 'phrase': 'Phrase 2 from player 2', 'timestamp': time.time()},
+            {'player_id': 'player3', 'phrase': 'Phrase 1 from player 3', 'timestamp': time.time()},
             {'player_id': 'player3', 'phrase': 'Phrase 2 from player 3', 'timestamp': time.time()},
+            {'player_id': 'player3', 'phrase': 'Phrase 2 from player 3', 'timestamp': time.time()},
+            {'player_id': '317iZgZab5m5', 'phrase': 'Phrase 1 from 317iZgZab5m5', 'timestamp': time.time()},
+            {'player_id': '317iZgZab5m5', 'phrase': 'Phrase 1 from 317iZgZab5m5', 'timestamp': time.time()},
+            {'player_id': '317iZgZab5m5', 'phrase': 'Phrase 2 from 317iZgZab5m5', 'timestamp': time.time()},
+            {'player_id': '317iZgZab5m5', 'phrase': 'Phrase 2 from 317iZgZab5m5', 'timestamp': time.time()},
         ]
     }
 }
@@ -385,17 +393,23 @@ def distribute_drawing(room_id):
         
         while len(assignments[player_id]) < min_assignments and available_drawings:
             drawing = available_drawings.pop()
-            assignments[player_id].append(drawing['image_path'])
-            remaining_drawings.remove(drawing)
+            # Verificar se o jogador já tem esse desenho
+            if drawing['image_path'] not in assignments[player_id]:
+                assignments[player_id].append(drawing['image_path'])
+                remaining_drawings.remove(drawing)
 
     # Redistribuir os desenhos restantes
     for player_id in players:
         available_drawings = [drawing for drawing in remaining_drawings if drawing['player_id'] != player_id]
         random.shuffle(available_drawings)
         
-        while len(assignments[player_id]) < 4 and available_drawings:
-            drawing = available_drawings.pop()
+    assigned_drawings = set(assignments[player_id])  # Converte a lista de desenhos atribuídos para um set
+
+    while len(assignments[player_id]) < 4 and available_drawings:
+        drawing = available_drawings.pop()
+        if drawing['image_path'] not in assigned_drawings:
             assignments[player_id].append(drawing['image_path'])
+            assigned_drawings.add(drawing['image_path'])  # Adiciona ao set para futuras verificações
             remaining_drawings.remove(drawing)
     
     # Gera URLs para acessar as imagens distribuídas
@@ -411,37 +425,29 @@ def distribute_phrases(room_id):
     
     players = list(rooms[room_id]['players'].keys())
     phrases = rooms[room_id]['phrases']
-    
+
+    numPlayers = len(players)
+
     random.shuffle(players)
     random.shuffle(phrases)
-    
-    assignments = {player_id: [] for player_id in players}
-    remaining_phrases = phrases[:]
-    
-    # Primeiro, garante que todos recebem o número mínimo de frases
-    min_assignments = len(phrases) // len(players)
-    
-    # Distribuir o mínimo de frases para cada jogador
-    for player_id in players:
-        available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
-        random.shuffle(available_phrases)
-        
-        while len(assignments[player_id]) < min_assignments and available_phrases:
-            phrase = available_phrases.pop()
-            assignments[player_id].append(phrase['phrase'])
-            remaining_phrases.remove(phrase)
 
-    # Redistribuir as frases restantes
-    for player_id in players:
-        available_phrases = [phrase for phrase in remaining_phrases if phrase['player_id'] != player_id]
-        random.shuffle(available_phrases)
-        
-        while len(assignments[player_id]) < 4 and available_phrases:
-            phrase = available_phrases.pop()
-            assignments[player_id].append(phrase['phrase'])
-            remaining_phrases.remove(phrase)
+    assignments = {player_id: [] for player_id in players}
+
+    phrase_index = 0
+    for phrase in phrases:
+        assigned = False
+
+        while not assigned:
+            player_id = players[phrase_index % numPlayers]
+            phrase_index += 1
+
+            if phrase["player_id"] != player_id and len(assignments[player_id]) < 4:  # Garante que o jogador não pegue sua própria frase e não tenha mais de 2 frases
+                phraseText = phrase["phrase"]  # Agora estamos pegando o texto da frase
+                assignments[player_id].append(phraseText)
+                assigned = True
 
     return jsonify(assignments)
+
 
 @app.route('/uploads/<filename>')
 def get_image(filename):
@@ -564,23 +570,31 @@ def handle_connect():
     print('Client connected:', request.sid)
 
 def remove_room(room_id):
-    """Função que remove a sala após o timeout de inatividade."""
     if room_id in inactive_rooms:
         # Remover a sala de inactive_rooms
         del inactive_rooms[room_id]
         print(f'Sala {room_id} foi removida da lista de inatividade.')
 
-        # Remover a sala de rooms, se ela existir
-        if room_id in rooms:
-            del rooms[room_id]
-            print(f'Sala {room_id} foi deletada do dicionário principal de salas.')
+    # Remover a sala de rooms, se ela existir
+    if room_id in rooms:
+        room = rooms[room_id]
 
-            # Emitir uma mensagem para todos na sala, informando que foi deletada
-            socketio.emit('message', {'msg': f'Sala {room_id} foi removida por inatividade.'}, room=room_id)
-        else:
-            print(f'Sala {room_id} não existe em rooms.')
+        for key, value in room.items():
+            if isinstance(value, list):  # Verifica se o valor é uma lista
+                for image_path in value:
+                    if os.path.exists(image_path):  # Verificar se o arquivo existe antes de tentar deletar
+                        try:
+                            os.remove(image_path)
+                        except Exception as e:
+                            print(f'Erro ao deletar imagem {image_path}: {e}')
 
-    # Chama o gerenciador de filas após remover a sala
+        del rooms[room_id]
+        print(f'Sala {room_id} foi deletada do dicionário principal de salas.')
+
+        socketio.emit('message', {'msg': f'Sala {room_id} foi removida por inatividade.'}, room=room_id)
+    else:
+        print(f'Sala {room_id} não existe em rooms.')
+
     queue_manager()
 
 @socketio.on('disconnect')

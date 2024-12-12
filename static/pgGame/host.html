@@ -11,15 +11,25 @@
 </head>
 <body id="body">
     <div class="message-screen" id="loadingScreen">
-        <video autoplay class="loading-screen-img" src="/static/images/logoAnimada.webm" alt="">
+        <video autoplay muted class="loading-screen-img" src="/static/images/logoAnimada.webm" alt="">
         <span>Carregando...</span>
     </div>
     <div class="message-screen" id="oopsMessage" style="display: none;">
-        <span class="message-screen-span">Oops!</span>
-        <p class="message-screen-p">Parece que você perdeu o fio da meada, a partida já está rolando...</p>
-        <button onclick="backToBox()" class="primary-btn">Voltar à Caixa</button>
+        <div class="menu-part warning pc">
+            <div class="categories-element"><span>Aviso</span></div>
+            <div class="categories-container warning">
+                <div class="element-container warning">
+                    <span>Ooops... Parece que o jogo já está rolando.</span> 
+                </div>
+                <button class="primary-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
+            </div>
+        </div>
     </div>
     <div id="effectContainer" class="effects-container"></div>
+    <div id="emissoraContainer">
+        <img id="emissoraLogo" src="/static/images/planetaLogo.svg" alt="" srcset="">
+        <span id="emissoraSpan">Closed Caption</span>
+    </div>
     <div id="circle"></div>
     <div id="circleLow"></div>
     <div id="roundContainer"></div>
@@ -164,6 +174,12 @@
         <span id="errorMsg"></span>
     </div>
 
+    <div class="caption-container active" id="subtitles"></div>
+
+    <audio id="audioTest1" muted src="/static/pgGame/audios/r1/soundTrackR1.mp3" type="audio/mpeg"></audio>
+    <audio id="audioTest2" muted src="/static/pgGame/audios/r1/soundTrackR1.mp3" type="audio/mpeg"></audio>
+
+
     <audio id="audioR1" src="/static/pgGame/audios/r1/narradorR1.mp3" type="audio/mpeg"></audio>
     <audio id="audioR2" src="" type="audio/mpeg"></audio>
     <audio id="audioR3" src="" type="audio/mpeg"></audio>
@@ -180,7 +196,6 @@
     <audio id="soundTrackR2" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR3" src="" type="audio/mpeg"></audio>
     <audio id="soundTrackR4" src="/static/pgGame/audios/r4/soundTrackR4.mp3" type="audio/mpeg"></audio>
-    <div class="caption-container active" id="subtitles"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>

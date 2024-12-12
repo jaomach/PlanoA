@@ -37,7 +37,7 @@ let round3Time = 90
 let round4Time = 35
 let optionsActive = false
 let gameWinner
-gameMenuListening = false
+let gameMenuListening = false
 let audioData
 let isCountdownActive = false
 let isPaused = false
@@ -48,6 +48,9 @@ let mobileUser = false
 let tournamentStarted = false
 let audioPlaybackSupport
 let actualRoundAudio
+let inTimeoutPause
+let numberOfPlayers
+let playersFinished = 0
 if (quality) {
     audioPlaybackSupport = obterDigito(quality, 3)
 }
@@ -495,6 +498,10 @@ if (mobileUser === false) {
     
             if (container) {
                 container.classList.remove('in-game');
+                playersFinished = playersFinished+1
+                if (playersFinished === numberOfPlayers) {
+                    timeLeft = 0
+                }
             }
         }
     });
@@ -518,6 +525,8 @@ const playerList = document.getElementById('playerList');
 for (const [playerId, playerData] of Object.entries(data.players)) {
     let playerContainer = document.getElementById(`container-${playerId}`);
     let playerImage, playerItem;
+
+    numberOfPlayers = Object.keys(data.players).length;
 
     if (!playerContainer) {
         let playerContainer = document.createElement('div');
@@ -707,6 +716,24 @@ function removePlayer(playerId) {
     socket.emit('remove_player', { room_id: roomId, player_id: playerId });
 }
 
+function animateEmissora() {
+    const emissoraContainer = document.getElementById('emissoraContainer')
+    const emissoraLogo = document.getElementById('emissoraLogo')
+    const emissoraSpan = document.getElementById('emissoraSpan')
+
+    emissoraSpan.innerText = 'Closed Caption'
+
+    emissoraContainer.classList.add('active')
+    emissoraLogo.classList.add('active')
+    emissoraSpan.classList.add('active')
+    console.log('fechouu')
+    setTimeout(function() {
+        emissoraContainer.classList.remove('active')
+        emissoraLogo.classList.remove('active')
+        emissoraSpan.classList.remove('active')
+    }, 5000)
+}
+
 function showOptions(){
     if (!reportActive) {
         const menu = document.getElementById('lateralMenu')
@@ -874,18 +901,26 @@ function startGame() {
             });
             document.getElementById('idContainer').remove()
         } else {
-            const errorMsg = document.getElementById('errorMsg')
-            const errorContainer = document.getElementById('errorContainer')
-            errorMsg.innerText = `${data.message}`
-            errorContainer.classList.add('appear')
-            setTimeout(function(){
-                errorContainer.classList.remove('appear')
-            }, 9000)
+            showMessage(data.message)
         }
     })
     .catch(error => {
         console.error('Error:', error);
     });
+}
+
+function showMessage(text, time) {
+    const errorMsg = document.getElementById('errorMsg')
+    const errorContainer = document.getElementById('errorContainer')
+    errorMsg.innerText = `${text}`
+    errorContainer.classList.add('appear')
+    if (!time) {
+        time = 9000
+    }
+
+    setTimeout(function(){
+        errorContainer.classList.remove('appear')
+    }, time)
 }
 
 function startCountdown(duration, intervalo, roundNum) {
@@ -899,6 +934,7 @@ function startCountdown(duration, intervalo, roundNum) {
     clearTimeout(timeoutPause);
     clearInterval(countdown);
     isCountdownActive = true;
+    inTimeoutPause = true
     remainingTime = intervalo
     actualRoundDuration = duration
 
@@ -915,7 +951,10 @@ function startCountdown(duration, intervalo, roundNum) {
     
     startTime = Date.now(); // Registra o momento de início
     timeoutPause = setTimeout(function() {
-        startNextRound(Number(duration), roundNum)
+        if (inTimeoutPause) {
+            startNextRound(Number(duration), roundNum)
+        }
+        inTimeoutPause = false
         console.log('intervalo excedido')
         timerElement.style.display = 'block'
         countdown = setInterval(() => {
@@ -951,10 +990,13 @@ function togglePauseResumeCountdown() {
             //console.log('Retomando temporizador');
             isPaused = false;
             isPausedContainer = false;
-        
+            
             startTime = Date.now();
             timeoutPause = setTimeout(() => {
-                startNextRound(Number(actualRoundDuration))
+                if (inTimeoutPause) {
+                    startNextRound(Number(actualRoundDuration))
+                }
+                inTimeoutPause = false
                 clearInterval(countdown);
                 countdown = setInterval(() => {
                     /*console.log(countdown);
@@ -989,6 +1031,7 @@ function startNextRound(duration, roundNumber) {
     .then(data => {
         if (data.message === 'Round started') {
             document.getElementById('timer').style.display = 'block';
+            playersFinished = 0
         }
     })
     .catch(error => {
@@ -998,6 +1041,7 @@ function startNextRound(duration, roundNumber) {
 window.onload = () => {
     fetchPlayers();
     setInterval(fetchPlayers, 3000);
+    setInterval(animateEmissora, 300000);
 };
 function startTournament(roomId) {
     if (tournamentStarted === false) {
@@ -1197,10 +1241,7 @@ async function saveWinners() {
 
         if (responseData.winner) {
             gameWinner = responseData.winner
-            document.getElementById('timerContainer').classList.remove('appear')
-            socket.emit('message', { message: `Tournament finished`, room_id: roomId });
-            console.log(responseData.winner);
-            console.log('sou IRADO');
+            document.getElementById('timerContainer').remove()
             showWinner(gameWinner);
         }
 
@@ -1213,6 +1254,8 @@ async function saveWinners() {
 
 function showWinner(winner) {
     roundFinal()
+    socket.emit('message', { message: `Tournament finished`, room_id: roomId });
+
 
     setTimeout(function() {
         var playerToRemove = actualPlayer1 === winner ? actualPlayer2 : actualPlayer1;
@@ -1230,7 +1273,6 @@ function processVotes(data) {
 
     for (const [user, vote] of Object.entries(data.votes)) {
         const characterName = data.players[user].character;
-        console.log(`${user} votou em ${vote}`);
         const playerContainer = document.getElementById(`${vote}Voters`);
         if (playerContainer) {
             const voters = document.createElement('div');
@@ -2618,6 +2660,7 @@ function roundFinal() {
         fetchPlayersCreditos()
         document.getElementById('skipRoundBtn').disabled = false;
         document.getElementById('skipRoundBtn').classList.add('aparecendo')
+        socket.disconnect()
     }, 10500);
     timeOuts.push(setTimeout(function() {
         const finalScreen = document.createElement('div')
@@ -2706,10 +2749,7 @@ function skipRound(roundNum) {
         finalScreen.classList.add('show')
 
         finalScreen.innerHTML = `
-        <img src="/static/images/logoAnimado.png" class="loading-screen-img"></img>
-        <button class="final-btn" onclick="createRoom()" id="newGameBtn">Jogar Novamente</button>
-        <button class="final-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
-        <img id="finalLogo" src="/static/images/index/planoA.png" alt="">
+        <button class="primary-btn" id="newGameBtn" onclick="backToBox()">Voltar à Caixa</button>
         `
         document.body.appendChild(finalScreen)
     }
@@ -2770,17 +2810,7 @@ function autoSetQuality(performanceLevel) {
     quality = performanceLevel
     localStorage.setItem('pc-gm-qual', quality)
 
-    checkAudioPlaybackSupport().then(support => {
-        if (support) {
-            alterarNum(quality, 3, "1")
-            localStorage.setItem('pc-gm-qual', quality)
-            audioPlaybackSupport = obterDigito(quality, 3)
-        } else {
-            alterarNum(quality, 3, "0")
-            localStorage.setItem('pc-gm-qual', quality)
-            audioPlaybackSupport = obterDigito(quality, 3)
-        }
-    });
+    checkAudioPlaybackSupport()
 
     if (obterDigito(performanceLevel, 0) == 1) {
         alterarNum(quality, 0, "1")
@@ -2847,36 +2877,25 @@ function calculateFPS() {
 }
 
 async function checkAudioPlaybackSupport() {
-    try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audio1 = document.getElementById('audioTest1')
+    const audio2 = document.getElementById('audioTest2')
 
-        const gainNode = audioContext.createGain();
-        gainNode.gain.value = 0.0001;
+    audio1.play()
+    audio2.play()
 
-        const oscillator1 = audioContext.createOscillator();
-        const oscillator2 = audioContext.createOscillator();
-        
-        oscillator1.frequency.setValueAtTime(440, audioContext.currentTime); 
-        oscillator2.frequency.setValueAtTime(660, audioContext.currentTime);
-
-        oscillator1.connect(gainNode);
-        oscillator2.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator1.start();
-        oscillator2.start();
-
-        setTimeout(() => {
-            oscillator1.stop();
-            oscillator2.stop();
-            audioContext.close();
-        }, 1000);
-
-        return true;
-
-    } catch (error) {
-        return false;
-    }
+    setTimeout(function() {
+        if (Math.abs(audio1.currentTime - audio2.currentTime) <= 0.5) {
+            alterarNum(quality, 3, "1")
+            localStorage.setItem('pc-gm-qual', quality)
+            audioPlaybackSupport = obterDigito(quality, 3)
+            return true
+        } else {
+            alterarNum(quality, 3, "0")
+            localStorage.setItem('pc-gm-qual', quality)
+            audioPlaybackSupport = obterDigito(quality, 3)
+            return false
+        }
+    }, 2000)
 }
 
 
