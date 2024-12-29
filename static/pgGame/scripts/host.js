@@ -108,7 +108,6 @@ function obterDigito(numero, posicao) {
     return numero[posicao];
 }
 
-
 function gameMenuChange() {
     const elements = document.querySelectorAll('.bar-element');
     const gameOptionContainer = document.getElementById('gameOption')

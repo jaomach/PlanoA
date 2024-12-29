@@ -134,7 +134,7 @@
             if (isCreatingRoom) return; // Evita múltiplos cliques
             isCreatingRoom = true; // Marca que o processo de criação está em andamento
 
-            fetch('/create_room', {
+            fetch('/create_room/2', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

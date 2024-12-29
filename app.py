@@ -68,6 +68,11 @@ rooms = {
     }
 }
 clients = []
+games = [
+    {'Plagio consentido': '1'},
+    {'Projeto02': '2'}
+]
+    
 users = {}
 queue = []
 inactive_rooms = {}  # Dicionário para armazenar salas inativas
@@ -149,22 +154,23 @@ def call_ai():
         # Erro ao processar a resposta
         return jsonify({"error": f"Exception: {str(e)}, response: {response.text}"}), 500
 
-@app.route('/create_room', methods=['POST'])
-def create_room():
+@app.route('/create_room/<game_id>', methods=['POST'])
+def create_room(game_id):
     socket_id = request.json.get('socket_id')
 
     if len(rooms) < max_rooms:
         room_id = generate_room_id()
         rooms[room_id] = {
+            'gameId': game_id,
             'players': {},
             'started': False,
             'start_time': None,
-            'duration': 10000, 
+            'duration': 10000,
             'current_round': 0,
             'last_activity': time.time(),
             'votes': {}
         }
-        return jsonify({'room_id': room_id})
+        return jsonify({'room_id': room_id, 'game_id': game_id})
     else:
         if socket_id not in queue:
             queue.append(socket_id)
@@ -723,10 +729,24 @@ def receptor(room_id):
     
     if room_id not in rooms:
         return redirect(url_for('index'))
+    
+    game_id = rooms[room_id].get('gameId')  # Obtém o game_id da sala
 
-    with open('static/pgGame/host.html', encoding='utf-8') as f:
-        html_content = f.read()
-    return render_template_string(html_content, room_id=room_id)
+    # Defina o template com base no game_id
+    if game_id == '1':
+        template_path = 'static/pgGame/host.html'
+    elif game_id == '2':
+        template_path = 'static/projeto02/host.html'
+    else:
+        template_path = 'static/pgGame/host_default.html'
+
+    try:
+        with open(template_path, encoding='utf-8') as f:
+            html_content = f.read()
+        return render_template_string(html_content, room_id=room_id, game_id=game_id)
+    except FileNotFoundError:
+        # Redireciona para o índice se o template não for encontrado
+        return redirect(url_for('index'))
 
 @app.errorhandler(404)
 def page_not_found(e):
