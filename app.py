@@ -4,7 +4,6 @@ import base64
 import time
 import random
 import threading
-import json
 from flask_socketio import SocketIO, emit, join_room
 import mysql.connector
 from mysql.connector import Error
@@ -19,10 +18,9 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 #api_key = os.environ["GPT_KEY"]
-available_characters = ["Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"]
-
 rooms = {
     'TEST': {
+        'game_id': '1',
         'players': {
             'player1': {'username': 'Alice', 'character': 'Vanderlei'},
             'player2': {'username': 'Bob', 'character': 'Merda'},
@@ -68,11 +66,24 @@ rooms = {
     }
 }
 clients = []
-games = [
-    {'Plagio consentido': '1'},
-    {'Projeto02': '2'}
-]
-    
+jogos = {
+    '1': {
+        'nome': 'Plagio Consentido',
+        'max_players': 6,
+        'min_players': 2,
+        'characters': [
+            "Vanderlei", "Merda", "Empregada", "Maria", "Davinte", "Berro"
+        ]
+    },
+    '2': {
+        'nome': 'Projeto02', # trocar nome no futuro
+        'max_players': 2,
+        'min_players': 2,
+        'characters': [
+            "Pirata", "Instrutor"
+        ]
+    }
+}
 users = {}
 queue = []
 inactive_rooms = {}  # Dicionário para armazenar salas inativas
@@ -103,18 +114,14 @@ def encode_image(image_path):
 @app.route('/call_ai', methods=['POST'])
 def call_ai():
     data = request.json
-    image_url = data['image_path']  # Este é o URL enviado pelo frontend
+    image_url = data['image_path']
 
-    # Extraia o caminho relativo do URL
     relative_path = image_url.replace("http://awdawd-y1xl.onrender.com", "")  # Ajuste para o domínio correto
 
-    # Combine com o caminho base no servidor
     local_image_path = os.path.join(os.getcwd(), relative_path.lstrip('/'))
 
-    # Agora, encode a imagem para base64
     base64_image = encode_image(local_image_path)
 
-    # Configurando a requisição para a API da OpenAI
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
@@ -134,24 +141,19 @@ def call_ai():
         "max_tokens": 300
     }
 
-    # Enviando a requisição para a API
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
     
-    # Verificar o status da resposta
     if response.status_code != 200:
         return jsonify({"error": f"API request failed with status code {response.status_code} and response: {response.text}"}), response.status_code
 
-    # Tente capturar e processar a resposta
     try:
         response_json = response.json()
         if 'choices' in response_json and len(response_json['choices']) > 0:
             ai_response = response_json['choices'][0]['message']['content']
             return jsonify({"response": ai_response})
         else:
-            # Resposta inesperada, sem a chave 'choices'
             return jsonify({"error": f"Unexpected API response format: {response_json}"}), 500
     except Exception as e:
-        # Erro ao processar a resposta
         return jsonify({"error": f"Exception: {str(e)}, response: {response.text}"}), 500
 
 @app.route('/create_room/<game_id>', methods=['POST'])
@@ -161,7 +163,7 @@ def create_room(game_id):
     if len(rooms) < max_rooms:
         room_id = generate_room_id()
         rooms[room_id] = {
-            'gameId': game_id,
+            'game_id': game_id,
             'players': {},
             'started': False,
             'start_time': None,
@@ -206,14 +208,20 @@ def generate_token(length=12):
     return secrets.token_urlsafe(length)[:length]
 
 @app.route('/api/join_room', methods=['POST'])
-def join_room_character():
+def join_room_game():
     data = request.json
     room_id = data['room_id']
     player_id = data['player_id']
     username = data['username']
     character = data['character']
 
-    if character not in available_characters:
+    room_id = room_id.upper()
+
+    game_id = rooms[room_id].get('game_id')  # Obtém o game_id da sala
+    max_players = jogos[game_id].get('max_players')
+
+
+    if character not in jogos[game_id].get('characters', []):
         return jsonify({'message': 'Invalid character'}), 400
 
     if room_id in rooms:
@@ -224,7 +232,7 @@ def join_room_character():
             room['last_activity'] = time.time()
             return jsonify({'message': 'Rejoining...', 'token': player_id})
 
-        if len(room['players']) < 8:
+        if len(room['players']) < max_players:
             if room['started']:
                 return jsonify({'message': 'Cannot join room, game already started'}), 400
 
@@ -260,7 +268,9 @@ def leave_room(room_id, player_id):
 def start_game(room_id):
     if room_id in rooms:
         players = rooms[room_id].get('players', [])
-        if len(players) < 2:
+        game_id = rooms[room_id].get('game_id')
+        min_players = jogos[game_id].get('min_players')
+        if len(players) < min_players:
             return jsonify({'message': 'É recomendado no mínimo 2 jogadores para iniciar o jogo.'}), 400
         
         rooms[room_id]['started'] = True
@@ -297,7 +307,7 @@ def start_round(room_id):
         if isinstance(duration, int) and duration > 0:
             if round_number is None:  # Se não foi passado um round, avança para o próximo
                 rooms[room_id]['current_round'] += 1
-            else:  # Caso contrário, seta o round fornecido
+            else:
                 rooms[room_id]['current_round'] = round_number
 
             rooms[room_id]['duration'] = duration
@@ -322,7 +332,6 @@ def change_duration(room_id):
             if elapsed_time >= rooms[room_id]['duration']:
                 return jsonify({'message': 'Round already finished, cannot change remaining time'}), 400
 
-            # Atualizar a duração e definir o novo tempo restante
             rooms[room_id]['duration'] = elapsed_time + new_remaining_time
             rooms[room_id]['start_time'] = time.time()  # Resetar o tempo de início
 
@@ -730,7 +739,7 @@ def receptor(room_id):
     if room_id not in rooms:
         return redirect(url_for('index'))
     
-    game_id = rooms[room_id].get('gameId')  # Obtém o game_id da sala
+    game_id = rooms[room_id].get('game_id')  # Obtém o game_id da sala
 
     # Defina o template com base no game_id
     if game_id == '1':

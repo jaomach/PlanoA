@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projeto02</title>
+    <link rel="stylesheet" href="/static/pgGame/style/host.css">
     <style>
         body {
             display: flex;
@@ -13,6 +14,7 @@
             height: 100vh;
             margin: 0;
             background-color: black;
+            background-image: none;
         }
 
         canvas {
@@ -146,9 +148,14 @@
             </section>
         </div>
         <img class="btn-interface" id="setting" src="/static/images/setting.svg" alt="">
+
         <div id="gameContainer">
             <canvas id="canvas"></canvas>
             <canvas id="noiseCanvas"></canvas>
+        </div>
+        
+        <div id="errorContainer">
+            <span id="errorMsg"></span>
         </div>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
         <script>
