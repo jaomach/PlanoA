@@ -45,6 +45,28 @@
             top: 0;
             pointer-events: all;
         }
+        #canvas.preparando {
+            animation: preparando 4s ease-out forwards;
+        }
+        #canvas.salto {
+            animation: salto 1s cubic-bezier(0,-0.02,.44,.96) forwards;
+        }
+        @keyframes preparando {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.2);
+            }
+        }
+        @keyframes salto {
+            0% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
     <body>

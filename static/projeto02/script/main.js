@@ -4,7 +4,7 @@ let timeLeft;
 let optionsActive = false;
 let gameMenuListening = false;
 let isCountdownActive = false;
-let gameStarted = false;
+let gameStarted = true;
 const asciiArt = `
 __________.__                            _____   
 \\______   \\  | _____    ____   ____     /  _  \\  
@@ -754,15 +754,15 @@ console.log(innerWidth);
 const ctx = canvas.getContext("2d");
 let x,
   y,
-  numberOfStars = 300,
-  speed = 2000,
+  numberOfStars = 400,
+  speed = 6000,
   initialSize = 10,
-  size = 30;
+  size = initialSize + 30;
 
 let frameCounter = 0;
 let frameCounterAux = 0;
 let starsGoing = false;
-let color = ["#eb4d55"];
+let color = ['white'];
 let planetSelectionAnimation = false;
 
 window.addEventListener("click", () => {
@@ -770,6 +770,7 @@ window.addEventListener("click", () => {
   if (planetSelected) return;
   if (transitioning) return;
   planetSelectionAnimation = true;
+  document.getElementById("canvas").classList.add('preparando')
   animateText(
     planets[currentPlanet],
     fixedWidth / 2,
@@ -778,6 +779,8 @@ window.addEventListener("click", () => {
     1
   );
   setTimeout(function () {
+    document.getElementById("canvas").classList.add('salto')
+    changeAllStarsColor('black');
     for (let i = 0; i < numberOfStars; i++) {
       stars[i].store_lx_ly();
     }
@@ -789,7 +792,7 @@ window.addEventListener("click", () => {
     fadeOut.id = "fadeOut";
     document.body.appendChild(fadeOut);
     roundAnimation(1, "9:00 AM");
-  }, 1000);
+  }, 4000);
 });
 
 // estrelas
@@ -802,7 +805,7 @@ function star(x, y, an, color) {
   this.color = color;
   this.speed = speed;
   this.m = Math.sqrt(Math.pow(this.y, 2) + Math.pow(this.x, 2));
-  this.size = Math.sqrt(this.m) / size;
+  this.size = (Math.sqrt(this.m) / size) + 10;
   this.lm, this.lx, this.ly;
   this.show_trail = false;
   this.draw = function () {
@@ -815,7 +818,7 @@ function star(x, y, an, color) {
       Math.PI * 2,
       false
     );
-    ctx.fillStyle = color;
+    ctx.fillStyle = this.color; // Use this.color instead of color
     ctx.fill();
 
     if (this.show_trail) {
@@ -823,8 +826,11 @@ function star(x, y, an, color) {
       ctx.moveTo(this.lx + fixedWidth / 2, this.ly + fixedHeight / 2);
       ctx.lineTo(this.x + fixedWidth / 2, this.y + fixedHeight / 2);
       ctx.stroke();
-      ctx.strokeStyle = color;
+      ctx.strokeStyle = this.color; // Use this.color instead of color
     }
+  };
+  this.updateColor = function(newColor) {
+    this.color = newColor;
   };
   this.store_lx_ly = () => {
     this.lx = this.x;
@@ -848,7 +854,7 @@ function star(x, y, an, color) {
       this.y >= fixedHeight / 2
     ) {
       if (this.show_trail) {
-        this.speed = 100;
+        this.speed = 5000;
         this.lm += this.lm / this.speed;
         this.lx = this.dirx * this.lm * Math.cos(this.an);
         this.ly = this.diry * this.lm * Math.sin(this.an);
@@ -887,8 +893,15 @@ for (let i = 0; i < numberOfStars; i++) {
   x = (Math.random() - 0.5) * fixedWidth * 0.7;
   y = (Math.random() - 0.5) * fixedHeight * 0.7;
   an = Math.random() * Math.PI - Math.PI / 2;
-  stars.push(new star(x, y, an, color[Math.floor(Math.random() * 7)]));
+  stars.push(new star(x, y, an, color[Math.floor(Math.random() * 6)]));
 }
+
+function changeAllStarsColor(newColor) {
+  stars.forEach(star => star.updateColor(newColor));
+}
+
+// Exemplo de uso:
+changeAllStarsColor('white'); // Troca a cor de todas as estrelas para vermelho
 
 function getEase(currentProgress, start, distance, steps) {
   currentProgress /= steps / 2;
@@ -925,7 +938,7 @@ function drawPlanet(planet, x, y, progress) {
   const pattern = ctx.createPattern(textureImage, "repeat");
 
   ctx.beginPath();
-  ctx.arc(x, y, planet.radius + frameCounterAux * 0.5, 0, Math.PI * 2);
+  ctx.arc(x, y, planet.radius, 0, Math.PI * 2);
   ctx.fillStyle = pattern;
   ctx.setTransform(
     1 + frameCounterAux * 0.3,
@@ -937,7 +950,7 @@ function drawPlanet(planet, x, y, progress) {
   );
   ctx.fill();
 
-  //atmosfera
+  /* atmosfera
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath();
   ctx.arc(x, y, planet.radius + frameCounterAux * 0.5 + 1.5, 0, Math.PI * 2);
@@ -948,18 +961,18 @@ function drawPlanet(planet, x, y, progress) {
   ctx.shadowColor = "#000";
   ctx.filter = `blur(${atmosphereBlur}px)`;
   ctx.stroke();
-  ctx.filter = "none";
+  ctx.filter = "none";*/
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath();
-  ctx.arc(x, y, planet.radius + frameCounterAux * 0.5 + 7, 0, Math.PI * 2);
+  ctx.arc(x, y, planet.radius + 7, 0, Math.PI * 2);
   ctx.strokeStyle = "red";
   ctx.lineWidth = 1;
   ctx.stroke();
 
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.beginPath();
-  ctx.arc(x, y, planet.radius + frameCounterAux * 0.5 + 7, 0, Math.PI * 2);
+  ctx.arc(x, y, planet.radius + 7, 0, Math.PI * 2);
   ctx.strokeStyle = "red";
   ctx.lineWidth = 1;
   ctx.filter = "blur(5px)";
@@ -1114,18 +1127,27 @@ function animateTransition(newPlanet, direction) {
       steps
     );
 
+    ctx.filter = "brightness(0.4)";
+    console.log(Math.max(1, (progress / steps * 2)) - 1)
+    ctx.drawImage(overlayImage, 0, 0, fixedWidth, fixedHeight);
+    ctx.filter = "none";
+
     if (progress <= steps) {
       drawPlanet(
         startPlanet,
-        startX,
+        startX-80,
         fixedHeight / 2 - 40,
-        1 - progress / steps,
+        Math.max(0, 1 - progress / (steps / 3)),
         true
       );
-      drawPlanet(endPlanet, endX, fixedHeight / 2 - 40, progress / steps, true);
-      ctx.filter = "brightness(0.7)";
-      ctx.drawImage(overlayImage, 0, 0, fixedWidth, fixedHeight);
-      ctx.filter = "none";
+
+      drawPlanet(
+        endPlanet,
+        endX-80,
+        fixedHeight / 2 - 40,
+        Math.max(2, (progress / steps * 3)) - 2,
+        true
+      );
     }
 
     if (!triggered) {
@@ -1438,10 +1460,21 @@ function animate() {
   } else if (gameStarted && !planetSelected) {
     // parte 1
     overlayImage = new Image();
+    universeImage = new Image();
+    universeImage.src = pathToAssets + "universe.png";
     overlayImage.src = pathToAssets + "nave.png";
-
+    
     overlayImage.onload = function () {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.filter = "brightness(0.4)";
+      ctx.drawImage(universeImage, 0, 0, fixedWidth, fixedHeight);
+      if (starsGoing) {
+        changeAllStarsColor('black');
+        ctx.filter = "invert(1)";
+        ctx.fillRect(0, 0, fixedWidth, fixedHeight);
+        ctx.filter = 'none'
+      }
+      ctx.filter = 'none'
 
       for (let i = 0; i < numberOfStars; i++) {
         stars[i].update();
@@ -1450,19 +1483,19 @@ function animate() {
       if (!transitioning && !starsGoing) {
         drawPlanet(
           planets[currentPlanet],
-          fixedWidth / 2,
+          fixedWidth / 2 - 80,
           fixedHeight / 2 - 40,
           1
         );
         if (!textAnimationInProgress && !planetSelectionAnimation) {
           drawPlanetText(
             planets[currentPlanet],
-            fixedWidth / 2,
+            fixedWidth / 2-80,
             fixedHeight / 2 - 40,
             1
           );
         }
-        ctx.filter = "brightness(0.7)";
+        ctx.filter = "brightness(0.4)";
         ctx.drawImage(overlayImage, 0, 0, fixedWidth, fixedHeight);
         ctx.filter = "none";
       } else if (!transitioning && starsGoing) {
@@ -1472,10 +1505,15 @@ function animate() {
           fixedHeight / 2 - 40,
           1
         );
-        ctx.filter = "brightness(0.7)";
+        ctx.filter = "brightness(0)";
         ctx.drawImage(overlayImage, 0, 0, fixedWidth, fixedHeight);
         ctx.filter = "none";
       }
+
+      ctx.filter = "none";
+      ctx.strokeStyle = "red"; // Cor do contorno
+      ctx.lineWidth = 1; // Espessura do contorno
+      ctx.strokeRect((fixedWidth/2)-(301/2), fixedHeight/2-119, 300, 160); // strokeRect(x, y, largura, altura)
 
       requestAnimationFrame(animate);
     };
