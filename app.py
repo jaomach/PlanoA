@@ -745,7 +745,7 @@ def receptor(room_id):
     if game_id == '1':
         template_path = 'static/pgGame/host.html'
     elif game_id == '2':
-        template_path = 'static/projeto02/host.html'
+        template_path = 'static/projeto02/teste.html'
     else:
         template_path = 'static/pgGame/host_default.html'
 

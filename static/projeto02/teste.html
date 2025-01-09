@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bola Aleatória</title>
+</head>
+<body>
+    <canvas id="canvas" width="854" height="480" style="border: 1px solid black;"></canvas>
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Configuração inicial da bola
+        const ball = {
+            x: canvas.width / 2, // posição inicial no centro
+            y: canvas.height / 2,
+            radius: 20,
+            color: "red", // cor inicial
+            speed: 2, // velocidade do movimento
+            targetX: canvas.width / 2,
+            moving: false, // flag para indicar movimento
+            preMoveFrames: 12, // número de frames antes de mover
+            frameCounter: 0, // contador de frames
+            preMoveInterval: null // intervalo para animação de frames pré-movimento
+        };
+
+        const bounds = {
+            minX: 200,
+            maxX: canvas.width - 50
+        };
+
+        function drawBall(color) {
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fillStyle = color || ball.color; // Usa `color` se fornecida, caso contrário `ball.color`
+            ctx.fill();
+            ctx.closePath();
+        }
+
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        let actualDirection
+
+        function setRandomTarget() {
+            if (!ball.moving) {
+                const distance = Math.floor(Math.random() * 100) + 200; // distância aleatória entre 200 e 300 pixels
+                const direction = Math.random() < 0.5 ? "left" : "right";
+
+                ball.frameCounter = 0; // reinicia o contador de frames
+                startPreMoveAnimation(direction);
+
+                if (ball.moving === true && direction === "right") {
+                    ball.color = "red";
+                    ball.targetX = Math.min(ball.x + distance, bounds.maxX);
+                } else if (ball.moving === true && direction === "left") {
+                    ball.color = "green";
+                    ball.targetX = Math.max(ball.x - distance, bounds.minX);
+                }
+
+            }
+        }
+        
+        function startPreMoveAnimation(direction) {
+            let frames = 0;
+            if (direction !== actualDirection) {
+                ball.preMoveInterval = setInterval(() => {
+                    if (frames < ball.preMoveFrames) {
+                        ball.color = getRandomColor();
+                        frames++;
+                    } else {
+                        clearInterval(ball.preMoveInterval);
+                        ball.preMoveInterval = null;
+                    }
+                }, 1000 / 12); // 12 FPS para pré-movimento
+            }
+            ball.moving = true; // marca como em movimento
+            actualDirection = direction
+        }
+
+        function updatePosition() {
+            if (ball.preMoveInterval) return; // Aguarda a animação de pré-movimento terminar
+
+            if (ball.x < ball.targetX) {
+                ball.color = "red";
+                ball.x = Math.min(ball.x + ball.speed, ball.targetX);
+            } else if (ball.x > ball.targetX) {
+                ball.color = "green";
+                ball.x = Math.max(ball.x - ball.speed, ball.targetX);
+            } else {
+                ball.moving = false;
+                setTimeout(setRandomTarget, 3000); // Aguarda 1 segundo antes de definir um novo alvo
+            }
+        }
+
+        let desconfiadoActive = false;
+        const spritesVarredor = [
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            '10',
+            '11',
+            '12'
+        ]
+        let desconfiometro = 0;
+        let visto = 0;
+        const condicoesDeMorte = [
+            { desconfiometro: 1, visto: 2 },
+            { desconfiometro: 2, visto: 1 }
+        ];
+        let generalSoundVolume = 0
+
+        document.addEventListener('keydown', function(event) {
+            if ((event.key === 'd' || event.key === 'D') && !event.shiftKey && !event.altKey && !event.ctrlKey) {
+                generalSoundVolume++
+                console.log(generalSoundVolume)
+            }
+            if ((event.key === 'a' || event.key === 'A') && !event.shiftKey && !event.altKey && !event.ctrlKey) {
+                generalSoundVolume--
+            }
+        });
+
+        let cooldownVolumeCheck = false
+
+        function checkGeneralSoundVolume() {
+            if (generalSoundVolume > 1 && !cooldownVolumeCheck) {
+                console.log('alarmado')
+                monsterAlarm()
+                cooldownVolumeCheck = true
+                setTimeout(function() {
+                    cooldownVolumeCheck = false
+                }, 3000)
+            }
+        }
+
+        function monsterAlarm() {
+            if (desconfiadoActive) {
+                visto++;
+            } else {
+                visto = 0
+                desconfiometro++;
+            }
+            desconfiadoActive = true;
+            setTimeout(function() {
+                desconfiadoActive = false;
+                console.log('não está mais desconfiado')
+            }, 10000);
+
+            verificarCondicoesDeMorte();
+        }
+
+        function verificarCondicoesDeMorte() {
+            for (const condicao of condicoesDeMorte) {
+                if (desconfiometro === condicao.desconfiometro && visto === condicao.visto) {
+                    console.log('Você morreu!');
+                    break;
+                }
+            }
+        }
+
+        let varredorActive = false
+
+        setTimeout(function() {
+            varredprActive = true
+        }, 1000)
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpa o canvas
+            if (varredorActive) {
+                drawBall();
+                if (!desconfiadoActive) {
+                    updatePosition();
+                } else {
+                    drawBall('orange')
+                }
+                setTimeout(function() {
+                    varredorActive = false
+                }, 30000)
+                setInterval(checkGeneralSoundVolume, 100)
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

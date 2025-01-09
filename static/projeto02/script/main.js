@@ -1417,6 +1417,30 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+const colorsOpacity = [0, 0, 0, 0, 0, 0]; // Inicializa o array com opacidades
+const targetOpacity = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]; // Alvo para opacidades
+const transitionSpeed = 0.05; // Velocidade da transição (quanto maior, mais rápida)
+
+function randomColorOpacity() {
+  for (let i = 0; i < targetOpacity.length; i++) {
+    targetOpacity[i] = Math.random();
+  }
+}
+
+function smoothTransition() {
+  for (let i = 0; i < colorsOpacity.length; i++) {
+    if (Math.abs(colorsOpacity[i] - targetOpacity[i]) > 0.01) {
+      colorsOpacity[i] += (targetOpacity[i] - colorsOpacity[i]) * transitionSpeed;
+    }
+  }
+
+  requestAnimationFrame(smoothTransition);
+}
+
+smoothTransition();
+
+setInterval(randomColorOpacity, 200);
+
 function animate() {
   if (!gameStarted) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1514,6 +1538,41 @@ function animate() {
       ctx.strokeStyle = "red"; // Cor do contorno
       ctx.lineWidth = 1; // Espessura do contorno
       ctx.strokeRect((fixedWidth/2)-(301/2), fixedHeight/2-119, 300, 160); // strokeRect(x, y, largura, altura)
+      
+      ctx.beginPath()
+      const grad=ctx.createLinearGradient(0, 100, 800, 0);
+      ctx.moveTo(fixedWidth/2+85, fixedHeight/2+150)
+      ctx.lineTo(fixedWidth/2-85, fixedHeight/2+150)
+      ctx.lineTo(fixedWidth/2-160, fixedHeight/2-130)
+      ctx.lineTo(fixedWidth/2+160, fixedHeight/2-130)
+      grad.addColorStop(0.2, 'rgb(255, 0, 0)');
+      grad.addColorStop(0.2, `rgb(255, 0, 0, ${colorsOpacity[0]})`);
+      grad.addColorStop(0.3, `rgb(255, 0, 0, ${colorsOpacity[1]})`);
+      grad.addColorStop(0.4, `rgb(255, 0, 0, ${colorsOpacity[2]})`);
+      grad.addColorStop(0.5, `rgb(255, 0, 0, ${colorsOpacity[3]})`);
+      grad.addColorStop(0.6, `rgb(255, 0, 0, ${colorsOpacity[4]})`);
+      grad.addColorStop(0.7, `rgb(255, 0, 0, ${colorsOpacity[5]})`);
+      ctx.fillStyle = grad
+      ctx.filter = 'blur(27px)'
+      ctx.globalAlpha = 0.2
+      ctx.fill()
+      ctx.filter = 'none'
+
+      ctx.beginPath()
+      ctx.moveTo(fixedWidth/2+85, fixedHeight/2+150)
+      ctx.lineTo(fixedWidth/2-85, fixedHeight/2+150)
+      ctx.lineTo(fixedWidth/2-160, fixedHeight/2-130)
+      ctx.lineTo(fixedWidth/2+160, fixedHeight/2-130)
+      grad.addColorStop(0.2, `rgb(255, 0, 0, ${colorsOpacity[0]})`);
+      grad.addColorStop(0.3, `rgb(255, 0, 0, ${colorsOpacity[1]})`);
+      grad.addColorStop(0.4, `rgb(255, 0, 0, ${colorsOpacity[2]})`);
+      grad.addColorStop(0.5, `rgb(255, 0, 0, ${colorsOpacity[3]})`);
+      grad.addColorStop(0.6, `rgb(255, 0, 0, ${colorsOpacity[4]})`);
+      grad.addColorStop(0.7, `rgb(255, 0, 0, ${colorsOpacity[5]})`);
+      ctx.fillStyle = grad
+      ctx.globalAlpha = 0.03
+      ctx.fill()
+      ctx.globalAlpha = 1
 
       requestAnimationFrame(animate);
     };
